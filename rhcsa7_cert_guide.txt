@@ -1,0 +1,2898 @@
+
+New system:
+    yum install openssh-server
+    In VirtualBox, add Port Forwarding for ssh: TCP 2122 -> TCP 22
+    yum install epel-release
+
+Connect to VirtualBox:
+    ssh -p 2122 ladmin@127.0.0.1
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                       #
+#  Part 1-1: Performing Basic System Management Tasks   #
+#                                                       #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1
+1-1-1                                                                       1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1
+1-1-1    Chapter 1: Installing Red Hat Enterprise Linux Server (25 pg.)     1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1
+1-1-1                                                                       1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1
+1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1
+
+Just a simple overview of a graphical installation.
+
+@@@
+@@@ Lab 1.1
+@@@
+    Configure "server1" with a GUI
+    Configure "server2" with a CL (minimal)
+@@@
+
+
+
+2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2
+2-2-2                                                 2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2
+2-2-2    Chapter 2: Using Essential Tools (23 pg.)    2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2
+2-2-2                                                 2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2
+2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2
+
+Three kinds of commands; run in the following order
+    Alias: user-defined
+    Internal Command: available when the shell is loaded; run from memory
+    External Command: exists as an executable file on disk
+
+alias newcommand='oldcommand'
+
+which ls
+
+@@@
+@@@ Exercise 2.1 Using Internal and External Commands from the Shell
+@@@
+    time ls
+        Desktop  Documents  Downloads  Music  Pictures  Public  Templates  Videos
+        real    0m0.005s
+        user    0m0.000s
+        sys     0m0.005s
+    which time
+        /usr/bin/time
+    echo $PATH
+        /usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ladmin/.local/bin:/home/ladmin/bin
+    /usr/bin/time ls
+    -OR-
+    `which time` ls
+        Desktop  Documents  Downloads  Music  Pictures  Public  Templates  Videos
+        0.00user 0.00system 0:00.00elapsed 100%CPU (0avgtext+0avgdata 972maxresident)k
+        0inputs+0outputs (0major+302minor)pagefaults 0swaps
+@@@
+
+STDIN: 0<
+STDOUT (overwrite): 1>
+STDOUT (append): 1>>
+STDERR: 2>
+STDERR to STDOUT: 2>&1
+
+Redirect standard output as well as errors to a file:
+    date -s 'tomorrow' 2>&1 | tee result.txt
+Same command with no terminal output:
+    date -s 'tomorrow' 2>&1 | tee result.txt > /dev/null
+Same result, but not POSIX:
+    date -s 'tomorrow' &> result.txt
+Append rather than overwrite:
+    date -s 'tomorrow' 2>&1 | tee -a result.txt > /dev/null
+
+/usr/bin/time ls 2> /dev/null
+/usr/bin/time ls 2> /dev/tty1
+/usr/bin/time ls 2> /dev/pts/0
+
+@@@
+@@@ Exercise 2.2 Using I/O Redirection and Pipes
+@@@
+    cd
+    pwd
+        /home/ladmin
+    ls
+        Desktop  Documents  Downloads  Music  Pictures  Public  Templates  Videos
+    ls > /dev/null
+    ls ilwehgi > /dev/null
+        ls: cannot access ilwehgi: No such file or directory
+    ls ilwehgi 2> /dev/null
+    ls ilwehgi Documents 2> /dev/null
+        Documents:
+    ls ilwehgi Documents 2> /dev/null > output
+    cat output
+        Documents:
+    echo hello > output
+    cat output
+        hello
+    ls >> output
+    cat output
+        hello
+        Desktop
+        Documents
+        ...
+    ls -R /
+        ...
+    ls -R / | less
+        <opens resutls in less>
+    ls > /dev/tty1
+        -bash: /dev/tty1: Permission denied
+@@@
+
+Working with history
+    history
+    Ctrl+R
+    !number
+        !118
+    !sometext
+        !vi
+
+@@@
+@@@ Exercise 2.3 Working with History
+@@@
+    history
+        1  exit
+        2  grep '{vmx|svm}' /proc/cpuinfo
+        3  yum install kvm
+        ...
+    history | grep cat
+        9  cat less
+        44  cat output.txt
+        48  cat output.txt
+        ...
+    !44
+        hello
+    history -c
+    exit
+    history
+        1  exit
+        2  grep '{vmx|svm}' /proc/cpuinfo
+        3  yum install kvm
+        ...
+    history -c
+    history -w
+    exit
+    history
+        1  history -w
+        2  exit
+        3  history
+@@@
+
+@@@
+@@@ Exercise 2.4 Using Bash Completion
+@@@
+    gd <tab> <tab>
+        gdb              gdbus    gdk-pixbuf-query-loaders-64    gdm-screenshot
+        gdb-add-index    gdisk    gdm                            gdmflexiserver
+    gdi <tab>
+        gdisk
+    cd /etc
+        cat pas <tab>
+            cat passwd
+@@@
+
+@@@
+@@@ Exercise 2.5 Vim Practice
+@@@
+    vim ~/testfile
+        cow
+        sheep
+        ox
+        chicken
+        snake
+        fish
+        oxygen
+    :w
+        [Writes changes to the file]
+    :3
+        [Goes to line #3]
+    dd
+        [Deletes the line]
+    dd
+        [Deletes another line]
+    u
+        [Undoes the last deletion]
+    o
+        [Opens a new line below the current line]
+        tree
+        farm
+    :%s/ox/OX/g
+        oxygen -> OXygen
+    :wq
+@@@
+
+/etc/motd
+    echo "You have just logged in; don't dick around" | sudo tee -a /etc/motd > /dev/null
+
+/etc/issue
+    echo "Before you log in, remember; don't dick around" | sudo tee -a /etc/issue > /dev/null
+
+@@@
+@@@ Exercise 2.6 Managing the Shell Environment
+@@@
+    echo $LANG
+        undefined.UTF-8
+    ls --help
+        [Shows help in English]
+    LANG=fr_FR.UTF-8
+    ls --help
+        [Shows help in French]
+    LANG=en_US.UTF-8
+    echo 'COLOR=red' >> ~/.bashrc
+    cat ~/.bashrc
+    . ~/.bashrc
+    echo $COLOR
+@@@
+
+Finding help:
+    --help
+        [Sometimes available as '-h']
+    man
+        man -f passwd
+            [Quick description of 'passwd']
+    info/pinfo
+        Use if a man page states "The full documentation for ... is maintained as a Texinfo manual."
+    /usr/share/doc
+        Usually for services and larger systems
+
+@@@
+@@@ Exercise 2.7 Using man -k
+@@@
+    man -k partition
+    man -k password | grep 5
+    man man
+        /-k
+    man apropos
+        /mandb
+    man mandb
+    sudo mandb
+@@@
+
+@@@
+@@@ Exercise 2.8 Using info
+@@@
+    man ls
+        <shift> G
+        q
+    info coreutils 'ls invocation'
+        n
+            [Page down]
+        p
+            [Page up]
+        q
+@@@
+
+@@@
+@@@ Lab 2.1
+@@@
+    1. Add a new sh script file to /etc/profile.d/
+        echo 'COLOR=red' | sudo tee -a /etc/profile.d/lab2.1.sh > /dev/null
+    2. sudo date -Ins -s $(date -Ins -d '+1 minute')
+        2017-02-13T21:06:22,948110923+0100
+@@@
+
+
+
+3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3
+3-3-3                                                           3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3
+3-3-3    Chapter 3: Essential File Management Tools (26 pg.)    3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3
+3-3-3                                                           3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3
+3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3
+
+Get an overview of devices and mount points:
+    mount
+        [Reads /proc/mounts]
+    df -Th
+        [Shows disk space on mounted devices]
+    findmnt
+        [Shows all mounts as a tree]
+
+@@@
+@@@ Exercise 3.1 Getting an Overview of Current Mounts
+@@@
+    mount
+        sysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime,seclabel)
+        proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)
+        devtmpfs on /dev type devtmpfs (rw,nosuid,seclabel,size=926268k,nr_inodes=231567,mode=755)
+        ...
+    df -Th
+        Filesystem               Type      Size  Used Avail Use% Mounted on
+        /dev/mapper/cl_odin-root xfs       8.0G  5.5G  2.6G  69% /
+        devtmpfs                 devtmpfs  905M     0  905M   0% /dev
+        tmpfs                    tmpfs     920M   84K  920M   1% /dev/shm
+        tmpfs                    tmpfs     920M  8.8M  912M   1% /run
+        tmpfs                    tmpfs     920M     0  920M   0% /sys/fs/cgroup
+        /dev/sda1                xfs      1014M  172M  843M  17% /boot
+        tmpfs                    tmpfs     184M   16K  184M   1% /run/user/42
+        tmpfs                    tmpfs     184M     0  184M   0% /run/user/1000
+    findmnt
+        TARGET                          SOURCE                      FSTYPE      OPTIONS
+        /                               /dev/mapper/cl_odin-root    xfs         rw,relatime,seclabel,attr2,inode64,noquota
+        |-/sys                          sysfs                       sysfs       rw,nosuid,nodev,noexec,relatime,seclabel
+        | |-/sys/kernel/security        securityfs                  securityfs  rw,nosuid,nodev,noexec,relatime
+        | |-/sys/fs/cgroup              tmpfs                       tmpfs       ro,nosuid,nodev,noexec,seclabel,mode=755
+        | | |-/sys/fs/cgroup/systemd    cgroup                      cgroup      rw,nosuid,nodev,noexec,relatime,xattr,release_agent=/usr/lib/systemd/systemd-cgroups-a
+        ...
+@@@
+
+ls c*
+    cal, cat, catman, cd, chattr, cot, cut
+ls c?t
+    cat, cet, cit, cot, cut
+ls c[aou]
+    cat, cot, cut
+
+@@@
+@@@ Exercise 3.2 Working with Directories
+@@@
+    cd
+    pwd
+        /home/ladmin
+    touch file1
+        [Success]
+    cd /
+    touch file2
+        touch: cannot touch 'file2': Permission denied
+    cd /tmp
+    touch file2
+        [Success]
+    cd
+    mkdir files
+        [Success]
+    mkdir /home/$USER/files
+        mkdir: cannot create directory '/home/ladmin/files': File exists
+    rmdir files
+        [Success; only works if folder is empty]
+@@@
+
+ls -l
+    [Long listing of information]
+ls -a
+    [Shows all files, including hidden files]
+ls -lrt
+    [Most recent files shown last]
+ls -d
+    [List directories, not their contents]
+ls -R
+    [Recursive listing]
+
+cp /somedir/* .
+    [Copies all visible files to the pwd]
+cp -R /somedir/* .
+    [Copies all visible files and visible directories to the pwd; if a directory contains hidden content, it is copied as well]
+cp /somedir/.* .
+    [Copies all hidden files to the pwd]
+cp -R /somedir/.* .
+    [Copies all hidden files and hidden directories to the pwd; TODO also copies the above directory?]
+cp -a /somedir/. .
+    [Copies all visible and hidden files/directories to the pwd]
+cp -a /somedir/ .
+    [Copies the entire somedir directory to the pwd]
+
+@@@
+@@@ Exercise 3.2 Working with Files
+@@@
+    cd /home/$USER
+    mkdir newfiles
+    mkdir oldfiles
+    touch newfiles/.hidden
+    touch newfiles/unhidden
+    cd oldfiles
+    ls -la
+        .
+        ..
+    ls -la ../newfiles
+        .
+        ..
+        .hidden
+        unhidden
+    cp -a ../newfiles/ .
+    ls -la
+    rm -rf newfiles
+    cp -a ../newfiles/* .
+    ls -la
+    cp -a ../newfiles/. .
+    ls -la
+@@@
+
+ln <source> <destination>
+ln /etc/hosts .
+    [Creates a hard link to /etc/hosts in pwd]
+ln -s /etc/hosts .
+    [Creates a symbolic link to /etc/hosts in pwd]
+ln -s /home /tmp
+    [Creates a symbolic link to /home in /tmp]
+
+@@@
+@@@ Link Exercise
+@@@
+    mkdir ~/test
+    cp /etc/[a-e]* ~/test
+    ln -s test link
+    rm link
+    ls -la
+        [Link is removed]
+    ln -s test link
+    rm -rf link
+    ls -la
+        [Link is removed]
+    ln -s test link
+    rm -rf link/
+    ls -la
+        [Link remains but its destination, test, is empty now]
+@@@
+
+@@@
+@@@ Exercise 3.4 Working with Symbolic Links and Hard Links
+@@@
+    cd
+    ln /etc/passwd .
+        ln: failed to create hard link './passwd' => '/etc/passwd': Operation not permitted
+    ln -s /etc/passwd .
+        [Success]
+    ln -s /etc/hosts
+    touch newfile
+    ln newfile linkedfile
+        ls -la
+            [inode counter is 2]
+    ln -s newfile symlinkfile
+    rm newfile
+    cat symlinkfile
+        cat: symlinkfile: No such file or directory
+    cat linkedfile
+        [Success]
+    ls -la
+        [symlinkfile still shows a link to the non-existent newfile]
+    ln linkedfile newfile
+    ls -la
+        [link from symlinkfile to newfile is restored]
+@@@
+
+tar -cvf files.tar file1 file2 dir1 dir2
+
+tar -tvf files.tar
+
+tar -xvf files.tar -C place/
+
+tar -xvf files.tar hosts
+
+file files.tar
+    files.tar: POSIX tar archive (GNU)
+
+@@@
+@@@ Exercise 3.5 Using tar
+@@@
+    sudo -i
+    cd
+    tar -cvf etc.tar /etc
+    file etc.tar
+        etc.tar: POSIX tar archive (GNU)
+    gzip etc.tar
+        [etc.tar is replaced by the compressed file etc.tar.gz]
+    tar -tvf etc.tar.gz
+        [Lists all files in the compressed archive, using a relative path]
+    tar -xvf etc.tar.gz etc/hosts
+        [etc/hosts is extracted in pwd]
+    ls -R
+        ./etc/hosts
+    gunzip etc.tar.gz
+        [etc.tar.gz is replaced by the uncompressed file etc.tar]
+    tar -xvf etc.tar -C /tmp etc/passwd
+    ls /tmp/etc
+        passwd
+    tar -cjvf home.tar /home
+        [Success]
+    rm -rf *gz *tar
+@@@
+
+@@@
+@@@ Lab 3.1
+@@@
+    1.  sudo -i
+        tar -cvf essentials.tar /home /etc
+        tar -tvf essentials.tar | less
+    2.  cp /root/essentials.tar /tmp
+        ln essentials.tar /
+    3.  mv /essentials.tar /archive.tar
+    4.  ln -s /archive.tar link.tar
+    5.  rm -rf /archive.tar
+        ls -la link.tar
+        rm -rf link.tar
+    6.  gzip essentials.tar
+        essentials.tar.gz
+@@@
+
+
+
+4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4
+4-4-4                                                   4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4
+4-4-4    Chapter 4: Working with Text Files (17 pg.)    4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4
+4-4-4                                                   4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4
+4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4
+
+@@@
+@@@ Exercise 4.1 Applying Basic Less Skills
+@@@
+    less /etc/passwd
+        [/etc/passwd is opened in less]
+    G
+        [Scrolls to the bottom of the file]
+    /root
+        [Forward searches for root]
+    ?root
+        [Backward searches for root]
+    q
+    ps aux | less
+        [Results are displayed in less]
+    q
+@@@
+
+cat /etc/passwd
+    [Results displayed in normal order]
+
+tac
+    [Inverse results displayed]
+
+@@@
+@@@ Exercise 4.2 Using Basic head and tail Operations
+@@@
+    tail -f /var/log/messages
+        [Real-time view of the file]
+    Ctrl+C
+    head -n 5 /etc/passwd
+        root:x:0:0:root:/root:/bin/bash
+        bin:x:1:1:bin:/bin:/sbin/nologin
+        daemon:x:2:2:daemon:/sbin:/sbin/nologin
+        adm:x:3:4:adm:/var/adm:/sbin/nologin
+        lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+    tail -n 2 /etc/passwd
+        tcpdump:x:72:72::/:/sbin/nologin
+        ladmin:x:1000:1000:ladmin:/home/ladmin:/bin/bash
+    head -n 5 /etc/passwd | tail -n 1
+        lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+@@@
+
+cut -d : -f 1-3 /etc/passwd
+    root:x:0
+    bin:x:1
+    daemon:x:2
+    adm:x:3
+    lp:x:4
+    ...
+
+cut -d : -f 1 /etc/passwd | sort
+    abrt
+    adm
+    avahi
+    bin
+    chrony
+    ...
+
+cut -d : -f 3 /etc/passwd | sort -n
+    0
+    1
+    2
+    3
+    4
+    ...
+
+cut -d : -f 3 /etc/passwd | sort -nr
+    65534
+    1000
+    999
+    998
+    997
+    ...
+
+du -h * | sort -hr
+    2.7M    anaconda
+    836K    audit
+    748K    sa
+    460K    messages
+    108K    gdm
+    ...
+
+sort -k3 -t : -hr /etc/passwd
+    nfsnobody:x:65534:65534:Anonymous NFS User:/var/lib/nfs:/sbin/nologin
+    ladmin:x:1000:1000:ladmin:/home/ladmin:/bin/bash
+    systemd-bus-proxy:x:999:998:systemd Bus Proxy:/:/sbin/nologin
+    polkitd:x:998:997:User for polkitd:/:/sbin/nologin
+    unbound:x:997:996:Unbound DNS resolver:/etc/unbound:/sbin/nologin
+    ...
+
+ps aux | sort -k4 -r
+    USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+    gdm       2488  0.0  5.1 1374232 97508 ?       Sl   Feb13   0:07 gnome-shell --mode=gdm
+    root       726  0.0  1.4 327292 26744 ?        Ssl  Feb13   0:01 /usr/bin/python -Es /usr/sbin/firewalld --nofork --nopid
+    gdm       2574  0.0  1.0 713768 18888 ?        Sl   Feb13   0:00 /usr/libexec/goa-daemon
+    root      1046  0.0  1.0 620968 20208 ?        Ssl  Feb13   0:00 /usr/sbin/libvirtd
+    gdm       2463  0.0  0.9 960608 18820 ?        Sl   Feb13   0:00 /usr/libexec/gnome-settings-daemon
+    ...
+
+ps aux | wc
+    144    1810   14114
+ps aux | wc -l
+    144
+ps aux | wc -w
+    1810
+ps aux | wc -c
+    14114
+
+Always escape regular expressions, even if both work
+    USE: grep '^anna' /etc/passwd
+    NOT: grep ^anna /etc/passwd
+
+^text
+    [Line starts with 'text']
+text$
+    [Line ends with 'text']
+.
+    [Wildcard for any single character]
+[abc]
+    [Matches a, b, or c]
+*
+    [Match zero to infinite of previous character/expression]
+\{2\}
+    [Matches exactly 2 of previous character]
+\{1,3\}
+    [Matches min 1 / max 3 of previous character]
+colou?r
+    [Matches 0 or 1 of previous character/expression]
+
+@@@
+@@@ Exercise 4.3 Using Common grep Options
+@@@
+    grep '^#' /etc/sysconfig/sshd
+        # Configuration file for the sshd service.
+        # The server keys are automatically generated if they are missing.
+        # To change the automatic creation uncomment and change the appropriate
+        ...
+    grep -v '^#' /etc/sysconfig/sshd
+        SSH_USE_STRONG_RNG=0
+    grep -v '^#' /etc/sysconfig/sshd -B 5
+        [Shows the five lines preceeding each match]
+    grep -v -e "^#" -e "^$" /etc/sysconfig/sshd
+        [Shows non-commented, non-blank lines; the $ requires "" rather than '']
+@@@
+
+awk -F : '{ print $4 }' /etc/passwd
+    [Prints the fourth field from /etc/passwd; if cut doesn't work, use awk]
+
+awk -F : '/user/ { print $1 }' /etc/passwd
+    [Searches for 'user' and prints the first field of any matching line]
+
+sed -n 5p /etc/passwd
+    [Prints the fifth line of /etc/passwd]
+
+sed -i s/oldtext/newtext/g ~/myfile
+    [Updates 'myfile' directly with replacement text]
+
+sed -i -e '2d' ~/myfile
+    [Deletes line 2 in 'myfile']
+
+sed -i -e '2,4d' ~/myfile
+    [Deletes lines 2-4 in 'myfile']
+
+@@@
+@@@ Lab 4.1
+@@@
+    1.  Show line 5 from /etc/passwd (two ways)
+            head -n 5 /etc/passwd | tail -n 1
+            sed -n 5p /etc/passwd
+    2.  Locate all text files on your server that contain the current IP address
+            find / -type f -exec grep -l `ip address show dev enp0s3 | grep -Eo '([0-9]*\.){3}[0-9]*/' | cut -d/ -f1` {} \;
+            grep -rnwl '/' -e "`ip address show dev enp0s3 | grep -Eo '([0-9]*\.){3}[0-9]*/' | cut -d/ -f1`"
+    3.  You have just used the sed command that replaces all occurrences of the text Administrator with root. How do you revert?
+            Identify recently modified files:
+                find . -type f -cmin -1 | grep -v '/\.'
+            In the future, use a backup extension when using 'sed -i'
+                sed -i.bak 's/Administrator/root/g' sample.txt
+    4.  Process the output of 'ps aux' to show the process that has the heaviest memory utilization first in the results list
+            ps aux | sort -k4 -r | head -n 10
+    5.  Filter the sixth column of ps aux output
+            ps aux | awk '{ print $6 }'
+    6.  Delete the sixth line from the file ~/myfile
+            sed -i.bak -e '6d' ~/myfile
+@@@
+
+
+
+5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
+5-5-5                                                                       5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
+5-5-5    Chapter 5: Connecting to a Red Hat Enterprise Linux 7 (19 pg.)     5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
+5-5-5                                                                       5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
+5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
+
+@@@
+@@@ Exercise 5.1 Working from Several Terminal Windows Simultaneously
+@@@
+    Open two terminal sessions on the same server
+    As root:
+        tail -f /var/log/secure
+    As ladmin:
+        su - (with the wrong password)
+            unix_chkpwd[11791]: password check failed for user (root)
+            su: pam_unix(su-l:auth): authentication failure; logname=ladmin uid=1000 euid=0 tty=pts/1 ruser=ladmin rhost=  user=root
+            su: pam_succeed_if(su-l:auth): requirement "uid >= 1000" not met by user "root"
+@@@
+
+Virtual terminal switching in a non-graphical environment (/dev/tty1 ... /dev/tty6)
+    Alt+F1
+    ...
+    Alt+F6
+
+Virtual terminal switching in a graphical environment (/dev/tty1 ... /dev/tty6)
+    Alt+Ctrl+F1
+    ...
+    Alt+Ctrl+F2
+
+-OR-
+
+Just use the 'chvt' command (/dev/tty1 ... /dev/tty6)
+    chvt 1
+    ...
+    chvt 6
+
+@@@
+@@@ Exercise 5.2 Working with Pseudo Terminals
+@@@
+    In the graphical environment, open the Terminal application
+        w
+            20:44:23 up 10:50,  3 users,  load average: 0.00, 0.01, 0.05
+            USER     TTY     FROM   LOGIN@   IDLE     JCPU     PCPU WHAT
+            ladmin   :0      :0     Tue07    ?xdm?    54.68s   0.33s gdm-session-worker [pam/gdm-password]
+            ladmin   pts/0   :0     Tue07    37:12m   0.02s    0.02s w
+    Open another Terminal application
+        w
+            21:01:19 up 11:07,  6 users,  load average: 0.27, 0.18, 0.15
+            USER     TTY     FROM   LOGIN@   IDLE     JCPU    PCPU WHAT
+            ladmin   :0      :0     Tue07    ?xdm?    1:30    0.38s gdm-session-worker [pam/gdm-password]
+            ladmin   pts/0   :0     Tue07    37:29m   0.02s   0.02s -bash
+            ladmin   pts/1   :0     20:59    7.00s    0.08s   2.90s /usr/libexec/gnome-terminal-server
+@@@
+
+Pseudo terminal identification
+    /dev/pts/0
+    ...
+    /dev/pts/5
+
+@@@
+@@@ Exercise 5.3 Using SSH to Log In to a Remote Server
+@@@
+    On Server2 as root:
+        systemctl status sshd
+        systemctl stop firewalld
+        ip address | grep 'inet '
+    On Server1 as ladmin:
+        ssh 10.0.1.6 -l root
+        yes
+        w
+            12:36:58 up 7 min,  2 users,  load average: 0.00, 0.05, 0.05
+            USER     TTY     FROM       LOGIN@   IDLE     JCPU    PCPU    WHAT
+            ladmin   tty1               12:34    58.00s   0.16s   0.16s   login -- ladmin
+            root     pts/0   10.0.1.5   12:36    2.00s    0.02s   0.02s   w
+        exit
+@@@
+
+Regular connections:
+    ssh ladmin@172.25.1.102
+    ssh 172.25.1.102 -l ladmin
+Custom port:
+    ssh ladmin@172.25.1.102 -p 2222
+Untrusted X11 Forwarding:
+    ssh -X ladmin@172.25.1.102
+Trusted X11 Forwarding:
+    ssh -Y ladmin@172.25.1.102
+
+To make X11 Forwarding active by default on a client:
+    vi /etc/ssh/ssh_config
+        ForwardX11 yes
+
+Copy a file to remote server as current user:
+    scp /etc/hosts 172.25.1.102:/tmp
+
+Copy a file from remote server as specified user to local server:
+    scp root@172.25.1.102:/etc/hosts /home/ladmin
+
+Copy a remote directory the the local home directory as a specified user:
+    scp -r ladmin@172.25.1.102:/etc/ssh ~
+
+scp uses '-P' for custom port specification, not '-p'
+
+@@@
+@@@ Exercise 5.4 Connecting to a Remote Server with Public/Private Keys
+@@@
+    On Server1 as root:
+        ssh-keygen
+            Generating public/private rsa key pair.
+            Enter file in which to save the key (/root/.ssh/id_rsa): <Enter>
+            Created directory '/root/.ssh'.
+            Enter passphrase (empty for no passphrase):
+            Enter same passphrase again:
+            Your identification has been saved in /root/.ssh/id_rsa.
+            Your public key has been saved in /root/.ssh/id_rsa.pub.
+            The key fingerprint is:
+            65:74:6e:c9:70:5e:c4:8f:13:15:ae:22:c3:ba:46:8a root@Server1
+            The key's randomart image is:
+            +--[ RSA 2048]----+
+            |          o ooooo|
+            |         . B o+  |
+            |          o *  = |
+            |        .o .  + .|
+            |        S+ . . . |
+            |       .. o .    |
+            |    . o.         |
+            |   E . ..        |
+            |      ..         |
+            +-----------------+
+        ssh-copy-id 172.25.1.102
+            The authenticity of host '172.25.1.102 (172.25.1.102)' can't be established.
+            ECDSA key fingerprint is 94:5c:13:f8:a0:df:1b:12:b5:67:96:80:10:41:a0:be.
+            Are you sure you want to continue connecting (yes/no)? yes
+            /bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+            /bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+            root@172.25.1.102's password:
+
+            Number of key(s) added: 1
+
+            Now try logging into the machine, with:   "ssh '172.25.1.102'"
+            and check to make sure that only the key(s) you wanted were added.
+        ssh 172.25.1.102
+            [Connects successfully without a password]
+@@@
+
+ssh-keygen's default is rsa and 2048 bits; use options to change:
+    ssh-keygen -t rsa -b 4096
+
+Copy keys to the same user on the remote server:
+    ssh-copy-id 172.25.1.102
+
+Copy keys to the 'ladmin' user on the remote server (same keys can be copied to multiple remote users):
+    ssh-copy-id ladmin@172.25.1.102
+
+Scan for remote keys:
+    ssh-keyscan 172.25.1.102
+    ssh-keyscan -t rsa 172.25.1.102
+
+Using the 'screen' utility
+    Open an ssh session
+    screen
+        Execute a command
+            w
+                USER     TTY     FROM         LOGIN@   IDLE     JCPU    PCPU WHAT
+                ladmin   pts/0   172.25.1.1   13:39    28.00s   0.10s   0.20s sshd: ladmin [p
+                root     pts/1   :tty1:S.0    15:22    4.00s    0.01s   0.00s w
+                                      ^^^^
+        List screen commands
+            Ctrl+A, ?
+        Disconnect
+            Ctrl+A, d
+        As the same user, reconnect to the screen session
+            screen -r
+        List all screen sessions
+            screen -ls
+                There are screens on:
+                4707.tty1.Server2       (Attached)
+                4696.pts-0.Server2      (Detached)
+                2 Sockets in /var/run/screen/S-root.
+        Connect to an available, detached screen session
+            screen -r 4696
+        Connect to a shared session
+            screen -x
+            screen -x 4786
+        Disconnect current screen session from terminal (from within screen or external)
+            screen -d
+        Disconnect and terminate
+            Ctrl+D
+        Terminate the screen session
+            Ctrl+A, \
+
+@@@
+@@@ Lab 5.1
+@@@
+    1.  Alt+Ctrl+F6
+            /dev/tty6
+        Alt+F1
+            /dev/tty1
+    2.  Test Server2 -> Server1 key-based authentication with graphical application support
+@@@
+
+
+
+6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6
+6-6-6                                                     6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6
+6-6-6    Chapter 6: User and Group Management (26 pg.)    6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6
+6-6-6                                                     6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6
+6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6
+
+'su -' is better than 'su'
+
+Edit sudoers list with visudo
+
+@@@
+@@@ Exercise 6.1 Switching User Accounts
+@@@
+    As ladmin:
+        whoami
+            ladmin
+        id
+            uid=1000(ladmin) gid=1000(ladmin) groups=1000(ladmin),10(wheel) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+        su
+        id
+            uid=0(root) gid=0(root) groups=0(root) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+        visudo
+            %wheel ALL=(ALL) ALL
+        useradd -G wheel lisa
+        id lisa
+            uid=1001(lisa) gid=1001(lisa) groups=1001(lisa),10(wheel)
+        passwd lisa
+        su - lisa
+        sudo useradd lori
+        id lori
+            uid=1002(lori) gid=1002(lori) groups=1002(lori)
+@@@
+
+Create the file /etc/nologin.txt with a message to display when someone tries to log in to a /sbin/nologin account
+
+Update password properties directly in /etc/shadow, or using 'passwd', or using 'chage'
+
+@@@
+@@@ Exercise 6.2 Creating User Accounts
+@@@
+    Assume root role
+    vi /etc/login.defs
+        /CREATE_HOME
+        /USERGROUPS_ENAB
+            USERGROUPS_ENAB no
+                When 'yes', the new user's default group is the same as their name
+                When 'no', the new user's default group is 'users'
+    cd /etc/skel
+        mkdir Pictures
+        mkdir Documents
+        echo "export EDITOR=/usr/bin/vim" | sudo tee -a .bashrc
+    useradd linda
+    id linda
+        uid=1001(linda) gid=100(users) groups=100(users)
+    ls /home/linda
+    passwd linda
+    passwd -n 30 -w 3 -x 90 linda
+    for i in lisa lori bob; do useradd $i; done
+    grep lori /etc/passwd /etc/shadow /etc/group
+@@@
+
+vigr
+    [Command line editing of groups and secondary group members]
+groupadd
+    [Add new groups]
+groupmod
+    [Update a group's name or gid, but not members; use usermod to change membership]
+
+@@@
+@@@ Exercise 6.3 Working with Groups
+@@@
+    groupadd sales
+    groupadd account
+    groups linda
+        linda : linda
+    id linda
+        uid=1001(linda) gid=100(users) groups=100(users)
+    usermod -aG sales linda
+    usermod -aG sales lisa
+    usermod -aG account lori
+    usermod -aG account bob
+    id linda
+        uid=1001(linda) gid=100(users) groups=100(users),1005(sales)
+@@@
+
+groupmems -g sales -l
+    linda  lisa
+
+groupmems -g wheel -a lisa
+id lisa
+    uid=1002(lisa) gid=100(users) groups=100(users),10(wheel),1005(sales)
+groupmems -g wheel -d lisa
+id lisa
+    uid=1002(lisa) gid=100(users) groups=100(users),1005(sales)
+
+lid -g mail
+    mail(uid=8)
+    postfix(uid=89)
+lid -g mail | cut -d'(' -f1
+    mail
+    postfix
+
+lid lisa
+    users(gid=100)
+    sales(gid=1005)
+lid lisa | cut -d'(' -f1
+    users
+    sales
+
+@@@
+@@@ Exercise 6.4 Connecting to an External LDAP Server
+@@@
+    [Set up the FreeIPA Server as described in Appendix D]
+    vi /etc/hosts
+        172.25.1.103 ipa.example.com
+        :wq
+    yum groupinstall directory-client
+
+    mkdir -p /etc/openldap/cacerts
+    scp ipa.example.com:/root/cacert.p12 /etc/openldap/cacerts/
+
+    *DEPRECATED*
+        authconfig-tui
+            User Information -> Use LDAP
+            Authentication -> Use LDAP Authentication
+            [Next]
+            Use TLS
+            ldap://ipa.example.com
+            dc=example,dc=com
+            [Ok]
+
+    Configure LDAP using sssd without TLS:
+        authconfig -help | grep rfc
+        authconfig --enableldap --enableldapauth --update
+        authconfig --ldapserver=ipa.example.com --ldapbasedn="dc=example,dc=com" --update
+
+    Add TLS:
+        authconfig --enableldaptls --update
+        vi /etc/sssd/sssd.conf
+            ldap_tls_reqcert = never
+
+    Make a local home directory for LDAP users:
+        authconfig --enablemkhomedir --update
+
+    Restart sssd service to use LDAP:
+        systemctl restart sssd
+        getent passwd lara
+        su - lara
+
+    Other sssd configs that don't seem necessary:
+        #authconfig --enablesssd --enablesssdauth --update
+        #authconfig --enablerfc2307bis --update
+        #authconfig --ldaploadcacert=ftp://ipa.example.com/pub/cacert.p12 --update
+
+    Use nslcd instead of sssd:
+        yum install openldap-clients nss-pam-ldapd
+        authconfig --enableforcelegacy --update
+        authconfig --enableldap --enableldapauth --update
+        authconfig --ldapserver="ipa.example.com" --ldapbasedn="dc=example,dc=com" --update
+        authconfig --enableldaptls --update
+        authconfig --enablemkhomedir --update
+        vi /etc/nslcd.conf
+            tls_reqcert never
+        systemctl restart nslcd
+        getent passwd lara
+        su - lara
+@@@
+
+@@@
+@@@ Lab 6.1
+@@@
+    1.1     groupadd sales
+            groupadd account
+    1.2     vi /etc/login.defs
+                USERGROUPS_ENAB yes
+            for i in bobby betty bill beatrix; do useradd $i; done
+    1.3     for i in bobby betty; do usermod -aG sales $i; done
+            for i in bill beatrix; do usermod -aG account $i; done
+    1.4     vi /etc/login.defs
+                PASS_MAX_DAYS   90
+            for i in bobby betty bill beatrix; do passwd -x 90 $i; done
+            for i in bobby betty bill beatrix; do chage -l $i; done
+@@@
+
+@@@
+@@@ Lab 6.2
+@@@
+    1.  [Set up the FreeIPA Server as described in Appendix D]
+        [Configure LDAP locally]
+        su - lara
+        su - linda
+        su - lisa
+        su - admin
+@@@
+
+
+
+7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7
+7-7-7                                                   7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7
+7-7-7    Chapter 7: Configuring Permissions (24 pg.)    7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7
+7-7-7                                                   7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7
+7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7
+
+find / -user linda
+find / -group users
+
+chown who what
+chown linda account
+chown user:group file
+chown user.group file
+
+chown -R linda /home/linda
+chown -R :account /home/account
+chown -R .account /home/account
+
+chgrp account /home/account
+chgrp -R account /home/account
+
+groups lisa
+    lisa : users sales
+
+su - lisa
+    groups
+        users sales
+    touch stuff
+    ls -la stuff
+        -rw-r--r--. 1 lisa users 0 Feb 20 19:29 stuff
+                           ^^^^^
+    newgrp sales
+    groups
+        sales users
+    touch toes
+    ls -la toes
+        -rw-r--r--. 1 lisa sales 0 Feb 20 19:30 toes
+                           ^^^^^
+    exit
+    groups
+        users sales
+
+gpasswd wheel
+    Changing the password for group wheel
+    New Password:
+    Re-enter new password:
+su - lisa
+    groups
+        users sales
+    newgrp wheel
+        Password:
+    groups
+        wheel users sales
+    exit
+    groups
+        users sales
+
+chmod 755 somefile
+chmod +x somefile
+chmod g+w,o-r somefile
+
+chmod -R o+rx /data
+    [sets execute permissions on all files and directories in /data]
+chmod -R o+rX /data
+    [sets execute permissions only on directories in /data]
+
+@@@
+@@@ Exercise 7.1 Managing Basic Permissions
+@@@
+    mkdir -p /data/sales /data/account
+    chown linda:sales /data/sales
+    chown linda:account /data/account
+    chmod 770 /data/sales
+    chmod 770 /data/account
+    su - lisa
+        cd /data/account
+            -bash: cd: /data/account: Permission denied
+        cd /data/sales
+            [Success]
+        touch emptyfile
+            [Success]
+@@@
+
+Set User ID (SUID)
+    ls -la /bin/passwd
+        -rwsr-xr-x. 1 root root 27832 Jun 10  2014 /bin/passwd
+           ^
+    touch somefile
+    chmod 755 somefile
+    ls -l somefile
+        -rwxr-xr-x. 1 root root 0 Feb 20 20:18 somefile
+           ^
+    chmod u+s somefile
+    ls -l somefile
+        -rwsr-xr-x. 1 root root 0 Feb 20 20:18 somefile
+           ^
+    chmod 4700 somefile
+          ^
+    ls -l somefile
+        -rws------. 1 root root 0 Feb 20 20:18 somefile
+           ^
+
+Set Group ID (SGID)
+    mkdir somedir
+    ls -ld somedir
+        drwxr-xr-x. 2 root root 6 Feb 20 20:22 somedir
+              ^
+    chmod g+s somedir
+    ls -ld somedir
+        drwxr-sr-x. 2 root root 6 Feb 20 20:22 somedir
+              ^
+    chmod 2070 somedir
+          ^
+    ls -ld somedir
+        d---rws---. 2 root root 6 Feb 20 20:22 somedir
+              ^
+
+Set Stick Bit
+    mkdir stickydir
+    chmod 755 stickydir
+    ls -ld stickydir
+        drwxr-xr-x. 2 root root 6 Feb 20 20:35 stickydir
+                 ^
+    chmod +t stickydir
+    ls -ld stickydir
+        drwxr-xr-t. 2 root root 6 Feb 20 20:35 stickydir
+                 ^
+    chmod 1005 stickydir
+          ^
+    ls -ld stickydir
+        d------r-t. 2 root root 6 Feb 20 20:35 stickydir
+                 ^
+
+@@@
+@@@ Exercise 7.2 Working with Special Permissions
+@@@
+    su - linda
+        cd /data/sales
+        touch linda1
+        touch linda2
+    su - lisa
+        cd /data/sales
+        ls -l
+            -rw-r--r--. 1 linda users 0 Feb 20 20:43 linda1
+            -rw-r--r--. 1 linda users 0 Feb 20 20:43 linda2
+        rm -rf linda*
+        ls -l
+            [None]
+        touch lisa1
+        touch lisa2
+    su -
+        chmod g+s,o+t /data/sales
+        ls -ld /data/sales
+            drwxrws--T. 2 linda sales 49 Feb 20 20:45 /data/sales
+                  ^  ^          ^^^^^
+                [T means others have no execute, whereas t means others have execute]
+    su - linda
+        groups
+            users sales
+        cd /data/sales
+        touch linda3
+        touch linda4
+        ls -l
+            -rw-r--r--. 1 linda sales 0 Feb 20 20:56 linda3
+            -rw-r--r--. 1 linda sales 0 Feb 20 20:56 linda4
+                                ^^^^^
+        mkdir place
+        ls -ld place
+            drwxr-sr-x. 2 linda sales 6 Feb 20 20:58 place/
+                  ^             ^^^^^
+        rm -rf lisa*
+            [Even with sticky bit set, files removed because linda owns /data/sales]
+
+    su - lisa
+        cd /data/sales
+        rm -rf linda*
+            rm: cannot remove ‘linda3’: Operation not permitted
+            rm: cannot remove ‘linda4’: Operation not permitted
+                [Because sticky bit is set, lisa cannot remove files owned by linda]
+@@@
+
+TODO If archiving with ACL, use star instead of tar
+
+getfacl -R /directory > file.acl
+setfacl --restore=file.acl
+
+setfacl -m u:linda:rwx /data
+    [Gives permissions to linda on /data without making her the owner and without changing the current owner assignment]
+
+setfacl -R -m
+    [Modify the ACLs for current files]
+setfacl -m d:
+    [Take care of all new items that will be created]
+
+setfacl -m d:o::- /data
+    [On every new file that will ever be created in /data, others have no permissions]
+
+@@@
+@@@ Exercise 7.3 Managing Advanced Permissions Using ACLs
+@@@
+    setfacl -m g:account:rx /data/sales
+        ls -ld /data/sales
+            drwxrws--T+ 3 linda sales 60 Feb 20 21:02 /data/sales
+        getfacl /data/sales
+            # file: sales
+            # owner: linda
+            # group: sales
+            # flags: -st
+            user::rwx
+            group::rwx
+            group:account:r-x
+            mask::rwx
+            other::---
+    setfacl -m g:sales:rx /data/account
+        ls -ld /data/account
+            drwxrwx---+ 2 linda account 6 Feb 20 20:03 /data/account
+        getfacl /data/account
+            # file: account
+            # owner: linda
+            # group: account
+            user::rwx
+            group::rwx
+            group:sales:r-x
+            mask::rwx
+            other::---
+    setfacl -m d:g:sales:rwx,d:g:account:rx /data/sales
+    setfacl -m d:g:account:rwx,d:g:sales:rx /data/account
+    touch /data/sales/newfile
+    ls -la newfile
+        -rw-rw----+ 1 root sales 0 Feb 20 21:19 newfile
+    getfacl /data/sales/newfile
+        # file: data/sales/newfile
+        # owner: root
+        # group: sales
+        user::rw-
+        group::rwx                      #effective:rw-
+        group:sales:rwx                 #effective:rw-
+        group:account:r-x               #effective:r--
+        mask::rw-
+        other::---
+    mkdir newdir
+    ls -ld /data/sales/newdir
+        drwxrws---+ 2 root sales 6 Feb 20 21:52 /data/sales/newdir
+    getfacl /data/sales/newdir
+        # file: data/sales/newdir
+        # owner: root
+        # group: sales
+        # flags: -s-
+        user::rwx
+        group::rwx
+        group:sales:rwx
+        group:account:r-x
+        mask::rwx
+        other::---
+        default:user::rwx
+        default:group::rwx
+        default:group:sales:rwx
+        default:group:account:r-x
+        default:mask::rwx
+        default:other::---
+@@@
+
+umask 666
+    [files]
+umask 777
+    [directories]
+
+man chattr
+touch /root/fuzzy
+chattr +i /root/fuzzy
+ls -la /root/fuzzy
+    -rw-r--r--. 1 root root 0 Feb 20 22:28 /root/fuzzy
+lsattr /root/fuzzy
+    ----i----------- /root/fuzzy
+rm -rf /root/fuzzy
+    rm: cannot remove ‘/root/fuzzy’: Operation not permitted
+chattr -i /root/fuzzy
+lsattr /root/fuzzy
+    ---------------- /root/fuzzy
+rm -rf /root/fuzzy
+    [Success]
+
+@@@
+@@@ Lab 7.1
+@@@
+    1.  mkdir -p /data/sales
+        mkdir -p /data/account
+        chown root:sales /data/sales
+        chown root:account /data/account
+    2.  chmod 770 /data/sales
+        chmod 770 /data/account
+        setfacl -R -m d:o::- /data
+    3.  setfacl -m g:account:rx /data/sales
+        setfacl -m g:sales:rx /data/account
+        setfacl -m d:g:account:rx /data/sales
+        setfacl -m d:g:sales:rx /data/account
+    4.  chmod g+s /data/sales
+        chmod g+s /data/account
+    5.  chmod +t /data/sales
+        chmod +t /data/account
+@@@
+
+
+
+8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8
+8-8-8                                                   8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8
+8-8-8    Chapter 8: Configuring Networking (26 pg.)     8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8
+8-8-8                                                   8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8
+8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8
+
+ip addr
+    [Configure and monitor network addresses]
+ip route
+    [Configure and monitor routing information]
+ip link
+    [Configure and monitor network link state]
+
+If interface is DOWN:
+    ip link set dev enp0s3 up
+
+@@@
+@@@ Exercise 8.1 Validating Network Configuration
+@@@
+    Log in as root
+        ip -s link
+            1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT qlen 1
+                link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+                RX: bytes  packets  errors  dropped overrun mcast
+                52744      309      0       0       0       0
+                TX: bytes  packets  errors  dropped carrier collsns
+                52744      309      0       0       0       0
+            2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP mode DEFAULT qlen 1000
+                link/ether 08:00:27:a9:50:a9 brd ff:ff:ff:ff:ff:ff
+                RX: bytes  packets  errors  dropped overrun mcast
+                28427114   35328    0       0       0       0
+                TX: bytes  packets  errors  dropped carrier collsns
+                1090323    17274    0       0       0       0
+
+        ip link show
+            1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT qlen 1
+                link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+            2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP mode DEFAULT qlen 1000
+                link/ether 08:00:27:a9:50:a9 brd ff:ff:ff:ff:ff:ff
+
+        ip addr show
+            1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN qlen 1
+                link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+                inet 127.0.0.1/8 scope host lo
+                   valid_lft forever preferred_lft forever
+                inet6 ::1/128 scope host
+                   valid_lft forever preferred_lft forever
+            2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+                link/ether 08:00:27:a9:50:a9 brd ff:ff:ff:ff:ff:ff
+                inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic enp0s3
+                    valid_lft 86252sec preferred_lft 86252sec
+                inet6 fe80::8a70:e37:e28:ea25/64 scope link
+                    valid_lft forever preferred_lft forever
+@@@
+
+ip route show
+    default via 10.0.2.2 dev enp0s3  proto static  metric 100
+    10.0.2.0/24 dev enp0s3  proto kernel  scope link  src 10.0.2.15  metric 100
+    172.25.1.0/24 dev enp0s8  proto kernel  scope link  src 172.25.1.101  metric 100
+    192.168.122.0/24 dev virbr0  proto kernel  scope link  src 192.168.122.1
+
+Network ports and services
+    netstat -uplant
+        Active Internet connections (servers and established)
+        Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+        tcp        0      0 0.0.0.0:111             0.0.0.0:*               LISTEN      1/systemd
+        tcp        0      0 192.168.122.1:53        0.0.0.0:*               LISTEN      2536/dnsmasq
+        tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1604/sshd
+        tcp        0      0 127.0.0.1:631           0.0.0.0:*               LISTEN      1201/cupsd
+        tcp        0      0 127.0.0.1:25            0.0.0.0:*               LISTEN      2398/master
+        tcp        0      0 172.25.1.101:22         172.25.1.1:49537        ESTABLISHED 21572/sshd: ladmin
+        tcp        0      0 172.25.1.101:22         172.25.1.1:62648        ESTABLISHED 13089/sshd: ladmin
+        tcp        0      0 172.25.1.101:45628      172.25.1.103:389        ESTABLISHED 4860/nslcd
+        ...
+    -OR-
+    ss -t
+        State    Recv-Q    Send-Q    Local Address:Port    Peer Address:Port
+        ESTAB    0         0         172.25.1.101:ssh      172.25.1.1:49537
+        ESTAB    0         0         172.25.1.101:ssh      172.25.1.1:62648
+        ESTAB    0         0         172.25.1.101:45628    172.25.1.103:ldap
+
+@@@
+@@@ Exercise 8.2 Verifying Network Settings
+@@@
+    ip addr show
+    ip route show
+    ping -c 4 8.8.8.8
+    ip addr add 10.0.0.10/24 dev enp0s3
+    ip addr show
+        2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+            link/ether 08:00:27:a9:50:a9 brd ff:ff:ff:ff:ff:ff
+            inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic enp0s3
+               valid_lft 84532sec preferred_lft 84532sec
+            inet 10.0.0.10/24 scope global enp0s3
+               valid_lft forever preferred_lft forever
+    ifconfig
+        enp0s3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+            inet 10.0.2.15  netmask 255.255.255.0  broadcast 10.0.2.255
+            inet6 fe80::8a70:e37:e28:ea25  prefixlen 64  scopeid 0x20<link>
+            ether 08:00:27:a9:50:a9  txqueuelen 1000  (Ethernet)
+        [Can't see newly added 10.0.0.10/24; don't use ifconfig]
+    ss -tul
+        Netid   State    Recv-Q   Send-Q   Local Address:Port    Peer Address:Port
+        udp     UNCONN   0        0                    *:mdns               *:*
+        udp     UNCONN   0        0                    *:58664              *:*
+        udp     UNCONN   0        0            127.0.0.1:323                *:*
+        udp     UNCONN   0        0                    *:44770              *:*
+    ip addr del 10.0.0.10/24 dev enp0s3
+        [Removes 10.0.0.10/24 from enp0s3]
+@@@
+
+systemctl status NetworkManager
+    ● NetworkManager.service - Network Manager
+       Loaded: loaded (/usr/lib/systemd/system/NetworkManager.service; enabled; vendor preset: enabled)
+       Active: active (running) since Mon 2017-02-20 13:14:08 CET; 1 day 23h ago
+         Docs: man:NetworkManager(8)
+      Main PID: 820 (NetworkManager)
+      ...
+
+cd /etc/sysconfig/network-scripts
+ls ifcfg-*
+    ifcfg-enp0s3  ifcfg-lo
+
+The 'ip' command is non-persistent. User 'nmtui' or 'nmcli' for persistent changes.
+
+nmcli con show
+    NAME                UUID                                  TYPE            DEVICE
+    Wired connection 1  e2cf784c-5ce4-30a6-86af-a4ca2bc93eb3  802-3-ethernet  enp0s8
+    enp0s3              f5dad1bf-ce1b-460e-99fd-f5e9ceb48360  802-3-ethernet  enp0s3
+    virbr0              5c43228c-068c-4bbf-afd4-ca135d5ffff6  bridge          virbr0
+
+nmcli con show 'Wired connection 1'
+nmcli con show 'Wired connection 1' | tr -d ' '
+nmcli con show 'Wired connection 1' | tr -d ' ' | cut -d':' -f2-10
+
+nmcli con show 'Wired connection 1' | grep 'IP4.ADDRESS'
+nmcli con show 'Wired connection 1' | grep 'IP4.ADDRESS' | tr -d ' '
+nmcli con show 'Wired connection 1' | grep 'IP4.ADDRESS' | tr -d ' ' | cut -d':' -f2-10
+
+nmcli dev status
+    DEVICE      TYPE      STATE      CONNECTION
+    virbr0      bridge    connected  virbr0
+    enp0s3      ethernet  connected  enp0s3
+    enp0s8      ethernet  connected  Wired connection 1
+    lo          loopback  unmanaged  --
+    virbr0-nic  tun       unmanaged  --
+
+nmcli dev show enp0s8
+    GENERAL.DEVICE:                         enp0s8
+    GENERAL.TYPE:                           ethernet
+    GENERAL.HWADDR:                         08:00:27:64:75:9C
+    GENERAL.MTU:                            1500
+    GENERAL.STATE:                          100 (connected)
+    GENERAL.CONNECTION:                     Wired connection 1
+    GENERAL.CON-PATH:                       /org/freedesktop/NetworkManager/ActiveConnection/5
+    WIRED-PROPERTIES.CARRIER:               on
+    IP4.ADDRESS[1]:                         172.25.1.101/24
+    IP4.GATEWAY:
+    IP6.ADDRESS[1]:                         fe80::7800:f963:db51:8583/64
+    IP6.GATEWAY:
+
+@@@
+@@@ Exercise 8.3 Managing Network Connections with nmcli
+@@@
+    nmcli con add con-name "dhcp" type ethernet ifname enp0s3
+        Connection 'dhcp' (cd925c78-c58b-4f18-9f68-b965c8fd18f1) successfully added.
+
+    nmcli con add con-name "static" type ethernet ifname enp0s3 autoconnect no ip4 10.0.0.20/24 gw4 10.0.2.2
+        Connection 'static' (7b4c3aa4-fd3a-4b72-a9a0-7dd98e1b3e87) successfully added.
+
+    nmcli con show
+        NAME                UUID                                  TYPE            DEVICE
+        Wired connection 1  e2cf784c-5ce4-30a6-86af-a4ca2bc93eb3  802-3-ethernet  enp0s8
+        enp0s3              f5dad1bf-ce1b-460e-99fd-f5e9ceb48360  802-3-ethernet  enp0s3
+        virbr0              5c43228c-068c-4bbf-afd4-ca135d5ffff6  bridge          virbr0
+        dhcp                da584d6b-b114-4553-88f8-9617abc72e48  802-3-ethernet  --
+        static              54bf6aee-3d6e-495d-b379-fb69d61a5ca0  802-3-ethernet  --
+
+    nmcli con down "enp0s3"
+        Connection 'enp0s3' successfully deactivated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/8)
+
+    nmcli con up "static"
+        Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/11)
+
+    nmcli dev status
+        DEVICE      TYPE      STATE      CONNECTION
+        virbr0      bridge    connected  virbr0
+        enp0s3      ethernet  connected  static
+        enp0s8      ethernet  connected  Wired connection 1
+        lo          loopback  unmanaged  --
+        virbr0-nic  tun       unmanaged  --
+
+    nmcli con delete static
+        Connection 'static' (7b4c3aa4-fd3a-4b72-a9a0-7dd98e1b3e87) successfully deleted.
+
+    nmcli con up "dhcp"
+        Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/15)
+
+    nmcli con up "enp0s3"
+        Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/16)
+
+    nmcli con down "dhcp"
+        Connection 'dhcp' successfully deactivated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/17)
+
+    [enp0s3 remains up]
+
+    nmcli con delete dhcp
+        Connection 'dhcp' (cd925c78-c58b-4f18-9f68-b965c8fd18f1) successfully deleted.
+@@@
+
+@@@
+@@@ Exercise 8.4 Changing Connection Parameters with nmcli
+@@@
+    nmcli con add con-name "dhcp" type ethernet ifname enp0s3
+    nmcli con add con-name "static" type ethernet ifname enp0s3 autoconnect no ip4 10.0.0.20/24 gw4 10.0.2.2
+
+    nmcli con mod "static" connection.autoconnect no
+    nmcli con show "static" | grep connection.autoconnect:
+        connection.autoconnect: no
+
+    nmcli con mod "static" ipv4.dns 10.0.0.10
+    nmcli con show "static" | grep ipv4.dns:
+        ipv4.dns: 10.0.0.10
+    nmcli con mod "static" +ipv4.dns 8.8.8.8
+    nmcli con show "static" | grep ipv4.dns:
+        ipv4.dns: 10.0.0.10,8.8.8.8
+
+    nmcli con mod "static" ipv4.addresses "10.0.0.20/24" ip4 10.0.0.100/24
+    nmcli con show "static" | grep ipv4.addresses:
+        ipv4.addresses: 10.0.0.100/24
+
+    nmcli con mod "static" +ipv4.addresses "10.20.30.40/16"
+    nmcli con show "static" | grep ipv4.addresses:
+        ipv4.addresses: 10.0.0.100/24, 10.20.30.40/16
+
+    nmcli con up "static"
+    nmcli dev status
+        DEVICE      TYPE      STATE      CONNECTION
+        virbr0      bridge    connected  virbr0
+        enp0s3      ethernet  connected  static
+        enp0s8      ethernet  connected  Wired connection 1
+        lo          loopback  unmanaged  --
+        virbr0-nic  tun       unmanaged  --
+    nmcli con up enp0s3
+@@@
+
+man nmcli-examples
+
+nmtui
+
+cd /etc/sysconfig/network-scripts
+ls ifcfg-*
+    ifcfg-dhcp  ifcfg-enp0s3  ifcfg-lo  ifcfg-static  ifcfg-textgui
+
+vi /etc/sysconfig/network-scripts/ifcfg-static
+    BOOTPROTO=dhcp
+    :wq
+
+If editing an 'ifcfg-' file directly, activate the changes:
+    nmcli con reload
+
+hostnamectl set-hostname server1.local
+hostnamectl status
+   Static hostname: server1.local
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: b101d0db23e44e9f9a4be5f01ca6416e
+           Boot ID: 4174f1b9ffbf41998daa2fa87bf1e7d6
+    Virtualization: kvm
+  Operating System: CentOS Linux 7 (Core)
+       CPE OS Name: cpe:/o:centos:centos:7
+
+            Kernel: Linux 3.10.0-514.6.1.el7.x86_64
+      Architecture: x86-64
+
+To set DNS:
+    1. Use nmtui
+    2. Edit /etc/sysconfig/network-scripts/ifcfg-* files
+    3. nmcli con mod <con-name> [+]ipv4.dns <ip-of-dns>
+    4. Rely on DHCP
+
+Ignore DNS from DHCP:
+    1. Edit /etc/sysconfig/network-scripts/ifcfg-* files to include PEERDNS=no
+    2. nmcli con mod <con-name> ipv4.ignore-auto-dns yes
+
+Verify hostname resolution:
+    getent hosts <server-name>
+
+DO NOT specify DNS in /etc/resolv.conf because it will be overwritten by NM!
+
+@@@
+@@@ Lab 8.1a
+@@@
+    1.  server1 and server2:
+            vi /etc/hosts
+                192.168.222.100 server1a.example.com server1a
+                192.168.222.110 server2a.example.com server2a
+    2.  server1:
+            nmcli device | grep -v -e "connected\ " -e "unmanaged" | cut -d' ' -f1
+                DEVICE
+                enp0s9
+            nmcli con add con-name internal ifname enp0s9 type ethernet ip4 192.168.222.100/24
+                Connection 'internal' (4ebc24b7-c465-4998-b025-afc96d941a64) successfully added.
+            nmcli dev status
+                DEVICE      TYPE      STATE      CONNECTION
+                virbr0      bridge    connected  virbr0
+                enp0s3      ethernet  connected  static
+                enp0s8      ethernet  connected  Wired connection 1
+                enp0s9      ethernet  connected  internal
+                lo          loopback  unmanaged  --
+                virbr0-nic  tun       unmanaged  --
+            ip addr show | grep enp0s9: -A 5
+                4: enp0s9: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+                    link/ether 08:00:27:16:17:ff brd ff:ff:ff:ff:ff:ff
+                    inet 192.168.222.100/24 brd 192.168.222.255 scope global enp0s9
+                       valid_lft forever preferred_lft forever
+                    inet6 fe80::b19e:83ca:bb35:93d5/64 scope link
+                       valid_lft forever preferred_lft forever
+        server2:
+            nmcli device | grep -v -e "connected\ " -e "unmanaged" | cut -d' ' -f1
+                DEVICE
+                enp0s9
+            nmcli con add con-name internal ifname enp0s9 type ethernet ip4 192.168.222.110/24
+                Connection 'internal' (6687939a-c8a7-45b8-86a9-62f3235bf3ae) successfully added.
+            nmcli dev status
+                DEVICE      TYPE      STATE      CONNECTION
+                virbr0      bridge    connected  virbr0
+                enp0s3      ethernet  connected  enp0s3
+                enp0s8      ethernet  connected  Wired connection 1
+                enp0s9      ethernet  connected  internal
+                lo          loopback  unmanaged  --
+                virbr0-nic  tun       unmanaged  --
+            ip addr show | grep enp0s9: -A 5
+                4: enp0s9: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+                    link/ether 08:00:27:a9:1c:64 brd ff:ff:ff:ff:ff:ff
+                    inet 192.168.222.110/24 brd 192.168.222.255 scope global enp0s9
+                       valid_lft forever preferred_lft forever
+                    inet6 fe80::cb5d:8cb3:a148:9d6f/64 scope link
+                       valid_lft forever preferred_lft forever
+    3.  server1:
+            ping 192.168.222.110
+            ping server2a.example.com
+            ping server2a
+        server2:
+            ping 192.168.222.100
+            ping server1a.example.com
+            ping server1a
+    4.  server1:
+            vi /etc/sysconfig/network-scripts/ifcfg-internal
+                BOOTPROTO=dhcp
+            nmcli con show internal
+        server2:
+            vi /etc/sysconfig/network-scripts/ifcfg-internal
+                BOOTPROTO=dhcp
+            nmcli con show internal
+@@@
+
+@@@
+@@@ Lab 8.1b
+@@@
+    1.  server1 and server2:
+            vi /etc/hosts
+                10.11.12.100 server1b.example.com server1b
+                10.11.12.110 server2b.example.com server2b
+    2.  server1:
+            nmcli device | grep 'Wired'
+                DEVICE
+                enp0s10
+            nmcli con mod 'Wired connection 2' ipv4.addresses 10.11.12.100/24
+            nmcli con mod 'Wired connection 2' connection.id 'NatNet'
+            mv /etc/sysconfig/network-scripts/ifcfg-Wired_connection_2 /etc/sysconfig/network-scripts/ifcfg-NatNet
+            nmcli con show
+                NAME                UUID                                  TYPE            DEVICE
+                NatNet              6e0b382b-02ac-3325-9d01-21354311a424  802-3-ethernet  enp0s10
+                Wired connection 1  e2cf784c-5ce4-30a6-86af-a4ca2bc93eb3  802-3-ethernet  enp0s8
+                internal            81ea4bba-eae9-464f-a9f6-2dd6cc83f689  802-3-ethernet  enp0s9
+                static              ac3a5276-d197-4d25-a87f-90ff73550c3f  802-3-ethernet  enp0s3
+                virbr0              2e7d796b-5100-4580-9f28-2bcff5ebd0df  bridge          virbr0
+                dhcp                d0ad6209-37c2-4710-a8a7-6b27dfdd19b9  802-3-ethernet  --
+                enp0s3              f5dad1bf-ce1b-460e-99fd-f5e9ceb48360  802-3-ethernet  --
+                textgui             a2f2e11e-ce73-4934-a609-2a7d2c632637  802-3-ethernet  --
+            nmcli con down NatNet
+                Connection 'NatNet' successfully deactivated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/3)
+            nmcli con up NatNet
+                Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/35)
+            ip addr show | grep enp0s10: -A 7
+                5: enp0s10: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+                    link/ether 08:00:27:6f:be:6b brd ff:ff:ff:ff:ff:ff
+                    inet 10.11.12.100/24 brd 10.11.12.255 scope global enp0s10
+                       valid_lft forever preferred_lft forever
+                    inet 10.11.12.5/24 brd 10.11.12.255 scope global secondary dynamic enp0s10
+                       valid_lft 1187sec preferred_lft 1187sec
+                    inet6 fe80::4dc9:848e:b489:5ac9/64 scope link
+                       valid_lft forever preferred_lft forever
+        server2:
+            nmcli device | grep 'Wired'
+                DEVICE
+                enp0s10
+            nmcli con mod 'Wired connection 2' ipv4.addresses 10.11.12.110/24
+            nmcli con mod 'Wired connection 2' connection.id 'NatNet'
+            mv /etc/sysconfig/network-scripts/ifcfg-Wired_connection_2 /etc/sysconfig/network-scripts/ifcfg-NatNet
+            nmcli con show
+                NAME                UUID                                  TYPE            DEVICE
+                NatNet              8b0670ea-c091-3be2-bd18-38b5546162d7  802-3-ethernet  enp0s10
+                Wired connection 1  7842047d-a6b4-38c5-9bcb-3afa4971a615  802-3-ethernet  enp0s8
+                enp0s3              1c3dc7e0-d3cb-4b99-b956-ab4a351776b7  802-3-ethernet  enp0s3
+                internal            6687939a-c8a7-45b8-86a9-62f3235bf3ae  802-3-ethernet  enp0s9
+                virbr0              2c4ade77-504f-49c7-b6c3-33aafb14b368  bridge          virbr0
+            nmcli con down NatNet
+                Connection 'NatNet' successfully deactivated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/3)
+            nmcli con up NatNet
+                Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/35)
+            ip addr show | grep enp0s10: -A 7
+                5: enp0s10: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP qlen 1000
+                link/ether 08:00:27:5c:e9:b6 brd ff:ff:ff:ff:ff:ff
+                inet 10.11.12.110/24 brd 10.11.12.255 scope global enp0s10
+                   valid_lft forever preferred_lft forever
+                inet 10.11.12.4/24 brd 10.11.12.255 scope global secondary dynamic enp0s10
+                   valid_lft 1198sec preferred_lft 1198sec
+                inet6 fe80::d70c:8a20:e89c:a105/64 scope link
+                   valid_lft forever preferred_lft forever
+    3.  server1:
+            ping 10.11.12.110
+            ping server2b.example.com
+            ping server2b
+        server2:
+            ping 10.11.12.100
+            ping server1b.example.com
+            ping server1b
+    4.  server1:
+            nmcli con show NatNet
+        server2:
+            nmcli con show NatNet
+@@@
+
+
+
+# # # # # # # # # # # # # # # # # # # # #
+#                                       #
+#  Part 1-2: Operating Running Systems  #
+#                                       #
+# # # # # # # # # # # # # # # # # # # # #
+
+
+9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9
+9-9-9                                               9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9
+9-9-9    Chapter 9: Managing Processes (18 pg.)     9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9
+9-9-9                                               9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9
+9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9
+
+@@@
+@@@ Exercise 9.1 Managing jobs
+@@@
+    sleep 3600 &
+    dd if=/dev/zero of=/dev/null &
+    sleep 7200
+    Ctrl+Z
+    jobs
+        [1]   Running                 sleep 3600 &
+        [2]-  Running                 dd if=/dev/zero of=/dev/null &
+        [3]+  Stopped                 sleep 7200
+    bg 3
+        [Sends job 3 to the background]
+    fg 1
+        [Moves job 1 to the foreground]
+    Ctrl+C
+    jobs
+        [2]-  Running                 dd if=/dev/zero of=/dev/null &
+        [3]+  Running                 sleep 7200 &
+    fg 2
+    Ctrl+C
+    fg 3
+    Ctrl+C
+    jobs
+        [None]
+    [Open second terminal]
+        dd if=/dev/zero of=/dev/null &
+        exit
+    [Return to original server]
+        top
+        k
+@@@
+
+Still use '<command> &' to start a process in the bg, but no longer need 'nohup' in front.
+
+Kernel threads are within [] in the output of 'ps aux'; can't manage or kill them.
+
+ps
+    [Processes started by the current user]
+
+ps aux
+    [Summary of all active processes]
+
+ps -ef
+    [Less info but includes PPID with PID]
+
+ps fax
+    [Shows parent/child process hierarchy]
+
+pgrep <string>
+    [Returns PIDs of all processes with <string> in the name]
+pgrep dnsmasq
+    2659
+    2661
+
+Priority ranges from 0 (highest priority) to 39 (lowest priority); default is 20.
+
+Setting process priority using 'niceness' adjustment (-20 to 19; lower number is higher priority):
+    nice
+        [Start a process with adjusted priority]
+    renice
+        [Adjust the priority of an active process]
+    top -> r
+        [Adjust the priority of the selected process]
+
+nice -n 5 dd if=/dev/zero of=/dev/null &
+ps aux | grep 'dd if'
+    5441
+renice -n 10 -p 5441
+    5441 (process ID) old priority 5, new priority 10
+
+Regular users can decrease priority; only root can increase priority.
+
+Signals:
+    SIGTERM (15)
+        [Asks a process to stop]
+    SIGKILL (9)
+        [Forces a process to stop]
+    SIGHUP (1)
+        [Hang up; forces a process to re-read its config files]
+
+kill -l
+    1) SIGHUP       2) SIGINT       3) SIGQUIT      4) SIGILL       5) SIGTRAP
+    6) SIGABRT      7) SIGBUS       8) SIGFPE       9) SIGKILL     10) SIGUSR1
+    11) SIGSEGV     12) SIGUSR2     13) SIGPIPE     14) SIGALRM     15) SIGTERM
+    16) SIGSTKFLT   17) SIGCHLD     18) SIGCONT     19) SIGSTOP     20) SIGTSTP
+    21) SIGTTIN     22) SIGTTOU     23) SIGURG      24) SIGXCPU     25) SIGXFSZ
+    26) SIGVTALRM   27) SIGPROF     28) SIGWINCH    29) SIGIO       30) SIGPWR
+    31) SIGSYS      34) SIGRTMIN    35) SIGRTMIN+1  36) SIGRTMIN+2  37) SIGRTMIN+3
+    38) SIGRTMIN+4  39) SIGRTMIN+5  40) SIGRTMIN+6  41) SIGRTMIN+7  42) SIGRTMIN+8
+    43) SIGRTMIN+9  44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13
+    48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13 52) SIGRTMAX-12
+    53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9  56) SIGRTMAX-8  57) SIGRTMAX-7
+    58) SIGRTMAX-6  59) SIGRTMAX-5  60) SIGRTMAX-4  61) SIGRTMAX-3  62) SIGRTMAX-2
+    63) SIGRTMAX-1  64) SIGRTMAX
+
+kill -##
+    e.g. kill -9
+
+pkill <process-name>
+    [Sends a signal to processes based on PATTERN MATCHING on a name instead of using a PID; kills everything it matches]
+
+killall <process-name>
+    [Kills all processes with the same EXACT name; safer than pkill]
+
+@@@
+@@@ Exercise 9.2 Managing Processes from the Command Line
+@@@
+    dd if=/dev/zero of=/dev/null &
+    dd if=/dev/zero of=/dev/null &
+    dd if=/dev/zero of=/dev/null &
+    ps aux | grep dd | tail -n 4 | head -n 3
+        root      5687 35.9  0.0 107940   596 pts/0    R    13:51   0:14 dd if=/dev/zero of=/dev/null
+        root      5688 33.8  0.0 107940   592 pts/0    R    13:51   0:12 dd if=/dev/zero of=/dev/null
+        root      5689 33.1  0.0 107940   592 pts/0    R    13:51   0:12 dd if=/dev/zero of=/dev/null
+    renice -n 5 5687
+        5687 (process ID) old priority 0, new priority 5
+    ps fax | grep -B6 dd
+        1400 ?        Ss     0:00 /usr/sbin/sshd
+        3059 ?        Ss     0:00  \_ sshd: ladmin [priv]
+        3064 ?        S      0:00      \_ sshd: ladmin@pts/0
+        3066 pts/0    Ss     0:00          \_ -bash
+        3116 pts/0    S      0:00              \_ sudo -i
+        3117 pts/0    S      0:00                  \_ -bash
+        5687 pts/0    RN     0:34                      \_ dd if=/dev/zero of=/dev/null
+        5688 pts/0    R      0:54                      \_ dd if=/dev/zero of=/dev/null
+        5689 pts/0    R      0:54                      \_ dd if=/dev/zero of=/dev/null
+        5725 pts/0    R+     0:00                      \_ ps fax
+        5726 pts/0    S+     0:00                      \_ grep --color=auto -B6 dd
+    kill -9 3117
+        [TODO Killing bash doesn't actually kill the 'dd' process as was expected]
+@@@
+
+top
+    k
+        <PID>
+            <SIGNAL> (default is 15)
+
+top
+    r
+        <PID>
+            <niceness>
+
+@@@
+@@@ Lab 9.1
+@@@
+    1.  dd if=/dev/zero of=/dev/null &
+            [1] 7490
+        dd if=/dev/zero of=/dev/null &
+            [2] 7491
+        dd if=/dev/zero of=/dev/null &
+            [3] 7500
+        dd if=/dev/zero of=/dev/null &
+            [4] 7523
+
+        jobs
+            [1]   Running                 dd if=/dev/zero of=/dev/null &
+            [2]   Running                 dd if=/dev/zero of=/dev/null &
+            [3]-  Running                 dd if=/dev/zero of=/dev/null &
+            [4]+  Running                 dd if=/dev/zero of=/dev/null &
+
+        fg
+            dd if=/dev/zero of=/dev/null
+        Ctrl+C
+            9402544+0 records in
+            9402543+0 records out
+            4814102016 bytes (4.8 GB) copied, 17.4815 s, 275 MB/s
+
+    2.  jobs
+            [1]   Running                 dd if=/dev/zero of=/dev/null &
+            [2]-  Running                 dd if=/dev/zero of=/dev/null &
+            [3]+  Running                 dd if=/dev/zero of=/dev/null &
+
+        top
+            PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
+            7491 root      20   0  107940    596    504 R 33.6  0.0   0:58.17 dd
+            7490 root      20   0  107940    596    504 R 33.2  0.0   1:06.82 dd
+            7500 root      20   0  107940    592    504 R 33.2  0.0   0:50.82 dd
+
+        renice -n -5 -p 7491
+            7491 (process ID) old priority 0, new priority -5
+
+        top
+            PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
+            7491 root      15  -5  107940    596    504 R 60.3  0.0   1:22.43 dd
+            7500 root      20   0  107940    592    504 R 19.9  0.0   1:07.42 dd
+            7490 root      20   0  107940    596    504 R 19.5  0.0   1:23.41 dd
+
+        renice -n -15 -p 7491
+            7491 (process ID) old priority -5, new priority -15
+
+        top
+            PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
+            7491 root       5 -15  107940    596    504 R 93.1  0.0   2:11.03 dd
+            7490 root      20   0  107940    596    504 R  3.3  0.0   1:33.43 dd
+            7500 root      20   0  107940    592    504 R  3.0  0.0   1:17.42 dd
+
+    3.  killall dd
+@@@
+
+
+
+10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10
+10-10                                                          10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10
+10-10    Chapter 10: Working with Virtual Machines (23 pg.)    10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10
+10-10                                                          10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10
+10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10
+
+@@@
+@@@ Exercise 10.1 Setting Up Your Server as a KVM Hypervisor Host
+@@@
+    Host Requirements:
+        arch
+            x86_64
+        uname -i
+            x86_64
+        cat /proc/cpuinfo | grep -E 'svm|vmx'
+            vmx
+
+        lscpu
+            Architecture:          x86_64
+            CPU op-mode(s):        32-bit, 64-bit
+            Byte Order:            Little Endian
+            CPU(s):                4
+            On-line CPU(s) list:   0-3
+            Thread(s) per core:    1
+            Core(s) per socket:    1
+            Socket(s):             4
+            NUMA node(s):          1
+            Vendor ID:             GenuineIntel
+            CPU family:            6
+            Model:                 42
+            Model name:            Intel(R) Core(TM) i7-2720QM CPU @ 2.20GHz
+            Stepping:              7
+            CPU MHz:               2199.131
+            BogoMIPS:              4400.21
+            Virtualization:        VT-x
+            Hypervisor vendor:     VMware
+            Virtualization type:   full
+            L1d cache:             32K
+            L1i cache:             32K
+            L2 cache:              256K
+            L3 cache:              6144K
+            NUMA node0 CPU(s):     0-3
+
+    yum grouplist
+        Available Environment Groups:
+            Minimal Install
+            ...
+            Virtualization Host
+            Server with GUI
+            ...
+        Available Groups:
+            CIFS file server
+            ...
+            Eclipse
+            NFS file server
+            ...
+        Done
+
+    yum groupinstall "Virtualization Host"
+@@@
+
+brctl show
+    bridge name     bridge id               STP enabled     interfaces
+    virbr0          8000.525400c397cf       yes             virbr0-nic
+
+@@@
+@@@ Exercise 10.2 Installing a Virtual Machine
+@@@
+    lsmod | grep kvm
+        kvm_intel             170181  0
+        kvm                   554609  1 kvm_intel
+        [If no output: 'modprobe kvm']
+
+    systemctl status libvirtd
+        ● libvirtd.service - Virtualization daemon
+           Loaded: loaded (/usr/lib/systemd/system/libvirtd.service; enabled; vendor preset: enabled)
+           Active: active (running) since Fri 2017-02-24 14:19:09 CET; 17min ago
+             Docs: man:libvirtd(8)
+                   http://libvirt.org
+         Main PID: 1352 (libvirtd)
+           CGroup: /system.slice/libvirtd.service
+                   ├─1352 /usr/sbin/libvirtd
+                   ├─2685 /sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dh...
+                   └─2687 /sbin/dnsmasq --conf-file=/var/lib/libvirt/dnsmasq/default.conf --leasefile-ro --dh...
+
+    df -h
+        Filesystem           Size  Used Avail Use% Mounted on
+        /dev/mapper/cl-root   17G  8.3G  8.8G  49% /
+        devtmpfs             897M     0  897M   0% /dev
+        tmpfs                912M  152K  912M   1% /dev/shm
+        tmpfs                912M  9.0M  903M   1% /run
+        tmpfs                912M     0  912M   0% /sys/fs/cgroup
+        /dev/sda1           1014M  229M  786M  23% /boot
+        tmpfs                183M   20K  183M   1% /run/user/1000
+
+    yum install virt-manager
+
+    virt-manager &
+        [Starts 'Virtual Machine Manager' GUI]
+        File -> New Virtual Machine
+            [Follow the prompts]
+
+    The VM virtual disk is stored in:
+        /var/lib/libvirt/images
+        [In production, LVM is often used instead of disk image files.]
+
+    The VM configuration file is:
+        /etc/libvirt/qemu/<vm-name>.xml
+@@@
+
+On new KVM-hosted VM:
+    grubby --update-kernel=ALL --args=“console=ttyS0”
+        [Sends VM output to the serial console]
+    reboot
+
+On KVM host:
+    virsh list
+        Id    Name                           State
+        ----------------------------------------------------
+        4     smallvm1                       running
+
+    virsh list --all
+        Id    Name                           State
+        ----------------------------------------------------
+        4     smallvm1                       running
+        -     smallvm2                       shut off
+
+    virsh console smallvm1
+        Connected to domain smallvm1
+        Escape character is ^]
+
+        CentOS Linux 7 (Core)
+        Kernel 3.10.0-514.6.2.el7.x86_64 on an x86_64
+
+        smallvm1 login:
+
+    top
+        PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+        4127 qemu      20   0 1501640 979456   2812 S   1.3 52.5   9:42.70 qemu-kvm
+        3392 ladmin    20   0 2139452 341752  17108 S   5.6 18.3   7:05.52 gnome-shell
+
+qemu-img create -f qcow2 smallvm2.qcow2 4G
+
+virt-install --hvm --name smallvm2 --memory 768 --vcpus 2 --disk /var/lib/libvirt/images/smallvm2.qcow2,size=4 --cdrom /root/CentOS-7-x86_64-DVD-1611.iso --graphics none
+
+@@@
+@@@ Lab 10.1
+@@@
+    1.  [Set up a server as a hypervisor host; VirtualBox not supported -- using VMware Fusion]
+    2.  [Install a KVM virtual machine]
+            Via the GUI:
+                virt-manager &
+            Via the CL:
+                virt-install
+@@@
+
+
+
+11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11
+11-11                                              11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11
+11-11    Chapter 11: Managing Software (30 pg.)    11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11
+11-11                                              11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11
+11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11
+
+Repo file must contain:
+    [<repo-label>]
+    name=<repo-name>
+    baseurl=<http://, ftp://, file:///>
+
+Repo file may contain:
+    mirrorlist=<http://>
+    gpgcheck=<0,1>
+    gpgkey=<file:///>
+    enabled=<0,1>
+
+Repo labels:
+    base
+    optional
+    updates
+    supplementary
+    extras
+
+Repo files are stored in /etc/yum.repos.d
+
+GPG keys are stored in /etc/pki/rpm-gpg
+
+@@@
+@@@ Exercise 11.1 Creating Your Own Repository
+@@@
+    mount -o loop /root/CentOS-7-x86_64-DVD-1611.iso /mnt
+    mkdir /repo
+    cp /mnt/Packages/* /repo
+    yum install createrepo
+    createrepo /repo
+        Spawning worker 0 with 958 pkgs
+        Spawning worker 1 with 958 pkgs
+        Spawning worker 2 with 958 pkgs
+        Spawning worker 3 with 957 pkgs
+        Workers Finished
+        Saving Primary metadata
+        Saving file lists metadata
+        Saving other metadata
+        Generating sqlite DBs
+        Sqlite DBs complete
+    cd /etc/yum.repos.d
+    vi /etc/yum.repos.d/my.repo
+        [myrepo]
+        name=myrepo
+        baseurl=file:///repo
+    yum repolist
+@@@
+
+ls -l /repo | awk '{print $9}' | tail -n +2 | tee > myrepo_ISO.txt
+cat myrepo_ISO.txt | sort | tee > myrepo_ISO_sorted.txt
+cat myrepo_ISO_sorted.txt | wc -l
+    3833
+grep 'myrepo_ISO_sorted.txt' -v -e ".rpm$"
+    [Extra file "TRANS.TBL"]
+    [Extra file "repodata"]
+grep 'myrepo_ISO_sorted.txt' -e ".rpm$" | wc -l
+    3831
+[Remove the two extra files]
+cat myrepo_ISO_sorted.txt | wc -l
+    3831
+
+yum repolist | grep 'myrepo'
+    myrepo   myrepo   3831
+
+yum --disablerepo="*" --enablerepo="myrepo" list all | tail -n +4 | tee > myrepo_all.txt
+cat myrepo_all.txt | wc -l
+    3883 (three columns, with spillover lines)
+
+cat myrepo_all_anaconda.txt | awk '{print $1}' | tee > myrepo_all_anaconda_clean.txt
+cat myrepo_all_anaconda_clean.txt | wc -l
+    1281 (one column)
+
+cat myrepo_all_myrepo.txt | awk '{print $1}' | tee > myrepo_all_myrepo_clean.txt
+cat myrepo_all_myrepo_clean.txt | wc -l
+    2551 (one column)
+
+1281+2551=3832 (1 extra)
+
+cat myrepo_all_anaconda_clean.txt > myrepo_all_rebuild.txt
+cat myrepo_all_myrepo_clean.txt >> myrepo_all_rebuild.txt
+cat myrepo_all_rebuild.txt | sort | tee > myrepo_all_rebuild_sorted.txt
+cat myrepo_all_rebuild_sorted.txt | wc -l
+    3832
+
+Compare:
+    myrepo_ISO_sorted.txt (3831)
+    myrepo_all_rebuild_sorted.txt (3832)
+
+cat myrepo_ISO_sorted.txt | cut -c-6 | tee > myrepo_ISO_sorted_cut.txt
+cat myrepo_all_rebuild_sorted.txt | cut -c-6 | tee > myrepo_all_rebuild_sorted_cut.txt
+
+diff myrepo_all_rebuild_sorted_cut.txt myrepo_ISO_sorted_cut.txt | less
+    *kernel*
+
+yum --disablerepo="*" --enablerepo="myrepo" list available | tail -n +4 | tee > myrepo_avail.txt
+cat myrepo_avail.txt | grep -v -e "^ " | awk '{print $1}' | tee > myrepo_avail_clean.txt
+cat myrepo_avail_clean.txt | wc -l
+    2551
+
+Download RPMs as files (with dependencies):
+    yumdownloader nmap /root
+
+yum commands:
+    yum search nmap
+        nmap-frontend.noarch : The GTK+ front end for nmap
+        nmap-ncat.x86_64 : Nmap's Netcat replacement
+        nmap.x86_64 : Network exploration tool and security scanner
+    yum provides */traceroute
+        3:traceroute-2.0.22-2.el7.x86_64 : Traces the route taken by packets over an IPv4/IPv6 network
+        Repo        : base
+        Matched from:
+        Filename    : /bin/traceroute
+        Filename    : /usr/bin/traceroute
+    yum info rsync
+        Installed Packages
+        Name        : rsync
+        Arch        : x86_64
+        Version     : 3.0.9
+        Release     : 17.el7
+        Size        : 732 k
+        Repo        : installed
+        From repo   : anaconda
+        Summary     : A program for synchronizing files over a network
+        URL         : http://rsync.samba.org/
+        License     : GPLv3+
+        Description : Rsync uses a reliable algorithm to bring remote and host files into
+                    : sync very quickly. Rsync is fast because it just sends the differences
+                    : in the files over the network instead of sending the complete
+                    : files. Rsync is often used as a very powerful mirroring process or
+                    : just as a more capable replacement for the rcp command. A technical
+                    : report which describes the rsync algorithm is included in this
+                    : package.
+    yum install <package>
+    yum remove <package>
+    yum list [all | installed]
+    yum group list
+    yum group install "<group>"
+    yum update
+    yum clean all
+
+yum list kernel
+    Installed Packages
+    kernel.x86_64   3.10.0-514.el7       @anaconda
+    kernel.x86_64   3.10.0-514.6.2.el7   @updates
+
+@@@
+@@@ Exercise 11.2 Using yum for Package Management
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 11.3 Using RPM Queries
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 11.1
+@@@
+    1.
+    2.
+    3.
+    4.
+    5.
+    6.
+    7.
+@@@
+
+
+
+12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
+12-12                                              12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
+12-12    Chapter 12: Scheduling Tasks (13 pg.)     12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
+12-12                                              12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
+12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
+
+@@@
+@@@ Exercise 12.1 Running Scheduled Tasks Through cron
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 12.2 Scheduling Jobs with at
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 12.1
+@@@
+    1.
+    2.
+@@@
+
+
+
+13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13
+13-13                                                 13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13
+13-13    Chapter 13: Configuring Logging (23 pg.)     13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13
+13-13                                                 13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13
+13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13
+
+@@@
+@@@ Exercise 13.1 Using Live Log Monitoring and logger
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 13.2 Changing rsyslog.conf Rules
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 13.3 Discovering journalctl
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 13.4 Making the journald Journal Permanent
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 13.1
+@@@
+    1.
+    2.
+    3.
+@@@
+
+
+
+14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
+14-14                                                 14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
+14-14    Chapter 14: Managing partitions (28 pg.)     14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
+14-14                                                 14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
+14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
+
+@@@
+@@@ Exercise 14.1 Creating MBR Partitions with fdisk
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 14.2 Creating Logical Partitions
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 14.3 Creating GPT Partitions with gdisk
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 14.4 Creating a File System
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 14.5 Creating a Swap Partition
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 14.6 Mounting Partitions Through /etc/fstab
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 14.1
+@@@
+    1.
+    2.
+@@@
+
+
+@@@
+@@@ Lab 14.2
+@@@
+    1.
+    2.
+    3.
+@@@
+
+
+
+15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15
+15-15                                                          15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15
+15-15    Chapter 15: Managing LVM Logical Volumes (19 pg.)     15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15
+15-15                                                          15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15
+15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15
+
+@@@
+@@@ Exercise 15.1 Creating the Physical Volume
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 15.2 Creating the Volume Group and Logical Volumes
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 15.3 Resizing Logical Volumes
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 15.1
+@@@
+    1.
+    2.
+    3.
+@@@
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#                                                             #
+#  Part 1-3: Performing Advanced System Administration Tasks  #
+#                                                             #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16
+16-16                                                       16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16
+16-16     Chapter 16: Basic Kernel Management (18 pg.)      16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16
+16-16                                                       16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16
+16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16
+
+@@@
+@@@ Exercise 16.1 Managing Kernel Modules from the Command Line
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 16.2 Loading Kernel Modules with Parameters
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 16.1
+@@@
+    1.
+    2.
+    3.
+@@@
+
+
+
+17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17
+17-17                                                                17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17
+17-17    Chapter 17: Configuring a Basic Apache Server (14 pg.)      17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17
+17-17                                                                17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17
+17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17
+
+@@@
+@@@ Exercise 17.1 Setting Up a Basic Web Server
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 17.2 Installing Apache Virtual Hosts
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 17.1
+@@@
+    1.
+    2.
+    3.
+    4.
+    5.
+@@@
+
+
+
+18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18
+18-18                                                                            18-18-18-18-18-18-18-18-18-18-18-18-18-18-18
+18-18    Chapter 18: Managing and Understanding the Boot Procedure (22 pg.)      18-18-18-18-18-18-18-18-18-18-18-18-18-18-18
+18-18                                                                            18-18-18-18-18-18-18-18-18-18-18-18-18-18-18
+18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18
+
+@@@
+@@@ Exercise 18.1 Managing Units with systemctl
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 18.2 Isolating Targets
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 18.3 Applying Modifications to GRUB2
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 18.1
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 18.2
+@@@
+
+@@@
+
+
+
+19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19
+19-19                                                                19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19
+19-19    Chapter 19: Troubleshooting the Boot Procedure (20 pg.)     19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19
+19-19                                                                19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19
+19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19
+
+@@@
+@@@ Exercise 19.1 Exploring troubleshooting targets.
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 19.2 Using the Rescue Option
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 19.1
+@@@
+    1.
+    2.
+    3.
+    4.
+@@@
+
+
+
+# # # # # # # # # # # # # # # # # # # # #
+#                                       #
+#  Part 1-4: Managing Network Services  #
+#                                       #
+# # # # # # # # # # # # # # # # # # # # #
+
+
+20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20
+20-20                                              20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20
+20-20    Chapter 20: Using Kickstart (21 pg.)      20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20
+20-20                                              20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20
+20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20
+
+@@@
+@@@ Exercise 20.1 Setting Up the Network Installation Server
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 20.2 Configuring the TFTP Server for PXE Boot
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 20.3 Performing a Virtual Machine Network Installation Using a Kickstart File
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 20.1
+@@@
+    1.
+    2.
+    3.
+    4.
+@@@
+
+
+
+21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21
+21-21                                              21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21
+21-21    Chapter 21: Managing SELinux (24 pg.)     21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21
+21-21                                              21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21
+21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21
+
+@@@
+@@@ Exercise 21.1 Manipulating SELinux Modes
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 21.2 Setting a Context Label on a Nondefault Apache Document Root
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 21.3 Installing SELinux-Specific Man Pages
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 21.4 Using restorecon to Relabel Files
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 21.5 Working with SELinux Booleans
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 21.1
+@@@
+    1.
+    2.
+@@@
+
+
+
+22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22
+22-22                                                    22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22
+22-22    Chapter 22: Configuring a Firewall (15 pg.)     22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22
+22-22                                                    22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22
+22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22
+
+@@@
+@@@ Exercise 22.1 Managing the Firewall with Firewall-cmd
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 22.2 Using Firewall-config
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 22.1
+@@@
+    1.
+    2.
+@@@
+
+
+
+23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23
+23-23                                                                23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23
+23-23    Chapter 23: Configuring Remote Mounts and FTP (23 pg.)      23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23
+23-23                                                                23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23
+23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23
+
+@@@
+@@@ Exercise 23.1 Mounting an NFS Share
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 23.2 Discovering and Mounting SMB Shares
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 23.3 Configuring Direct and Indirect Maps to Mount NFS Shares
+@@@
+
+@@@
+
+
+@@@
+@@@ Exercise 23.4 Configuring an FTP Anonymous Drop Box
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 23.1
+@@@
+    1.
+    2.
+    3.
+@@@
+
+
+
+24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24
+24-24                                                       24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24
+24-24    Chapter 24: Configuring Time Services (14 pg.)     24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24
+24-24                                                       24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24
+24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24
+
+@@@
+@@@ Exercise 24.1 Managing Local Time
+@@@
+
+@@@
+
+
+@@@
+@@@ Lab 24.1
+@@@
+    1.
+    2.
+@@@

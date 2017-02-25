@@ -1,0 +1,4 @@
+
+git clone https://bitbucket.org/allyourco_de/rhel-lab.git rhel-lab
+
+vagrant up
