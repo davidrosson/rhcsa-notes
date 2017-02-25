@@ -2261,9 +2261,15 @@ GPG keys are stored in /etc/pki/rpm-gpg
     cd /etc/yum.repos.d
     vi /etc/yum.repos.d/my.repo
         [myrepo]
-        name=myrepo
+        name=thisismyrepo
         baseurl=file:///repo
     yum repolist
+        repo id             repo name             status
+        base/7/x86_64       CentOS-7 - Base       9363
+        extras/7/x86_64     CentOS-7 - Extras      264
+        myrepo              thisismyrepo          3831
+        updates/7/x86_64    CentOS-7 - Updates     856
+        repolist: 14314
 @@@
 
 ls -l /repo | awk '{print $9}' | tail -n +2 | tee > myrepo_ISO.txt
@@ -2353,7 +2359,7 @@ yum commands:
     yum install <package>
     yum remove <package>
     yum list [all | installed]
-    yum group list
+    yum group list [hidden]
     yum group install "<group>"
     yum update
     yum clean all
@@ -2363,30 +2369,276 @@ yum list kernel
     kernel.x86_64   3.10.0-514.el7       @anaconda
     kernel.x86_64   3.10.0-514.6.2.el7   @updates
 
+yum group info "Basic Web Server"
+    Environment Group: Basic Web Server
+     Environment-Id: web-server-environment
+     Description: Server for serving static and dynamic internet content.
+     Mandatory Groups:
+        base
+        core
+       +web-server
+     Optional Groups:
+       +backup-client
+       +debugging
+       +directory-client
+       ...
+
+yum history
+    ID     | Login user               | Date and time    | Action(s)      | Altered
+    -------------------------------------------------------------------------------
+        12 | ladmin <ladmin>          | 2017-02-25 15:09 | Install        |   51
+        11 | ladmin <ladmin>          | 2017-02-25 15:07 | Install        |    9
+        10 | ladmin <ladmin>          | 2017-02-24 18:22 | Install        |    1
+         9 | ladmin <ladmin>          | 2017-02-24 16:01 | Install        |    1
+         8 | ladmin <ladmin>          | 2017-02-24 14:40 | Install        |    6
+         7 | ladmin <ladmin>          | 2017-02-24 13:58 | Erase          |    2
+         6 | ladmin <ladmin>          | 2017-02-24 13:57 | Install        |    5
+         5 | ladmin <ladmin>          | 2017-02-24 13:55 | Install        |    1
+         4 | ladmin <ladmin>          | 2017-02-24 13:55 | Install        |    1
+         3 | ladmin <ladmin>          | 2017-02-24 13:13 | Install        |   10
+         2 | ladmin <ladmin>          | 2017-02-24 13:04 | I, U           |  108 EE
+         1 | System <unset>           | 2017-02-24 12:37 | Install        | 1257
+
+vi /var/log/yum.log
+
+yum history undo 12
+yum groups mark remove directory-client
+    Marked remove: directory-client
+
 @@@
 @@@ Exercise 11.2 Using yum for Package Management
 @@@
-
+    yum repolist
+        repo id             repo name             status
+        base/7/x86_64       CentOS-7 - Base       9363
+        extras/7/x86_64     CentOS-7 - Extras      264
+        myrepo              myrepo                3831
+        updates/7/x86_64    CentOS-7 - Updates     856
+        repolist: 14314
+    yum search xeyes
+        Warning: No matches found for: xeyes
+        No matches found
+    yum provides */xeyes
+        xorg-x11-apps-7.7-6.el7.x86_64 : X.Org X11 applications
+        Repo        : base
+        Matched from:
+        Filename    : /usr/bin/xeyes
+    yum install xorg-x11-apps -y
+        Complete!
+    yum list xorg-x11-apps
+        Installed Packages
+        xorg-x11-apps.x86_64    7.7-6.el7    @base
+    yum history
+        ID     | Login user               | Date and time    | Action(s)      | Altered
+        -------------------------------------------------------------------------------
+            14 | ladmin <ladmin>          | 2017-02-25 15:19 | Install        |    2
+            ...
+    yum history undo 14 -y
+        Complete!
+    yum list xorg-x11-apps
+        Available Packages
+        xorg-x11-apps.x86_64    7.7-6.el7    @base
 @@@
 
+RPM package installation commands:
+    rpm -ivh <package-filename>
+        [Installs the package if not already present]
+            rpm -ivh nmap-6.40-7.el7.x86_64.rpm
+                Preparing...                          ################################# [100%]
+                Updating / installing...
+                1:nmap-2:6.40-7.el7                ################################# [100%]
+    rpm -Uvh <package-filename>
+        [Installs the package, and upgrades if already present]
+            rpm -Uvh nmap-6.40-7.el7.x86_64.rpm
+                Preparing...                          ################################# [100%]
+                package nmap-2:6.40-7.el7.x86_64 is already installed
+
+RPM package selection commands (queries RPM database):
+    rpm -qa
+        [Query all installed packages]
+            rpm -qa | wc -l
+                1291
+    rpm -qf <file-name>
+        [Query package owning <file-name>]
+            rpm -qf /bin/ls
+                coreutils-8.22-18.el7.x86_64
+    rpm -qg <group-name>
+        [Query packages with the group of <group-name>]
+            rpm -qg "System Environment/Daemons"
+                libtdb-1.3.8-1.el7_2.x86_64
+                libtalloc-2.1.6-1.el7.x86_64
+                libtevent-0.9.28-1.el7.x86_64
+                ...
+
+RPM package query commands (queries RPM database):
+    rpm -qc <package-name>
+        [List only configuration files]
+            rpm -qc openldap
+                /etc/openldap/ldap.conf
+    rpm -qd <package-name>
+        [List only documentation files]
+            rpm -qd openldap
+                /usr/share/doc/openldap-2.4.40/ANNOUNCEMENT
+                /usr/share/doc/openldap-2.4.40/CHANGES
+                ...
+    rpm -qi <package-name>
+        [Display package information, including name, version, and description]
+            rpm -qi openldap
+                [Lots of info; similar to 'yum info openldap', but not exact]
+    rpm -ql <package-name>
+        [List files in package]
+            rpm -ql openldap
+                /etc/openldap
+                /etc/openldap/certs
+                /etc/openldap/ldap.conf
+                /usr/lib64/liblber-2.4.so.2
+                ...
+    rpm -qR <package-name>
+        [List package dependencies]
+            rpm -qR openldap
+                [Lots of binaries]
+
+RPM package query commands (queries RPM file):
+    rpm -qpc <package-filename>
+        [List only configuration files]
+            rpm -qpc /repo/openldap-2.4.40-13.el7.x86_64.rpm
+                /etc/openldap/ldap.conf
+    rpm -qpd <package-filename>
+        [List only documentation files]
+            rpm -qpd /repo/openldap-2.4.40-13.el7.x86_64.rpm
+                /usr/share/doc/openldap-2.4.40/ANNOUNCEMENT
+                /usr/share/doc/openldap-2.4.40/CHANGES
+                ...
+    rpm -qpi <package-filename>
+        [Display package information, including name, version, and description]
+            rpm -qpi /repo/openldap-2.4.40-13.el7.x86_64.rpm
+                [Lots of info; similar to 'yum info openldap', but not exact]
+    rpm -qpl <package-filename>
+        [List files in package]
+            rpm -qpl /repo/openldap-2.4.40-13.el7.x86_64.rpm
+                /etc/openldap
+                /etc/openldap/certs
+                /etc/openldap/ldap.conf
+                /usr/lib64/liblber-2.4.so.2
+                ...
+    rpm -qp --scripts <package-filename>
+        [Check which scripts a package file contains]
+            rpm -qp --scripts /repo/openldap-2.4.40-13.el7.x86_64.rpm
+                [Prints the script(s) content to the screen]
+    rpm -qpR <package-filename>
+        [List package dependencies]
+            rpm -qpR /repo/openldap-2.4.40-13.el7.x86_64.rpm
+                [Lots of binaries]
+
+yum install yum-utils
+rpm -qi kubernetes-unit-test
+    package kubernetes-unit-test is not installed
+repoquery -i kubernetes-unit-test
+    Name        : kubernetes-unit-test
+    Version     : 1.4.0
+    Release     : 0.1.git87d9d8d.el7
+    ...
 
 @@@
 @@@ Exercise 11.3 Using RPM Queries
 @@@
-
+    which dnsmasq
+        /sbin/dnsmasq
+    rpm -qf $(which dnsmasq)
+        dnsmasq-2.66-21.el7.x86_64
+    rpm -qi dnsmasq
+        [Lots of info]
+    rpm -ql dnsmasq
+        /etc/dbus-1/system.d/dnsmasq.conf
+        /etc/dnsmasq.conf
+        /etc/dnsmasq.d
+        ...
+    rpm -qd dnsmasq
+        ...
+        /usr/share/doc/dnsmasq-2.66/doc.html
+        /usr/share/doc/dnsmasq-2.66/setup.html
+        ...
+    rpm -qc dnsmasq
+        /etc/dbus-1/system.d/dnsmasq.conf
+        /etc/dnsmasq.conf
+    rpm -q --scripts dnsmasq
+        [Prints the script(s) content to the screen]
 @@@
-
 
 @@@
 @@@ Lab 11.1
 @@@
-    1.
-    2.
-    3.
-    4.
-    5.
-    6.
-    7.
+    1.  mkdir /myrepo
+        cp /mnt/Packages/openldap* /myrepo
+        createrepo /myrepo
+            Spawning worker 0 with 1 pkgs
+            Spawning worker 1 with 1 pkgs
+            Spawning worker 2 with 1 pkgs
+            Spawning worker 3 with 1 pkgs
+            Workers Finished
+            Saving Primary metadata
+            Saving file lists metadata
+            Saving other metadata
+            Generating sqlite DBs
+            Sqlite DBs complete
+        vi /etc/yum.repos.d/lab11.repo
+            [lab11repo]
+            name=lab11repo
+            baseurl=file:///myrepo
+            :wq
+    2.  yum repolist
+        repo id                 repo name             status
+            base/7/x86_64       CentOS-7 - Base       9363
+            extras/7/x86_64     CentOS-7 - Extras      264
+            lab11repo           lab11repo                4
+            myrepo              thisismyrepo          3831
+            updates/7/x86_64    CentOS-7 - Updates     856
+            repolist: 14318
+    3.  yum search 'cach' | grep 'DNS'
+            dnsmasq.x86_64 : A lightweight DHCP/caching DNS server
+            unbound.x86_64 : Validating, recursive, and caching DNS(SEC) resolver
+    4.  repoquery -l dnsmasq
+            /etc/dbus-1/system.d/dnsmasq.conf
+            /etc/dnsmasq.conf
+            /etc/dnsmasq.d
+            ...
+        repoquery -R dnsmasq
+            /bin/sh
+            chkconfig
+            libc.so.6(GLIBC_2.15)(64bit)
+            ...
+        rpm -ql dnsmasq
+            /etc/dbus-1/system.d/dnsmasq.conf
+            /etc/dnsmasq.conf
+            /etc/dnsmasq.d
+            ...
+        rpm -qR dnsmasq
+            /bin/sh
+            chkconfig
+            config(dnsmasq) = 2.66-21.el7
+            ...
+        rpm -qd dnsmasq
+            /usr/share/doc/dnsmasq-2.66/CHANGELOG
+            /usr/share/doc/dnsmasq-2.66/COPYING
+            ...
+        rpm -qc dnsmasq
+            /etc/dbus-1/system.d/dnsmasq.conf
+            /etc/dnsmasq.conf
+    5.  yumdownloader dnsmasq
+            dnsmasq-2.66-21.el7.x86_64.rpm
+        rpm -qp --scripts dnsmasq-2.66-21.el7.x86_64.rpm
+            [Prints the script(s) content to the screen]
+    6.  yum install dnsmasq-2.66-21.el7.x86_64.rpm
+            [Already installed]
+    7.  yum history
+            ID     | Login user               | Date and time    | Action(s)      | Altered
+            -------------------------------------------------------------------------------
+                16 | ladmin <ladmin>          | 2017-02-25 17:17 | Install        |    2
+                15 | ladmin <ladmin>          | 2017-02-25 15:22 | Erase          |    2
+                14 | ladmin <ladmin>          | 2017-02-25 15:19 | Install        |    2
+                ...
+        yum history undo 16 -y
+            [Uninstalled]
 @@@
 
 
