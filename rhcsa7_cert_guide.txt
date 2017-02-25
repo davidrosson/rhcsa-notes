@@ -2195,6 +2195,10 @@ On KVM host:
         4127 qemu      20   0 1501640 979456   2812 S   1.3 52.5   9:42.70 qemu-kvm
         3392 ladmin    20   0 2139452 341752  17108 S   5.6 18.3   7:05.52 gnome-shell
 
+Start VM on KVM host boot:
+    virsh autostart smallvm1
+    virsh autostart --disable smallvm1
+
 qemu-img create -f qcow2 smallvm2.qcow2 4G
 
 virt-install --hvm --name smallvm2 --memory 768 --vcpus 2 --disk /var/lib/libvirt/images/smallvm2.qcow2,size=4 --cdrom /root/CentOS-7-x86_64-DVD-1611.iso --graphics none
@@ -2649,25 +2653,197 @@ repoquery -i kubernetes-unit-test
 12-12                                              12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
 12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
 
+systemctl status crond -l
+
+cron timing:
+    minute          0-59
+    hour            0-23
+    day of month    1-31
+    month           1-12
+    day of week     0-7
+
+man 5 crontab
+
+cat /etc/crontab
+    [Don't update directly]
+
+cron jobs are activated automatically; no need to restart crond
+
+To edit a cron job:
+    Login as the user and execute 'crontab -e'
+        crontab -e
+            no crontab for root - using an empty one
+            crontab: installing new crontab
+    -OR-
+    As root, execute 'crontab -e -u <username>'
+        crontab -e -u ladmin
+            no crontab for ladmin - using an empty one
+            crontab: installing new crontab
+    [Editing takes place via vi]
+    [Do NOT specify a user when editing cron via 'crontab -e'; the shell will interpret the user as a command and fail]
+    [The saved user-specific file lives in /var/spool/cron]
+    ls /var/spool/cron
+        ladmin  root
+
+Add non-user-specifc cron files to /etc/cron.d
+    Filename is not important, only syntax
+    Should specify a user; jobs are run as root if a user is not specified
+
+Scripts can be added to the following directories:
+    /etc/cron.hourly
+    /etc/cron.daily
+    /etc/cron.weekly
+    /etc/cron.monthly
+    [Files have a different syntax; no timing information; determined by folder]
+
+cat /etc/anacrontab
+    [anacron is run by cron every hour to check /etc/anacrontab]
+    [/etc/anacrontab can be manually updated to add custom entries]
+    [anacron runs scripts in the cron.<period> directories defined in /etc/anacrontab]
+    [Only lists 'cron.daily' 'cron.weekly' 'cron.monthly' but custom directories can be added]
+    [Depending on the period, there is a different delay and random timing component]
+    [Uses the 'run-parts' command to execute all scripts in a given directory]
+
+crontab -l
+    [Lists the current user's cron jobs]
+
+crontab -l -u <username>
+    [Lists a specified user's cron jobs]
+
+cron security
+    /etc/cron.allow
+        [If exists (not by default), only listed users can use cron]
+    /etc/cron.deny
+        [If exists (not by default), listed users cannot use cron]
+
+Time stepping:
+    Use */2 to run something every second minute/hour/day/etc.
+    Use 5-20/5 to run something every 5th, 10th, 15th, 20th minute/hour/day/etc.
+
 @@@
 @@@ Exercise 12.1 Running Scheduled Tasks Through cron
 @@@
-
+    cat /etc/crontab
+        [Never edit directly]
+    crontab -e
+        8 20 * * 1-7 logger Special crontab message about Stockholm from root
+        :wq
+    cd /etc/cron.hourly
+        vi eachhour
+            logger This hourly message is written in Stockholm by /etc/cron.hourly/eachhour at $(date)
+        ls -l eachhour
+            -rw-r--r--. 1 root root 42 Feb 25 19:47 eachhour
+        chmod +x eachhour
+        ls -l eachhour
+            -rwxr-xr-x. 1 root root 42 Feb 25 19:47 eachhour
+    cd /etc/cron.d
+        vi eachhour
+            11 * * * *  root  logger This message is written in Stockholm by /etc/cron.d/eachhour
+            :wq
+        [Need to make executable? Apparently no.]
+    grep 'Stockholm' /var/log/messages
+        Feb 25 20:01:04 virthost root: This hourly message is written in Stockholm by /etc/cron.hourly/eachhour at Sat Feb 25 20:01:04 CET 2017
+            [From '/etc/cron.hourly/eachhour']
+        Feb 25 20:08:02 virthost root: Special crontab message about Stockholm from root
+            [From 'crontab -e']
+        Feb 25 20:11:03 virthost root: This message is written in Stockholm by /etc/cron.d/eachhour
+            [From '/etc/cron.d/eachhour']
 @@@
-
 
 @@@
 @@@ Exercise 12.2 Scheduling Jobs with at
 @@@
+    systemctl status atd
+        ● atd.service - Job spooling tools
+           Loaded: loaded (/usr/lib/systemd/system/atd.service; enabled; vendor preset: enabled)
+           Active: active (running) since Sat 2017-02-25 11:15:42 CET; 8h ago
+         Main PID: 1356 (atd)
+           CGroup: /system.slice/atd.service
+                   └─1356 /usr/sbin/atd -f
 
+        Feb 25 11:15:42 virthost.local systemd[1]: Started Job spooling tools.
+        Feb 25 11:15:42 virthost.local systemd[1]: Starting Job spooling tools...
+    date
+        Sat Feb 25 19:57:56 CET 2017
+    at 20:30
+        at>
+            logger This is message from Sweden scheduled by at
+            Ctrl+D
+                at> <EOT>
+                job 5 at Sat Feb 25 20:30:00 2017
+    atq
+        5       Sat Feb 25 20:30:00 2017 a root
+                                         ^ ('a' for 'at'; 'b' for 'batch')
+    at 20:35
+        at>
+            logger This message from at will never be seen
+            Ctrl+D
+                at> <EOT>
+                job 6 at Sat Feb 25 20:35:00 2017
+    atq
+        5       Sat Feb 25 20:30:00 2017 a root
+        6       Sat Feb 25 20:35:00 2017 a root
+    atrm 6
+    atq
+        Sat Feb 25 20:30:00 2017 a root
+    grep 'Sweden' /var/log/messages
+        Feb 25 20:30:02 virthost root: This is message from Sweden scheduled by at
 @@@
 
+at jobs are stored at /var/spool/at
+
+at security:
+    /etc/at.allow
+        [If exists (not by default), only listed users can use at]
+    /etc/at.deny
+        [If exists (not by default), listed users cannot use at]
+
+Remove multiple at jobs
+    atrm 14 15 16
+
+atd controls 'at' and 'batch'
+
+batch jobs only start when system performance is below a set threshold (default 0.8)
+
+atd -l 0.7
+    [Sets batch job threshold to 0.7; best for single CPU systems]
+atd -l 3.0
+    [Sets batch job threshold to 3.0; best for multi CPU systems]
+
+batch
+    at>
+        logger Hey Sweden this is a batch job!
+        Ctrl+D
+            at> <EOT>
+            job 10 at Sat Feb 25 20:48:00 2017
+atq
+    10      Sat Feb 25 21:48:00 2017 b root
+                                     ^ ('a' for 'at'; 'b' for 'batch')
+grep 'Sweden' /var/log/messages
+    Feb 25 20:49:29 virthost root: Hey Sweden this is a batch job!
+
+crontab -e -OR- /etc/cron.d
+0 14 1,15 * *
+*/2 * * * * -OR- 0/2 * * * *
+0 0 19 9 4
+0, 7, sun
+crontab -e -u lisa
+echo "boris" > /etc/cron.deny
+/etc/anacrontab
+atd
+atq
 
 @@@
 @@@ Lab 12.1
 @@@
-    1.
-    2.
+    1.  crontab -e
+            0 23 * * * yum update -y
+                [Don't specify a username]
+            :wq
+    2.  vi /etc/cron.d/rebootjob
+            0 03 25 2 * root /sbin/reboot
+                [Should specify a username; otherwise will run as root]
+            :wq
 @@@
 
 
