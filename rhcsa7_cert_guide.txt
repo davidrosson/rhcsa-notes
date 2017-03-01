@@ -22,7 +22,22 @@ Connect to VirtualBox:
 1-1-1                                                                       1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1
 1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1-1
 
+Do I Know This Already?
+A D A C A C D D D B
+
 Just a simple overview of a graphical installation.
+
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 1.1
@@ -38,6 +53,9 @@ Just a simple overview of a graphical installation.
 2-2-2    Chapter 2: Using Essential Tools (23 pg.)    2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2
 2-2-2                                                 2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2
 2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2-2
+
+Do I Know This Already?
+B A&B C D A D D A B C
 
 Three kinds of commands; run in the following order
     Alias: user-defined
@@ -264,6 +282,18 @@ Finding help:
         q
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 2.1
 @@@
@@ -280,6 +310,9 @@ Finding help:
 3-3-3    Chapter 3: Essential File Management Tools (26 pg.)    3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3
 3-3-3                                                           3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3
 3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3-3
+
+Do I Know This Already?
+D C A C C C A D C C
 
 Get an overview of devices and mount points:
     mount
@@ -487,6 +520,18 @@ file files.tar
     rm -rf *gz *tar
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 3.1
 @@@
@@ -511,6 +556,9 @@ file files.tar
 4-4-4    Chapter 4: Working with Text Files (17 pg.)    4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4
 4-4-4                                                   4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4
 4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4-4
+
+Do I Know This Already?
+A D D A A D A B D-NOT-B B
 
 @@@
 @@@ Exercise 4.1 Applying Basic Less Skills
@@ -675,6 +723,18 @@ sed -i -e '2d' ~/myfile
 sed -i -e '2,4d' ~/myfile
     [Deletes lines 2-4 in 'myfile']
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 4.1
 @@@
@@ -704,6 +764,9 @@ sed -i -e '2,4d' ~/myfile
 5-5-5    Chapter 5: Connecting to a Red Hat Enterprise Linux 7 (19 pg.)     5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
 5-5-5                                                                       5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
 5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
+
+Do I Know This Already?
+B A C B A&C-NOT-B D C D C C
 
 @@@
 @@@ Exercise 5.1 Working from Several Terminal Windows Simultaneously
@@ -889,6 +952,18 @@ Using the 'screen' utility
         Terminate the screen session
             Ctrl+A, \
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 5.1
 @@@
@@ -906,6 +981,9 @@ Using the 'screen' utility
 6-6-6    Chapter 6: User and Group Management (26 pg.)    6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6
 6-6-6                                                     6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6
 6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6-6
+
+Do I Know This Already?
+C D B B C A B C A D
 
 'su -' is better than 'su'
 
@@ -1069,6 +1147,18 @@ lid lisa | cut -d'(' -f1
         su - lara
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 6.1
 @@@
@@ -1103,6 +1193,9 @@ lid lisa | cut -d'(' -f1
 7-7-7    Chapter 7: Configuring Permissions (24 pg.)    7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7
 7-7-7                                                   7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7
 7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7-7
+
+Do I Know This Already?
+C A C C C D B A C C
 
 find / -user linda
 find / -group users
@@ -1380,6 +1473,18 @@ lsattr /root/fuzzy
 rm -rf /root/fuzzy
     [Success]
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 7.1
 @@@
@@ -1407,6 +1512,9 @@ rm -rf /root/fuzzy
 8-8-8    Chapter 8: Configuring Networking (26 pg.)     8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8
 8-8-8                                                   8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8
 8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8-8
+
+Do I Know This Already?
+D B C D A B C D A C
 
 ip addr
     [Configure and monitor network addresses]
@@ -1692,6 +1800,18 @@ Verify hostname resolution:
 
 DO NOT specify DNS in /etc/resolv.conf because it will be overwritten by NM!
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 8.1a
 @@@
@@ -1852,6 +1972,9 @@ DO NOT specify DNS in /etc/resolv.conf because it will be overwritten by NM!
 9-9-9                                               9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9
 9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9-9
 
+Do I Know This Already?
+B&D B A A&B A C C B A A
+
 @@@
 @@@ Exercise 9.1 Managing jobs
 @@@
@@ -1995,6 +2118,18 @@ top
         <PID>
             <niceness>
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 9.1
 @@@
@@ -2059,6 +2194,9 @@ top
 10-10    Chapter 10: Working with Virtual Machines (23 pg.)    10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10
 10-10                                                          10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10
 10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10-10
+
+Do I Know This Already?
+B B A C&D A C D C C D
 
 @@@
 @@@ Exercise 10.1 Setting Up Your Server as a KVM Hypervisor Host
@@ -2203,6 +2341,18 @@ qemu-img create -f qcow2 smallvm2.qcow2 4G
 
 virt-install --hvm --name smallvm2 --memory 768 --vcpus 2 --disk /var/lib/libvirt/images/smallvm2.qcow2,size=4 --cdrom /root/CentOS-7-x86_64-DVD-1611.iso --graphics none
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 10.1
 @@@
@@ -2221,6 +2371,9 @@ virt-install --hvm --name smallvm2 --memory 768 --vcpus 2 --disk /var/lib/libvir
 11-11    Chapter 11: Managing Software (30 pg.)    11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11
 11-11                                              11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11
 11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11-11
+
+Do I Know This Already?
+D B C D D C D A C C
 
 Repo file must contain:
     [<repo-label>]
@@ -2569,6 +2722,18 @@ repoquery -i kubernetes-unit-test
         [Prints the script(s) content to the screen]
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 11.1
 @@@
@@ -2652,6 +2817,9 @@ repoquery -i kubernetes-unit-test
 12-12    Chapter 12: Scheduling Tasks (13 pg.)     12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
 12-12                                              12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
 12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12-12
+
+Do I Know This Already?
+B C A A&D B A D D B C
 
 systemctl status crond -l
 
@@ -2822,16 +2990,17 @@ atq
 grep 'Sweden' /var/log/messages
     Feb 25 20:49:29 virthost root: Hey Sweden this is a batch job!
 
-crontab -e -OR- /etc/cron.d
-0 14 1,15 * *
-*/2 * * * * -OR- 0/2 * * * *
-0 0 19 9 4
-0, 7, sun
-crontab -e -u lisa
-echo "boris" > /etc/cron.deny
-/etc/anacrontab
-atd
-atq
+Review Questions
+1. crontab -e -OR- /etc/cron.d
+2. 0 14 1,15 * *
+3. */2 * * * * -OR- 0/2 * * * *
+4. 0 0 19 9 4
+5. 0, 7, sun
+6. crontab -e -u lisa
+7. echo "boris" > /etc/cron.deny
+8. /etc/anacrontab
+9. atd
+10. atq
 
 @@@
 @@@ Lab 12.1
@@ -2853,6 +3022,9 @@ atq
 13-13    Chapter 13: Configuring Logging (23 pg.)     13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13
 13-13                                                 13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13
 13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13-13
+
+Do I Know This Already?
+C D C A D C D A D A
 
 Important log files/locations:
     /var/log/messages
@@ -3073,6 +3245,18 @@ vi /etc/systemd/journald.conf
     [The journal will be rotated like a regular log file]
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
 @@@
 @@@ Lab 13.1
 @@@
@@ -3090,62 +3274,506 @@ vi /etc/systemd/journald.conf
 14-14                                                 14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
 14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
 
+Do I Know This Already?
+A B C C C B D D B&D B
+
+Master Boot Record (MBR)
+    [First 512 bytes on a disk]
+    [Basic Input Output System (BIOS) only]
+    [4 partition maximum]
+    [2 TiB maximum partition size]
+    [32 bit partition data size]
+    [primary, extended, logical]
+
+GUID Partition Table (GPT)
+    [First 2 MiB and last 2 MiB (backup) on a disk]
+    [BIOS and Unified Extensible Firmware Interface (UEFI)]
+    [128 partition maximum]
+    [8 ZiB maximum partition size (1024^4 GiB)]
+    [128 bit partition data size]
+    [no partition 'types']
+
+Kilobyte (KB) - 1000 bytes
+Kibibyte (KiB) - 1024 bytes
+Megabyte (MG) - 1000 KB
+Mebibyte (MiB) - 1024 KiB
+
+/dev/sda    [SCSI driver for SCSI and SATA disks; physical servers and VMware VMs]
+/dev/hda    [Legacy IDE disk device type; rarely see now]
+/dev/vda    [Disk in a KVM VM using the virtio disk driver]
+/dev/xvda   [Disk in a Xen VM using the Xen virtual disk driver; RHEL running in AWS]
+
+fdisk for MBR
+gdisk for GPT
+
 @@@
 @@@ Exercise 14.1 Creating MBR Partitions with fdisk
 @@@
+    At boot:
+        IDE - 150MB
+        AHCI (SATA) - 10GB* /dev/sda
+        ACHI (SATA) - 200MB /dev/sdb
+        SCSI (SCSI) - 130MB
+        SCSI (SAS) - 112MB
 
+    dd if=/dev/sda of=/root/diskfile1 bs=1M count=1
+    dd if=/dev/sdb of=/root/diskfile2 bs=1M count=1
+    dd if=/dev/sdc of=/root/diskfile3 bs=1M count=1
+
+    cp /etc/fstab /root/fstab
+
+    fdisk /dev/sdb
+        Welcome to fdisk (util-linux 2.23.2).
+        Changes will remain in memory only, until you decide to write them.
+        Be careful before using the write command.
+
+        Device does not contain a recognized partition table
+        Building a new DOS disklabel with disk identifier 0x51b54358.
+
+        p
+            Disk /dev/sdb: 209 MB, 209704448 bytes, 409579 sectors
+            Units = sectors of 1 * 512 = 512 bytes
+            Sector size (logical/physical): 512 bytes / 512 bytes
+            I/O size (minimum/optimal): 512 bytes / 512 bytes
+            Disk label type: dos
+            Disk identifier: 0x24bdf885
+
+               Device Boot      Start         End      Blocks   Id  System
+
+        n
+            Partition type:
+               p   primary (0 primary, 0 extended, 4 free)
+               e   extended
+            Select (default p): p
+            Partition number (1-4, default 1): 1
+            First sector (2048-409578, default 2048): 2048
+            Last sector, +sectors or +size{K,M,G} (2048-409578, default 409578): +100M
+            Partition 1 of type Linux and of size 100 MiB is set
+
+        p
+            Disk /dev/sdb: 209 MB, 209704448 bytes, 409579 sectors
+            Units = sectors of 1 * 512 = 512 bytes
+            Sector size (logical/physical): 512 bytes / 512 bytes
+            I/O size (minimum/optimal): 512 bytes / 512 bytes
+            Disk label type: dos
+            Disk identifier: 0x24bdf885
+
+                Device Boot      Start         End      Blocks   Id  System
+                /dev/sdb1         2048      206847      102400   83  Linux
+
+        w
+            The partition table has been altered!
+            Calling ioctl() to re-read partition table.
+            Syncing disks.
+
+    [The in-memory kernel partition table can't be updated automatically when in use]
+    If not synced, compare:
+        fdisk -l /dev/sdb
+        cat /proc/partitions
+    Then run:
+        partprobe /dev/sdb
 @@@
 
+To clear a partition table:
+    dd if=/dev/zero of=/dev/sdb bs=1M count=1
+
+[If more than four partitions are needed on MBR, then use extended partitions]
+[Filesystems can't exist on extended partitions; only logical partitions can]
 
 @@@
 @@@ Exercise 14.2 Creating Logical Partitions
 @@@
+    fdisk /dev/sdb
+        [Welcome message]
 
+        p
+            Device Boot      Start         End      Blocks   Id  System
+            /dev/sdb1         2048      206847      102400   83  Linux
+            /dev/sdb2       206848      227327       10240   83  Linux
+            /dev/sdb3       227328      268287       20480   83  Linux
+
+        n
+            Partition type:
+               p   primary (3 primary, 0 extended, 1 free)
+               e   extended
+            Select (default e): e
+            Selected partition 4
+            First sector (268288-409578, default 268288):
+            Using default value 268288
+            Last sector, +sectors or +size{K,M,G} (268288-409578, default 409578):
+            Using default value 409578
+            Partition 4 of type Extended and of size 69 MiB is set
+
+        [All four partitions are now full; create a new one anyway]
+
+        n
+            All primary partitions are in use
+            Adding logical partition 5
+            First sector (270336-409578, default 270336):
+            Using default value 270336
+            Last sector, +sectors or +size{K,M,G} (270336-409578, default 409578): +50M
+            Partition 5 of type Linux and of size 50 MiB is set
+
+        p
+            Disk /dev/sdb: 209 MB, 209704448 bytes, 409579 sectors
+            Units = sectors of 1 * 512 = 512 bytes
+            Sector size (logical/physical): 512 bytes / 512 bytes
+            I/O size (minimum/optimal): 512 bytes / 512 bytes
+            Disk label type: dos
+            Disk identifier: 0x24bdf885
+
+               Device Boot          Start         End      Blocks   Id  System
+               /dev/sdb1             2048      206847      102400   83  Linux
+               /dev/sdb2           206848      227327       10240   83  Linux
+               /dev/sdb3           227328      268287       20480   83  Linux
+               /dev/sdb4           268288      409578       70645+   5  Extended
+               /dev/sdb5           270336      372735       51200   83  Linux
+
+        w
+            [Confirmation]
 @@@
 
+[Running gdisk on a disk with MBR and partitions will corrupt that disk]
 
 @@@
 @@@ Exercise 14.3 Creating GPT Partitions with gdisk
 @@@
+    gdisk /dev/sdc
+        GPT fdisk (gdisk) version 0.8.6
 
+        Partition table scan:
+          MBR: not present
+          BSD: not present
+          APM: not present
+          GPT: not present
+
+        Creating new GPT entries.
+
+    p
+        Disk /dev/sdc: 307197 sectors, 150.0 MiB
+        Logical sector size: 512 bytes
+        Disk identifier (GUID): DCDDF6BB-68BD-45E5-AF00-2C68CC93D5E6
+        Partition table holds up to 128 entries
+        First usable sector is 34, last usable sector is 307163
+        Partitions will be aligned on 2048-sector boundaries
+        Total free space is 307130 sectors (150.0 MiB)
+
+        Number  Start (sector)    End (sector)  Size       Code  Name
+
+    n
+        Partition number (1-128, default 1): 1
+        First sector (34-307163, default = 2048) or {+-}size{KMGTP}: 2048
+        Last sector (2048-307163, default = 307163) or {+-}size{KMGTP}: +55M
+        Current type is 'Linux filesystem'
+        Hex code or GUID (L to show codes, Enter = 8300): 8300
+
+    p
+        Disk /dev/sdc: 307197 sectors, 150.0 MiB
+        Logical sector size: 512 bytes
+        Disk identifier (GUID): DCDDF6BB-68BD-45E5-AF00-2C68CC93D5E6
+        Partition table holds up to 128 entries
+        First usable sector is 34, last usable sector is 307163
+        Partitions will be aligned on 2048-sector boundaries
+        Total free space is 194490 sectors (95.0 MiB)
+
+        Number  Start (sector)    End (sector)  Size       Code  Name
+           1            2048          114687   55.0 MiB    8300  Linux filesystem
+
+    w
+        Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING
+        PARTITIONS!!
+
+        Do you want to proceed? (Y/N): y
+        OK; writing new GUID partition table (GPT) to /dev/sdc.
+        The operation has completed successfully.
+
+    [Execute partprobe if necessary to sync disks]
 @@@
 
+mkfs -t ext4 /dev/sdb2
+-OR-
+mkfs.ext4 /dev/sdb2
+-OR-
+mke2fs -t ext4 /dev/sdb2
+
+mkfs [Default is ext2]
+
+[XFS requires the partition size to be at least 16M (4096 blocks @ 4KiB/block)]
 
 @@@
 @@@ Exercise 14.4 Creating a File System
 @@@
+    mkfs -t xfs /dev/sdb1
+        meta-data=/dev/sdb1              isize=512    agcount=4, agsize=6400 blks
+                 =                       sectsz=512   attr=2, projid32bit=1
+                 =                       crc=1        finobt=0, sparse=0
+        data     =                       bsize=4096   blocks=25600, imaxpct=25
+                 =                       sunit=0      swidth=0 blks
+        naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+        log      =internal log           bsize=4096   blocks=855, version=2
+                 =                       sectsz=512   sunit=0 blks, lazy-count=1
+        realtime =none                   extsz=4096   blocks=0, rtextents=0
 
+    mkfs.xfs /dev/sdb3
+        meta-data=/dev/sdb3              isize=512    agcount=1, agsize=5120 blks
+                 =                       sectsz=512   attr=2, projid32bit=1
+                 =                       crc=1        finobt=0, sparse=0
+        data     =                       bsize=4096   blocks=5120, imaxpct=25
+                 =                       sunit=0      swidth=0 blks
+        naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+        log      =internal log           bsize=4096   blocks=855, version=2
+                 =                       sectsz=512   sunit=0 blks, lazy-count=1
+        realtime =none                   extsz=4096   blocks=0, rtextents=0
 @@@
 
+[tune2fs works on ext2/ext3/ext4 file systems only]
+
+tune2fs -l /dev/sdb2
+    tune2fs 1.42.9 (28-Dec-2013)
+    Filesystem volume name:   <none>
+    Last mounted on:          <not available>
+    Filesystem UUID:          a96837de-7ef4-49a4-94b9-845af7c91fc7
+    ...
+    Filesystem features:      has_journal ext_attr resize_inode dir_index filetype extent 64bit flex_bg sparse_super huge_file uninit_bg dir_nlink extra_isize
+    Filesystem flags:         signed_directory_hash
+    Default mount options:    user_xattr acl
+    ...
+
+Enable/disable file system features on ext2/ext3/ext4 file systems:
+    tune2fs -O has_journal
+    tune2fs -O ^has_journal
+
+Enable/disable default file system mount options on ext2/ext3/ext4 file systems (therefore no need to specify them in /etc/fstab):
+    Enable:  tune2fs -o acl,usr_xattr
+    Disable: tune2fs -o ^acl,^usr_xattr
+
+Set a filesystem label on ext2/ext3/ext4:
+    tune2fs -L "my_disk_label" /dev/sdb2
+    -OR-
+    e2label /dev/sdb2 "my_disk_label"
+
+    tune2fs -l /dev/sdb2 | grep 'label'
+        Filesystem volume name:   my_disk_label
+
+[On XFS file systems, use xfs_admin to adjust file system parameters]
+xfs_admin -L "my_disk_label" /dev/sdb1
+    writing all SBs
+    xfs_admin: truncating label length from 13 to 12
+    new label = "my_disk_labe"
+xfs_admin -l /dev/sdb1
+    label = "my_disk_labe"
 
 @@@
 @@@ Exercise 14.5 Creating a Swap Partition
 @@@
+    fdisk /dev/sdb
+        p
+            Device Boot         Start         End      Blocks   Id  System
+            /dev/sdb1            2048      206847      102400   83  Linux
+            /dev/sdb2          206848      227327       10240   83  Linux
+            ...
+        t
+            Partition number (1-5, default 5): 1
+            Hex code (type L to list all codes): 82
+            Changed type of partition 'Linux' to 'Linux swap / Solaris'
+        p
+            Device Boot         Start         End      Blocks   Id  System
+            /dev/sdb1            2048      206847      102400   82  Linux swap / Solaris
+            /dev/sdb2          206848      227327       10240   83  Linux
+            ...
+        w
+            [Confirmation]
 
+    mkswap /dev/sdb1
+        mkswap: /dev/sdb1: warning: wiping old xfs signature.
+        Setting up swapspace version 1, size = 102396 KiB
+        no label, UUID=7e5d9285-ba2f-4f14-871f-b8b1dacb68f7
+
+    free -m
+                  total        used        free      shared  buff/cache   available
+        Mem:       1839         496         828           9         509        1132
+        Swap:      1023           0        1023
+                    ^                       ^
+    swapon /dev/sdb1
+        [Activate an additional 100M of swap]
+
+    free -m
+                  total        used        free      shared  buff/cache   available
+        Mem:       1839         496         834           9         509        1132
+        Swap:      1123           0        1123
+                    ^                       ^
+
+    [Procedure for gdisk is identical]
+    [Can change an existing partition type from ext4 or xfs to swap without issue]
 @@@
 
+Instead of creating a swap filesystem, a swap file can be created on the current file system:
+    dd if=/dev/zero of=/my_swapfile bs=1M count=100
+        100+0 records in
+        100+0 records out
+        104857600 bytes (105 MB) copied, 0.0863466 s, 1.2 GB/s
+    mkswap /my_swapfile
+        Setting up swapspace version 1, size = 102396 KiB
+        no label, UUID=cb84e494-af32-4d68-bf52-ed93c6ec8aad
+    swapon /my_swapfile
+        swapon: /my_swapfile: insecure permissions 0644, 0600 suggested.
+    chmod 600 /my_swapfile
+
+cat /proc/swaps
+    Filename            Type            Size    Used    Priority
+    /dev/dm-1           partition       1048572 0       -1
+    /dev/sdb1           partition       102396  0       -2
+    /dev/sdc1           partition       51196   0       -3
+    /my_swapfile        file            102396  0       -4
+
+mount /dev/sdb3 /mnt/xfs
+    mount | grep 'sdb3'
+        /dev/sdb3 on /mnt type xfs (rw,relatime,seclabel,attr2,inode64,noquota)
+
+umount /dev/sdb3
+-OR-
+umount /mnt/xfs
+
+mount /dev/sdb1 /mnt/ext4
+    mount | grep 'sdb1'
+        /dev/sdb1 on /mnt/ext4 type ext4 (rw,relatime,seclabel,data=ordered)
+
+umount /dev/sdb1
+-OR-
+umount /mnt/ext4
+
+tune2fs -l /dev/sdb1 | grep 'mount options'
+    Default mount options:    user_xattr acl
+
+tune2fs -o ^user_xattr,^acl /dev/sdb1
+    tune2fs 1.42.9 (28-Dec-2013)
+
+tune2fs -l /dev/sdb1 | grep 'mount options'
+    Default mount options:    (none)
+
+[Removing the mount options via tune2fs doesn't seem to prevent using chattr or setfacl]
+
+blkid
+    /dev/sda1: UUID="4700bf88-6f1b-446d-a369-d4614ce9d614" TYPE="xfs"
+    /dev/sda2: UUID="mS8FyW-lhbn-3e80-8O2g-0fX2-LIvX-8Q95l4" TYPE="LVM2_member"
+    /dev/sdb1: LABEL="my_ext4_disk" UUID="baa28b18-bf10-47b4-a4c1-47bf0c67d1d3" TYPE="ext4"
+    /dev/sdb2: UUID="d31d23fe-5dfc-4e7d-94ef-9f96d6dd67f1" TYPE="swap"
+    /dev/sdb3: LABEL="my_xfs_disk" UUID="1bc8450b-532d-4316-a6ef-eae0ecce6f24" TYPE="xfs"
+    /dev/sdc1: UUID="d9dffa5e-44fa-4d8b-981f-2ca16a07279c" TYPE="swap" PARTLABEL="Linux swap" PARTUUID="5f65bd4c-12ea-4d14-8827-46e1cf4bd280"
+    /dev/mapper/cl_odin-root: UUID="9a1e7042-03a8-4829-9939-d345533fc189" TYPE="xfs"
+    /dev/mapper/cl_odin-swap: UUID="03b12f9c-6a39-41e3-a32d-8428f902ceed" TYPE="swap"
+
+[GPT partitions include "PARTLABEL" and "PARTUUID"]
+
+mount /dev/sdb1 /mnt
+-OR-
+mount LABEL="my_ext4_disk" /mnt
+-OR-
+mount UUID="baa28b18-bf10-47b4-a4c1-47bf0c67d1d3" /mnt
+
+[Use /etc/fstab for auto-mounting file systems]
+
+|           Device           | Mount Point | File System |    Mount Options    | Dump Support | Automatic Check |
+  /dev/mapper/cl-centos-root    /                xfs            defaults              1               1
+  UUID=baa28b18-bf10-47b4-d4    /boot            xfs            defaults              1               2
+  /dev/mapper/cl-centos-swap    swap             swap           defaults              0               0
+  LABEL=my_xfs_disk             /mnt/dir1        ext4           ro,noatime            1               0
+  /dev/sdb3                     /my_dir          xfs            acl,user_xttr         1               2
+  10.1.1.145:/vol/data          /netapp_data     nfs            rw,hard,_netdev       0               0
 
 @@@
 @@@ Exercise 14.6 Mounting Partitions Through /etc/fstab
 @@@
-
+    blkid
+        /dev/sda1: UUID="4700bf88-6f1b-446d-a369-d4614ce9d614" TYPE="xfs"
+        /dev/sda2: UUID="mS8FyW-lhbn-3e80-8O2g-0fX2-LIvX-8Q95l4" TYPE="LVM2_member"
+        /dev/sdb1: UUID="db37ed47-cdfe-46de-bbcf-bcc830106a7e" TYPE="xfs"
+        ...
+    mkdir -p /mounts/data
+    vi /etc/fstab
+        UUID="db37ed47-cdfe-46de-bbcf-bcc830106a7e"    /mounts/data    xfs    defaults    1 2
+        :wq
+    mount -a
+    df -h
+        Filesystem                Size  Used Avail Use% Mounted on
+        /dev/mapper/cl_odin-root  8.0G  5.9G  2.2G  74% /
+        devtmpfs                  905M     0  905M   0% /dev
+        tmpfs                     920M  100K  920M   1% /dev/shm
+        tmpfs                     920M  8.9M  912M   1% /run
+        tmpfs                     920M     0  920M   0% /sys/fs/cgroup
+        /dev/sda1                1014M  226M  789M  23% /boot
+        tmpfs                     184M   12K  184M   1% /run/user/1000
+        /dev/sdb1                  97M  5.2M   92M   6% /mounts/data
 @@@
 
+Review Questions
+1. gdisk
+2. fdisk
+3. XFS
+4. /etc/fstab
+5. noauto
+6. mkswap
+7. mount -a
+8. ext2
+9. mkfs.ext4 <OR> mkfs -t ext4
+10. blkid
 
 @@@
 @@@ Lab 14.1
 @@@
-    1.
-    2.
+    1.  dd if=/root/diskfile1 of=/dev/sda
+        dd if=/root/diskfile2 of=/dev/sdb
+        dd if=/root/diskfile3 of=/dev/sdc
+    2.  \cp /root/fstab /etc/fstab
 @@@
-
 
 @@@
 @@@ Lab 14.2
 @@@
-    1.
-    2.
-    3.
+    1.  gdisk /dev/sdb
+            n
+                Partition number (1-128, default 1):
+                First sector (34-409545, default = 2048) or {+-}size{KMGTP}:
+                Last sector (2048-409545, default = 409545) or {+-}size{KMGTP}: +100M
+                Current type is 'Linux filesystem'
+                Hex code or GUID (L to show codes, Enter = 8300): 8200
+                Changed type of partition to 'Linux swap'
+            n
+                Partition number (2-128, default 2):
+                First sector (34-409545, default = 206848) or {+-}size{KMGTP}:
+                Last sector (206848-409545, default = 409545) or {+-}size{KMGTP}: +100M
+                Current type is 'Linux filesystem'
+                Hex code or GUID (L to show codes, Enter = 8300): 8300
+                Changed type of partition to 'Linux filesystem'
+            w
+                [Confirmation]
+        mkswap /dev/sdb1
+            mkswap: /dev/sdb1: warning: wiping old xfs signature.
+            Setting up swapspace version 1, size = 102396 KiB
+            no label, UUID=449f53e0-7d0b-4ea6-b5a8-ed9f4a15db8a
+        mkfs.ext4 /dev/sdb2
+            mke2fs 1.42.9 (28-Dec-2013)
+            Filesystem label=
+            OS type: Linux
+            Block size=1024 (log=0)
+            ...
+            Creating journal (4096 blocks): done
+            Writing superblocks and filesystem accounting information: done
+    2.  blkid | grep 'sdb'
+            /dev/sdb1: UUID="449f53e0-7d0b-4ea6-b5a8-ed9f4a15db8a" TYPE="swap" PARTLABEL="Linux swap" PARTUUID="80f36f00-e8c8-45da-8dbf-bdd09223a04a"
+            /dev/sdb2: UUID="e3a7f9f4-ed83-4d10-bbc1-38f8e605710a" TYPE="ext4" PARTLABEL="Linux filesystem" PARTUUID="4c0e43b5-642d-428b-86ef-30a9c5c1ba50"
+        mkdir -p /mounts/data
+        vi /etc/fstab
+            UUID="449f53e0-7d0b-4ea6-b5a8-ed9f4a15db8a"    swap    swap    defaults    0 0
+            UUID="e3a7f9f4-ed83-4d10-bbc1-38f8e605710a"    /mounts/data    ext4    defaults    0 0
+            :wq
+        mount -a
+
+    3.  reboot
+        df -hT
+        blkid
+        mount
+        cat /proc/swaps
 @@@
 
 
@@ -3155,6 +3783,9 @@ vi /etc/systemd/journald.conf
 15-15    Chapter 15: Managing LVM Logical Volumes (19 pg.)     15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15
 15-15                                                          15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15
 15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15
+
+Do I Know This Already?
+
 
 @@@
 @@@ Exercise 15.1 Creating the Physical Volume
@@ -3176,6 +3807,17 @@ vi /etc/systemd/journald.conf
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 15.1
@@ -3200,6 +3842,9 @@ vi /etc/systemd/journald.conf
 16-16                                                       16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16
 16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16
 
+Do I Know This Already?
+
+
 @@@
 @@@ Exercise 16.1 Managing Kernel Modules from the Command Line
 @@@
@@ -3213,6 +3858,17 @@ vi /etc/systemd/journald.conf
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 16.1
@@ -3230,6 +3886,9 @@ vi /etc/systemd/journald.conf
 17-17                                                                17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17
 17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17
 
+Do I Know This Already?
+
+
 @@@
 @@@ Exercise 17.1 Setting Up a Basic Web Server
 @@@
@@ -3243,6 +3902,17 @@ vi /etc/systemd/journald.conf
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 17.1
@@ -3261,6 +3931,9 @@ vi /etc/systemd/journald.conf
 18-18    Chapter 18: Managing and Understanding the Boot Procedure (22 pg.)      18-18-18-18-18-18-18-18-18-18-18-18-18-18-18
 18-18                                                                            18-18-18-18-18-18-18-18-18-18-18-18-18-18-18
 18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18
+
+Do I Know This Already?
+
 
 @@@
 @@@ Exercise 18.1 Managing Units with systemctl
@@ -3282,6 +3955,17 @@ vi /etc/systemd/journald.conf
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 18.1
@@ -3304,6 +3988,9 @@ vi /etc/systemd/journald.conf
 19-19                                                                19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19
 19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19
 
+Do I Know This Already?
+
+
 @@@
 @@@ Exercise 19.1 Exploring troubleshooting targets.
 @@@
@@ -3317,6 +4004,17 @@ vi /etc/systemd/journald.conf
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 19.1
@@ -3342,6 +4040,9 @@ vi /etc/systemd/journald.conf
 20-20                                              20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20
 20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20
 
+Do I Know This Already?
+
+
 @@@
 @@@ Exercise 20.1 Setting Up the Network Installation Server
 @@@
@@ -3362,6 +4063,17 @@ vi /etc/systemd/journald.conf
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 20.1
@@ -3379,6 +4091,9 @@ vi /etc/systemd/journald.conf
 21-21    Chapter 21: Managing SELinux (24 pg.)     21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21
 21-21                                              21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21
 21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21
+
+Do I Know This Already?
+
 
 @@@
 @@@ Exercise 21.1 Manipulating SELinux Modes
@@ -3414,6 +4129,17 @@ vi /etc/systemd/journald.conf
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 21.1
@@ -3430,6 +4156,9 @@ vi /etc/systemd/journald.conf
 22-22                                                    22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22
 22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22
 
+Do I Know This Already?
+
+
 @@@
 @@@ Exercise 22.1 Managing the Firewall with Firewall-cmd
 @@@
@@ -3443,6 +4172,17 @@ vi /etc/systemd/journald.conf
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 22.1
@@ -3458,6 +4198,9 @@ vi /etc/systemd/journald.conf
 23-23    Chapter 23: Configuring Remote Mounts and FTP (23 pg.)      23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23
 23-23                                                                23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23
 23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23
+
+Do I Know This Already?
+
 
 @@@
 @@@ Exercise 23.1 Mounting an NFS Share
@@ -3486,6 +4229,17 @@ vi /etc/systemd/journald.conf
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 23.1
@@ -3503,12 +4257,26 @@ vi /etc/systemd/journald.conf
 24-24                                                       24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24
 24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24
 
+Do I Know This Already?
+
+
 @@@
 @@@ Exercise 24.1 Managing Local Time
 @@@
 
 @@@
 
+Review Questions
+1.
+2.
+3.
+4.
+5.
+6.
+7.
+8.
+9.
+10.
 
 @@@
 @@@ Lab 24.1
