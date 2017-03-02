@@ -3785,46 +3785,477 @@ Review Questions
 15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15-15
 
 Do I Know This Already?
+B C D C B&C A&B C B A B
 
+Just remember:
+    pv <TAB><TAB> --help
+    vg <TAB><TAB> --help
+    lv <TAB><TAB> --help
 
 @@@
 @@@ Exercise 15.1 Creating the Physical Volume
 @@@
+    fdisk /dev/sdb
+    o
+        Building a new DOS disklabel with disk identifier 0x5f2e844f.
+    n
+        Partition type:
+           p   primary (0 primary, 0 extended, 4 free)
+           e   extended
+        Select (default p): p
+        Partition number (1-4, default 1): 1
+        First sector (2048-409578, default 2048): 2048
+        Last sector, +sectors or +size{K,M,G} (2048-409578, default 409578): +100M
+        Partition 1 of type Linux and of size 100 MiB is set
+    t
+        Selected partition 1
+        Hex code (type L to list all codes): 8e
+        Changed type of partition 'Linux' to 'Linux LVM'
+    w
+        The partition table has been altered!
+        Calling ioctl() to re-read partition table.
+        Syncing disks.
 
+    pvcreate /dev/sdb1
+        Physical volume "/dev/sdb1" successfully created.
+    pvs
+        PV         VG      Fmt  Attr PSize   PFree
+        /dev/sda2  cl_odin lvm2 a--    9.00g      0
+        /dev/sdb1          lvm2 ---  100.00m 100.00m
+    pvdisplay
+        --- Physical volume ---
+        PV Name               /dev/sda2
+        VG Name               cl_odin
+        PV Size               9.00 GiB / not usable 2.00 MiB
+        Allocatable           yes (but full)
+        PE Size               4.00 MiB
+        Total PE              2303
+        Free PE               0
+        Allocated PE          2303
+        PV UUID               mS8FyW-lhbn-3e80-8O2g-0fX2-LIvX-8Q95l4
+        "/dev/sdb1" is a new physical volume of "100.00 MiB"
+        --- NEW Physical volume ---
+        PV Name               /dev/sdb1
+        VG Name
+        PV Size               100.00 MiB
+        Allocatable           NO
+        PE Size               0
+        Total PE              0
+        Free PE               0
+        Allocated PE          0
+        PV UUID               PULXqp-SO4R-pRaN-Lkp0-ooGJ-VQSD-tEPllw
 @@@
 
+lsblk
+    NAME             MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+    sda                8:0    0   10G  0 disk
+    |-sda1             8:1    0    1G  0 part /boot
+    `-sda2             8:2    0    9G  0 part
+      |-cl_odin-root 253:0    0    8G  0 lvm  /
+      `-cl_odin-swap 253:1    0    1G  0 lvm  [SWAP]
+    sdb                8:16   0  200M  0 disk
+    `-sdb1             8:17   0  100M  0 part
+    sdc                8:32   0  130M  0 disk
+    sdd                8:48   0  112M  0 disk
+    sr0               11:0    1 1024M  0 rom
+
+vgcreate vg_mydata1 /dev/sdb1
+
+[Can skip the pvcreate step when creating a Volume Group from a partition]
+    fdisk /dev/sdc
+        n
+            p
+            1
+            2048
+            +100M
+        t
+            8e
+        w
+            [Confirmation]
+    vgcreate vg_mydata2 /dev/sdc1
+        Physical volume "/dev/sdc1" successfully created.
+        Volume group "vg_mydata2" successfully created
+
+[Can skip the pvcreate step when creating a Volume Group from an entire disk]
+    vgcreate vg_mydata3 /dev/sdd
+        Physical volume "/dev/sdd" successfully created.
+        Volume group "vg_mydata3" successfully created
+
+[When viewing pvdisplay output, "PE" means "Physical Extent"]
+[Default is 4MB; must be multiple of 2MB; set 8MB with 'vgcreate -s 8 vg_mydata2 /dev/sdc1']
+
+vgs
+    VG         #PV #LV #SN Attr   VSize   VFree
+    cl_odin      1   2   0 wz--n-   9.00g      0
+    vg_mydata1   1   0   0 wz--n-  96.00m  96.00m
+    vg_mydata2   1   0   0 wz--n-  96.00m  96.00m
+    vg_mydata3   1   0   0 wz--n- 110.00m 110.00m
+
+vgdisplay
+    --- Volume group ---
+    VG Name               vg_mydata1
+    System ID
+    Format                lvm2
+    Metadata Areas        1
+    Metadata Sequence No  1
+    VG Access             read/write
+    VG Status             resizable
+    MAX LV                0
+    Cur LV                0
+    Open LV               0
+    Max PV                0
+    Cur PV                1
+    Act PV                1
+    VG Size               96.00 MiB
+    PE Size               4.00 MiB
+    Total PE              24
+    Alloc PE / Size       0 / 0
+    Free  PE / Size       24 / 96.00 MiB
+    VG UUID               qwpLdl-l9pW-Bphd-bCGr-equl-1Qah-x2oimW
+    ...
+
+Also:
+    pvs /dev/<device>
+    pvdisplay /dev/<device>
+    vgs <volume-group>
+    vgdisplay <volume-group>
+
+LVMs accessible three ways:
+    /dev/<vg-name>/<lv-name>
+    /dev/dm-<#>
+    /dev/mapper/<vg-name>-<lv-name>
+
+lvcreate -n <new-lv-name> -L <absolute-size> <existing-vg-name>
+    lvcreate -n lv_mydata1_1 -L 75M vg_mydata1
+-OR-
+lvcreate -n <new-lv-name> -l <relative-size> <existing-vg-name>
+    lvcreate -n lv_mydata1_1 -l 50%FREE vg_mydata1
 
 @@@
 @@@ Exercise 15.2 Creating the Volume Group and Logical Volumes
 @@@
-
+    pvs
+        PV         VG         Fmt  Attr PSize   PFree
+        /dev/sda2  cl_odin    lvm2 a--    9.00g      0
+        /dev/sdb1             lvm2 ---  100.00m 100.00m
+        ...
+    vgcreate vg_mydata1 /dev/sdb1
+        Volume group "vg_mydata1" successfully created
+    vgs
+        VG         #PV #LV #SN Attr   VSize   VFree
+        cl_odin      1   2   0 wz--n-   9.00g      0
+        vg_mydata1   1   0   0 wz--n-  96.00m  96.00m
+    pvs
+        PV         VG         Fmt  Attr PSize   PFree
+        /dev/sda2  cl_odin    lvm2 a--    9.00g      0
+        /dev/sdb1  vg_mydata1 lvm2 a--   96.00m  96.00m
+        ...
+    lvcreate -n lv_mydata1_1 -l 50%FREE vg_mydata1
+        Logical volume "lv_mydata1_1" created.
+    lvs
+        LV           VG         Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+        root         cl_odin    -wi-ao----  8.00g
+        swap         cl_odin    -wi-ao----  1.00g
+        lv_mydata1_1 vg_mydata1 -wi-a----- 48.00m
+    lvdisplay
+        --- Logical volume ---
+        LV Path                /dev/vg_mydata1/lv_mydata1_1
+        LV Name                lv_mydata1_1
+        VG Name                vg_mydata1
+        LV UUID                uER6fH-wV7m-ZKam-KBs6-z76d-S9xI-IUFG2u
+        LV Write Access        read/write
+        LV Creation host, time server1.example.com, 2017-03-02 13:31:30 +0100
+        LV Status              available
+        # open                 1
+        LV Size                48.00 MiB
+        Current LE             12
+        Segments               1
+        Allocation             inherit
+        Read ahead sectors     auto
+        - currently set to     8192
+        Block device           253:2
+    mkfs.xfs /dev/vg_mydata1/lv_mydata1_1
+        meta-data=/dev/vg_mydata1/lv_mydata1_1 isize=512    agcount=2, agsize=6144 blks
+                 =                       sectsz=512   attr=2, projid32bit=1
+                 =                       crc=1        finobt=0, sparse=0
+        data     =                       bsize=4096   blocks=12288, imaxpct=25
+                 =                       sunit=0      swidth=0 blks
+        naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+        log      =internal log           bsize=4096   blocks=855, version=2
+                 =                       sectsz=512   sunit=0 blks, lazy-count=1
+        realtime =none                   extsz=4096   blocks=0, rtextents=0
+    mkdir /files
+    vi /etc/fstab
+        /dev/vg_mydata1/lv_mydata1_1    /files    xfs    defaults    1 2
+        :wq
+    mount -a
+    mount | grep 'files'
+        /dev/mapper/vg_mydata1-lv_mydata1_1 on /files type xfs (rw,relatime,seclabel,attr2,inode64,noquota)
 @@@
 
+LVM Commands:
+    pvcreate
+    pvs
+    pvdisplay
+    vgcreate
+    vgs
+    vgdisplay
+    lvcreate
+    lvs
+    lvdisplay
+
+'lvextend' extends logical volumes (and filesystems with '-r' flag)
+'lvreduce' shrinks logical volumes (and filesystems with '-r' flag)
+'lvresize' can do both
 
 @@@
 @@@ Exercise 15.3 Resizing Logical Volumes
 @@@
-
+    pvs
+        PV         VG         Fmt  Attr PSize   PFree
+        /dev/sda2  cl_odin    lvm2 a--    9.00g      0
+        /dev/sdb1  vg_mydata1 lvm2 a--   96.00m  48.00m
+        /dev/sdc1  vg_mydata2 lvm2 a--   96.00m  96.00m
+        /dev/sdd   vg_mydata3 lvm2 a--  110.00m 110.00m
+    vgs
+        VG         #PV #LV #SN Attr   VSize   VFree
+        cl_odin      1   2   0 wz--n-   9.00g      0
+        vg_mydata1   1   1   0 wz--n-  96.00m  48.00m
+        vg_mydata2   1   0   0 wz--n-  96.00m  96.00m
+        vg_mydata3   1   0   0 wz--n- 110.00m 110.00m
+    fdisk /dev/sdb
+        n
+            p
+            2
+            206848
+            409578
+        t
+            2
+            8e
+        w
+            The partition table has been altered!
+            Calling ioctl() to re-read partition table.
+            WARNING: Re-reading the partition table failed with error 16: Device or resource busy.
+            The kernel still uses the old table. The new table will be used at
+            the next reboot or after you run partprobe(8) or kpartx(8)
+            Syncing disks.
+    partprobe
+    cat /proc/partitions
+        ...
+        8       16     204789 sdb
+        8       17     102400 sdb1
+        8       18     101365 sdb2
+        ...
+    vgextend vg_mydata1 /dev/sdb2
+        Physical volume "/dev/sdb2" successfully created.
+        Volume group "vg_mydata1" successfully extended
+    pvs
+        PV         VG         Fmt  Attr PSize   PFree
+        /dev/sda2  cl_odin    lvm2 a--    9.00g      0
+        /dev/sdb1  vg_mydata1 lvm2 a--   96.00m  48.00m
+        /dev/sdb2  vg_mydata1 lvm2 a--   96.00m  96.00m
+        /dev/sdc1  vg_mydata2 lvm2 a--   96.00m  96.00m
+        /dev/sdd   vg_mydata3 lvm2 a--  110.00m 110.00m
+    vgs
+        VG         #PV #LV #SN Attr   VSize   VFree
+        cl_odin      1   2   0 wz--n-   9.00g      0
+        vg_mydata1   2   1   0 wz--n- 192.00m 144.00m
+        vg_mydata2   1   0   0 wz--n-  96.00m  96.00m
+        vg_mydata3   1   0   0 wz--n- 110.00m 110.00m
+    [vg_mydata1 now shows #PV:2 and more space]
+    vgreduce vg_mydata1 /dev/sdb2
+        Removed "/dev/sdb2" from volume group "vg_mydata1"
+    pvs
+        PV         VG         Fmt  Attr PSize   PFree
+        /dev/sda2  cl_odin    lvm2 a--    9.00g      0
+        /dev/sdb1  vg_mydata1 lvm2 a--   96.00m  48.00m
+        /dev/sdb2             lvm2 ---   98.99m  98.99m
+        /dev/sdc1  vg_mydata2 lvm2 a--   96.00m  96.00m
+        /dev/sdd   vg_mydata3 lvm2 a--  110.00m 110.00m
+    vgs
+        VG         #PV #LV #SN Attr   VSize   VFree
+        cl_odin      1   2   0 wz--n-   9.00g      0
+        vg_mydata1   1   1   0 wz--n-  96.00m  48.00m
+        vg_mydata2   1   0   0 wz--n-  96.00m  96.00m
+        vg_mydata3   1   0   0 wz--n- 110.00m 110.00m
+    vgextend vg_mydata1 /dev/sdb2
+        Volume group "vg_mydata1" successfully extended
+    lvs
+        LV           VG         Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+        root         cl_odin    -wi-ao----  8.00g
+        swap         cl_odin    -wi-ao----  1.00g
+        lv_mydata1_1 vg_mydata1 -wi-a----- 48.00m
+    df -hT
+        Filesystem               Type      Size  Used Avail Use% Mounted on
+        /dev/mapper/cl_odin-root xfs       8.0G  5.9G  2.2G  74% /
+        devtmpfs                 devtmpfs  905M     0  905M   0% /dev
+        tmpfs                    tmpfs     920M   84K  920M   1% /dev/shm
+        tmpfs                    tmpfs     920M  8.8M  912M   1% /run
+        tmpfs                    tmpfs     920M     0  920M   0% /sys/fs/cgroup
+        /dev/sda1                xfs      1014M  226M  789M  23% /boot
+        tmpfs                    tmpfs     184M   16K  184M   1% /run/user/42
+        tmpfs                    tmpfs     184M     0  184M   0% /run/user/1000
+    lvextend -r -l +50%FREE /dev/vg_mydata1/lv_mydata1_1
+        Phase 1 - find and verify superblock...
+        Phase 2 - using internal log
+                - zero log...
+                - scan filesystem freespace and inode maps...
+                - found root inode chunk
+        Phase 3 - for each AG...
+                - scan (but don't clear) agi unlinked lists...
+                - process known inodes and perform inode discovery...
+                - agno = 0
+                - agno = 1
+                - process newly discovered inodes...
+        Phase 4 - check for duplicate blocks...
+                - setting up duplicate extent list...
+                - check for inodes claiming duplicate blocks...
+                - agno = 0
+                - agno = 1
+        No modify flag set, skipping phase 5
+        Phase 6 - check inode connectivity...
+                - traversing filesystem ...
+                - traversal finished ...
+                - moving disconnected inodes to lost+found ...
+        Phase 7 - verify link counts...
+        No modify flag set, skipping filesystem flush and exiting.
+          Size of logical volume vg_mydata1/lv_mydata1_1 changed from 48.00 MiB (12 extents) to 120.00 MiB (30 extents).
+          Logical volume vg_mydata1/lv_mydata1_1 successfully resized.
+        meta-data=/dev/mapper/vg_mydata1-lv_mydata1_1 isize=512    agcount=2, agsize=6144 blks
+                 =                       sectsz=512   attr=2, projid32bit=1
+                 =                       crc=1        finobt=0 spinodes=0
+        data     =                       bsize=4096   blocks=12288, imaxpct=25
+                 =                       sunit=0      swidth=0 blks
+        naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+        log      =internal               bsize=4096   blocks=855, version=2
+                 =                       sectsz=512   sunit=0 blks, lazy-count=1
+        realtime =none                   extsz=4096   blocks=0, rtextents=0
+        data blocks changed from 12288 to 30720
+    pvs
+        PV         VG         Fmt  Attr PSize   PFree
+        /dev/sda2  cl_odin    lvm2 a--    9.00g      0
+        /dev/sdb1  vg_mydata1 lvm2 a--   96.00m      0
+        /dev/sdb2  vg_mydata1 lvm2 a--   96.00m  72.00m
+        /dev/sdc1  vg_mydata2 lvm2 a--   96.00m  96.00m
+        /dev/sdd   vg_mydata3 lvm2 a--  110.00m 110.00m
+    vgs
+        VG         #PV #LV #SN Attr   VSize   VFree
+        cl_odin      1   2   0 wz--n-   9.00g      0
+        vg_mydata1   2   1   0 wz--n- 192.00m  72.00m
+        vg_mydata2   1   0   0 wz--n-  96.00m  96.00m
+        vg_mydata3   1   0   0 wz--n- 110.00m 110.00m
+    lvs
+        LV           VG         Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+        root         cl_odin    -wi-ao----   8.00g
+        swap         cl_odin    -wi-ao----   1.00g
+        lv_mydata1_1 vg_mydata1 -wi-a----- 120.00m
+    lvresize -r -L +32M vg_mydata1/lv_mydata1_1
+        [Success]
+    lvreduce -r -L -52M /dev/vg_mydata1/lv_mydata1_1
+        fsadm: Xfs filesystem shrinking is unsupported
+        [Doesn't work on XFS; only works on Ext4 and Btrfs]
+    mkfs.ext4 /dev/vg_mydata1/lv_mydata1_1
+    lvresize -r -L -52M /dev/vg_mydata1/lv_mydata1_1
+        fsck from util-linux 2.23.2
+        /sbin/fsck.xfs: XFS file system.
+        resize2fs 1.42.9 (28-Dec-2013)
+        Resizing the filesystem on /dev/mapper/vg_mydata1-lv_mydata1_1 to 102400 (1k) blocks.
+        The filesystem on /dev/mapper/vg_mydata1-lv_mydata1_1 is now 102400 blocks long.
+          Size of logical volume vg_mydata1/lv_mydata1_1 changed from 152.00 MiB (38 extents) to 100.00 MiB (25 extents).
+          Logical volume vg_mydata1/lv_mydata1_1 successfully resized.
+    lvs
+        LV           VG         Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+        root         cl_odin    -wi-ao----   8.00g
+        swap         cl_odin    -wi-ao----   1.00g
+        lv_mydata1_1 vg_mydata1 -wi-a----- 100.00m
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. 8e00
+2. vgcreate -s 4MiB vggroup /dev/sdb3
+3. pvs
+4. vgextend vggroup /dev/sdd
+5. lvcreate -n lvvol1 -L 6M vgname (requires a 2MiB physical extent size)
+6. lvextend -r -L +100M /dev/vgname/lvvol1
+7. vgextend
+8. -r
+9. lvs
+10. fsck /dev/vgname/lvname
 
 @@@
 @@@ Lab 15.1
 @@@
-    1.
-    2.
-    3.
+    1.  dd if=/dev/zero of=/dev/sdb bs=1M count=600
+        gdisk /dev/sdb
+            n
+                1
+                2048
+                +600M
+                8e00
+            p
+            w
+            y
+        partprobe
+        vgcreate vggroup /dev/sdb1
+            Physical volume "/dev/sdb1" successfully created.
+            Volume group "vggroup" successfully created
+        pvs
+            PV         VG      Fmt  Attr PSize   PFree
+            /dev/sda2  cl_odin lvm2 a--    9.00g      0
+            /dev/sdb1  vggroup lvm2 a--  596.00m 596.00m
+        vgs
+            VG      #PV #LV #SN Attr   VSize   VFree
+            cl_odin   1   2   0 wz--n-   9.00g      0
+            vggroup   1   0   0 wz--n- 596.00m 596.00m
+        lvcreate -n lvgroup -L 500M vggroup
+            Logical volume "lvgroup" created.
+        mkfs.xfs /dev/vggroup/lvgroup
+            meta-data=/dev/vggroup/lvgroup   isize=512    agcount=4, agsize=32000 blks
+                     =                       sectsz=512   attr=2, projid32bit=1
+                     =                       crc=1        finobt=0, sparse=0
+            data     =                       bsize=4096   blocks=128000, imaxpct=25
+                     =                       sunit=0      swidth=0 blks
+            naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+            log      =internal log           bsize=4096   blocks=855, version=2
+                     =                       sectsz=512   sunit=0 blks, lazy-count=1
+            realtime =none                   extsz=4096   blocks=0, rtextents=0
+        mkdir /groups
+        echo "/dev/vggroup/lvgroup    /groups    xfs    defaults    1 2" | tee -a /etc/fstab
+        mount -a
+        mount | grep 'lvgroup'
+            /dev/mapper/vggroup-lvgroup on /groups type xfs (rw,relatime,seclabel,attr2,inode64,noquota)
+    2.  gdisk /dev/sdb
+            n
+                2
+                1230848
+                +300M
+                8e00
+            p
+            w
+            y
+        partprobe
+        vgextend vggroup /dev/sdb2
+            Physical volume "/dev/sdb2" successfully created.
+            Volume group "vggroup" successfully extended
+        lvextend -r -L +250M /dev/vggroup/lvgroup
+            Rounding size to boundary between physical extents: 252.00 MiB.
+              Size of logical volume vggroup/lvgroup changed from 500.00 MiB (125 extents) to 752.00 MiB (188 extents).
+              Logical volume vggroup/lvgroup successfully resized.
+            meta-data=/dev/mapper/vggroup-lvgroup isize=512    agcount=4, agsize=32000 blks
+                     =                       sectsz=512   attr=2, projid32bit=1
+                     =                       crc=1        finobt=0 spinodes=0
+            data     =                       bsize=4096   blocks=128000, imaxpct=25
+                     =                       sunit=0      swidth=0 blks
+
+            naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+            log      =internal               bsize=4096   blocks=855, version=2
+                     =                       sectsz=512   sunit=0 blks, lazy-count=1
+            realtime =none                   extsz=4096   blocks=0, rtextents=0
+            data blocks changed from 128000 to 192512
+    3.  df -hT
+            Filesystem                  Type      Size  Used Avail Use% Mounted on
+            ...
+            /dev/mapper/vggroup-lvgroup xfs       749M   26M  724M   4% /groups
 @@@
 
 
