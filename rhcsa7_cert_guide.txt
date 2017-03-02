@@ -4274,39 +4274,243 @@ Review Questions
 16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16-16
 
 Do I Know This Already?
+A B B-NOT-A C A B C C C C&D
 
+dmesg
+    [kernel-related messages showing time relative to the start of the kernel]
+
+journalctl --dmesg
+-OR-
+journalctl -k
+    [kernel-related messages showing clock time]
+
+/proc/*
+    [A file interface to the Linux kernel]
+
+cat /proc/meminfo
+cat /proc/cpuinfo
+cat /proc/partitions
+cat /proc/swaps
+cat /proc/stat
+cat /proc/consoles
+
+uname -a
+    Linux server1.example.com 3.10.0-514.6.1.el7.x86_64 #1 SMP Wed Jan 18 13:06:36 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
+
+hostnamectl status
+    Static hostname: server1.example.com
+          Icon name: computer-vm
+            Chassis: vm
+         Machine ID: b101d0db23e44e9f9a4be5f01ca6416e
+            Boot ID: fb73071502fc4b7dbe6fadc0909471b1
+     Virtualization: kvm
+    Operating System: CentOS Linux 7 (Core)
+        CPE OS Name: cpe:/o:centos:centos:7
+
+             Kernel: Linux 3.10.0-514.6.1.el7.x86_64
+       Architecture: x86-64
+
+cat /etc/redhat-release
+    CentOS Linux release 7.3.1611 (Core)
+
+systemctl status systemd-udevd
+    ● systemd-udevd.service - udev Kernel Device Manager
+       Loaded: loaded (/usr/lib/systemd/system/systemd-udevd.service; static; vendor preset: disabled)
+       Active: active (running) since Thu 2017-03-02 16:11:26 CET; 4h 38min ago
+         Docs: man:systemd-udevd.service(8)
+               man:udev(7)
+     Main PID: 512 (systemd-udevd)
+       CGroup: /system.slice/systemd-udevd.service
+               └─512 /usr/lib/systemd/systemd-udevd
+
+systemd-udevd reads:
+    /usr/lib/udev/rules.d/*
+    /etc/udev/rules.d/*
+
+udevadm monitor
+    monitor will print the received events for:
+    UDEV - the event which udev sends out after rule processing
+    KERNEL - the kernel uevent
+[Add a USB device via VirtualBox]
+    KERNEL[5383.335582] add      /devices/pci0000:00/0000:00:0b.0/usb1/1-1 (usb)
+    KERNEL[5383.435301] add      /devices/pci0000:00/0000:00:0b.0/usb1/1-1/1-1:1.0 (usb)
+    ...
+    KERNEL[5383.592230] add      /bus/usb/drivers/uvcvideo (drivers)
+    UDEV  [5383.594950] add      /module/uvcvideo (module)
+    ...
+Ctrl+C
+
+Specify additional modules to be loaded by the systemd-modules-load.service daemon by creating a program.conf file:
+    vi /etc/modules-load.d/<module-name>.conf
+        # Load <module-name> at boot
+        <module-name>
+        :wq
+
+lsmod
+    [Lists currently loaded kernel modules]
+    [Takes no arguments]
+
+modinfo <module-name>
+    [Displays information about the specified kernel module]
+    e.g. modinfo cryptd
+
+modprobe <module-name>
+    [Loads a specified kernel module file and all of its dependencies]
+    [Module must reside in /lib/modules/`uname -r`, e.g. /lib/modules/3.10.0-514.6.1.el7.x86_64/kernel/net/mac80211/mac80211.ko]
+    e.g. modprobe mac80211
+        lsmod | grep mac80211
+            Module        Size  Used by
+            mac80211    682454  0
+            cfg80211    593832  1 mac80211
+
+modprobe -r <module-name>
+    [Unloads the specified kernel module, considering its dependencies]
+    e.g. modprobe -r mac80211
+        lsmod | grep mac80211
+            [No results]
+
+Don't use anymore:
+    insmod
+    rmmod
 
 @@@
 @@@ Exercise 16.1 Managing Kernel Modules from the Command Line
 @@@
-
+    lsmod | head
+    modprobe ext4
+    lsmod | grep 'ext4'
+        Module       Size  Used by
+        ext4       583541  0
+        mbcache     14958  1 ext4
+        jbd2       102945  1 ext4
+    modinfo ext4
+        filename:       /lib/modules/3.10.0-514.6.1.el7.x86_64/kernel/fs/ext4/ext4.ko
+        license:        GPL
+        description:    Fourth Extended Filesystem
+        author:         Remy Card, Stephen Tweedie, Andrew Morton, Andreas Dilger, Theodore Ts'o and others
+        alias:          fs-ext4
+        ...
+    modprobe -r ext4
+    lsmod | grep 'ext4'
+        [No results]
+    modprobe -r xfs
+        modprobe: FATAL: Module xfs is in use.
 @@@
 
+lspci -k
+    00:00.0 Host bridge: Intel Corporation 440FX - 82441FX PMC [Natoma] (rev 02)
+    00:01.0 ISA bridge: Intel Corporation 82371SB PIIX3 ISA [Natoma/Triton II]
+    00:01.1 IDE interface: Intel Corporation 82371AB/EB/MB PIIX4 IDE (rev 01)
+            Kernel driver in use: ata_piix
+            Kernel modules: ata_piix, pata_acpi, ata_generic
+    00:02.0 VGA compatible controller: InnoTek Systemberatung GmbH VirtualBox Graphics Adapter
+    ...
+
+Create files to load modules with parameters automatically:
+    /etc/modprobe.d/
 
 @@@
 @@@ Exercise 16.2 Loading Kernel Modules with Parameters
 @@@
-
+    lsmod | grep 'cdrom'
+        Module     Size  Used by
+        cdrom     42556  1 sr_mod
+    modprobe -r cdrom
+        modprobe: FATAL: Module cdrom is in use.
+    modprobe -r sr_mod; modprobe -r cdrom
+    modinfo cdrom
+        filename:       /lib/modules/3.10.0-514.6.1.el7.x86_64/kernel/drivers/cdrom/cdrom.ko
+        license:        GPL
+        rhelversion:    7.3
+        srcversion:     BE3BD0D17D080229D55B173
+        depends:
+        intree:         Y
+        vermagic:       3.10.0-514.6.1.el7.x86_64 SMP mod_unload modversions
+        signer:         CentOS Linux kernel signing key
+        sig_key:        EE:3B:C2:53:44:A6:71:F6:D7:76:4A:5C:FD:83:AB:4B:AF:DB:E7:4D
+        sig_hashalgo:   sha256
+        parm:           debug:bool
+        parm:           autoclose:bool
+        parm:           autoeject:bool
+        parm:           lockdoor:bool
+        parm:           check_media_type:bool
+        parm:           mrw_format_restart:bool
+    modprobe cdrom debug=1
+    dmesg
+        [Sometimes load information is displayed]
+    vi /etc/modprobe.d/cdrom
+        options cdrom debug=1
+        :wq
+        [Debug option will be enabled every time the cdrom kernel module is loaded]
 @@@
 
+yum upgrade kernel
+-OR-
+yum install kernel
+    [A new kernel is installed beside the old kernel]
+    [The last four installed kernels are in /boot]
+
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. uname -v (according to 'man uname'); for the kernel release: uname -r
+2. /etc/redhat-release
+3. lsmod
+4. modinfo <module-name>
+5. modprobe -r
+6. Check for dependencies via lsmod to unload first
+7. modinfo
+8. /etc/modprobe.d/<filename>
+9. options cdrom debug=1
+10. yum upgrade kernel -OR- yum install kernel
 
 @@@
 @@@ Lab 16.1
 @@@
-    1.
-    2.
-    3.
+    1.  yum upgrade kernel
+            ==========================================================================================
+             Package                   Arch          Version                   Repository        Size
+            ==========================================================================================
+            Installing:
+             kernel                    x86_64        3.10.0-514.6.2.el7        updates           37 M
+
+            Transaction Summary
+            ==========================================================================================
+            Install  1 Package
+
+            Total download size: 37 M
+            Installed size: 148 M
+
+            reboot
+
+    2.  dmesg
+        journalctl -k
+        journalctl --dmesg
+
+    3.  lspci -k | grep 'net' -A3
+            00:03.0 Ethernet controller: Intel Corporation 82540EM Gigabit Ethernet Controller (rev 02)
+                    Subsystem: Intel Corporation PRO/1000 MT Desktop Adapter
+                    Kernel driver in use: e1000
+                    Kernel modules: e1000
+        modinfo -F parm e1000
+            TxDescriptors:Number of transmit descriptors (array of int)
+            RxDescriptors:Number of receive descriptors (array of int)
+            Speed:Speed setting (array of int)
+            Duplex:Duplex setting (array of int)
+            AutoNeg:Advertised auto-negotiation setting (array of int)
+            FlowControl:Flow Control setting (array of int)
+            XsumRX:Disable or enable Receive Checksum offload (array of int)
+            TxIntDelay:Transmit Interrupt Delay (array of int)
+            TxAbsIntDelay:Transmit Absolute Interrupt Delay (array of int)
+            RxIntDelay:Receive Interrupt Delay (array of int)
+            RxAbsIntDelay:Receive Absolute Interrupt Delay (array of int)
+            InterruptThrottleRate:Interrupt Throttling Rate (array of int)
+            SmartPowerDownEnable:Enable PHY smart power down (array of int)
+            copybreak:Maximum size of packet that is copied to a new buffer on receive (uint)
+            debug:Debug level (0=none,...,16=all) (int)
+        ls /sys/module/e1000/parameters | while read param; do echo -n "$param: "; cat /sys/module/e1000/parameters/$param; done;
+            copybreak: 256
+        modprobe e1000 debug=2
+            [No effect]
+        echo "options e1000 debug=2" | tee /etc/modprobe.d/e1000
 @@@
 
 
