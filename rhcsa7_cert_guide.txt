@@ -4522,41 +4522,144 @@ Review Questions
 17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17-17
 
 Do I Know This Already?
+A A-NOT-B C A B D C A A C
 
+yum install httpd
+-OR-
+yum groups install "Basic Web Server"
+
+/etc/httpd/conf/httpd.conf
+    ServerRoot
+        [Where configuration files are located; default is /etc/httpd]
+    DocumentRoot
+        [Where web content is located; default is /var/www/html]
 
 @@@
 @@@ Exercise 17.1 Setting Up a Basic Web Server
 @@@
-
+    yum groups install "Basic Web Server"
+        [Complete!]
+    vi /etc/httpd/conf/httpd.conf
+        DocumentRoot "/var/www/html"
+    echo "Welcome to my web server" | tee /var/www/html/index.html
+    systemctl start httpd; systemctl enable httpd
+        Created symlink from /etc/systemd/system/multi-user.target.wants/httpd.service to /usr/lib/systemd/system/httpd.service.
+    systemctl status httpd
+        ● httpd.service - The Apache HTTP Server
+           Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; vendor preset: disabled)
+           Active: active (running) since Fri 2017-03-03 10:09:35 CET; 56s ago
+             Docs: man:httpd(8)
+                   man:apachectl(8)
+         Main PID: 31509 (httpd)
+           Status: "Total requests: 0; Current requests/sec: 0; Current traffic:   0 B/sec"
+           CGroup: /system.slice/httpd.service
+                   ├─31509 /usr/sbin/httpd -DFOREGROUND
+                   ├─31510 /usr/sbin/httpd -DFOREGROUND
+                   ├─31511 /usr/sbin/httpd -DFOREGROUND
+                   ├─31512 /usr/sbin/httpd -DFOREGROUND
+                   ├─31513 /usr/sbin/httpd -DFOREGROUND
+                   ├─31514 /usr/sbin/httpd -DFOREGROUND
+                   └─31515 /usr/sbin/httpd -DFOREGROUND
+         
+        Mar 03 10:09:35 server1.example.com systemd[1]: Starting The Apache HTTP Server...
+        Mar 03 10:09:35 server1.example.com systemd[1]: Started The Apache HTTP Server.
+    yum install elinks
+        [A text-only web browser for non-graphical systems]
+    elinks http://localhost
+        [Success]
 @@@
 
+ls -la /etc/httpd
+    drwxr-xr-x. 2 root root  37 Mar  3 10:08 conf
+    drwxr-xr-x. 2 root root 135 Mar  3 09:51 conf.d
+    drwxr-xr-x. 2 root root 186 Mar  3 09:51 conf.modules.d
+    lrwxrwxrwx. 1 root root  19 Mar  3 09:50 logs -> ../../var/log/httpd
+    lrwxrwxrwx. 1 root root  29 Mar  3 09:50 modules -> ../../usr/lib64/httpd/modules
+    lrwxrwxrwx. 1 root root  10 Mar  3 09:50 run -> /run/httpd
+
+/etc/httpd/conf/
+    [Contains the main configuration files; 'httpd.conf' and 'magic']
+/etc/httpd/conf.d/
+    [Contains snap-in files from RPMs; 'ssl.conf', 'userdir.conf', etc.]
+    [Files loaded from httpd.conf by the line "IncludeOptional conf.d/*.conf"]
+/etc/httpd/conf.modules.d/
+    [Contains configuration files used by additional modules; '00-ssl.conf', '01-cgi.conf', etc.]
+    [Files loaded from httpd.conf by the line "Include conf.modules.d/*.conf"]
+    [Files contain the 'LoadModule' command with <module-name> and path to associated <module>.so file]
 
 @@@
 @@@ Exercise 17.2 Installing Apache Virtual Hosts
 @@@
-
+    vi /etc/hosts
+        192.168.222.100 account.example.com account
+        192.168.222.100 sales.example.com sales
+        :wq
+    vi /etc/httpd/conf/httpd.conf
+        <Directory "/www/docs">
+            AllowOverride None
+            Require all granted
+        </Directory>
+    vi /etc/httpd/conf.d/account.example.com.conf
+        <VirtualHost *:80>
+            ServerAdmin webmaster@account.example.com
+            DocumentRoot /www/docs/account.example.com
+            ServerName account.example.com
+            ErrorLog logs/account.example.com-error_log
+            CustomLog logs/account.example.com-access_log common
+        </VirtualHost>
+        :wq
+    mkdir -p /www/docs/account.example.com
+    echo "Welcome to the account server." | tee /www/docs/account.example.com/index.html
+    [Temporarily switch off SELinux]
+        setenforce 0
+    systemctl restart httpd
+    elinks http://account.example.com
+        [Welcome to the account server.]
+    cp /etc/httpd/conf.d/account.example.com.conf /etc/httpd/conf.d/sales.example.com.conf
+    vi /etc/httpd/conf.d/sales.example.com.conf
+        :%s/account/sales/g
+        :wq
+    mkdir -p /www/docs/sales.example.com
+    echo "Welcome to the sales server." | tee /www/docs/sales.example.com/index.html
+    systemctl restart httpd
+    elinks http://account.example.com
+        [Welcome to the account server.]
+    elinks http://sales.example.com
+        [Welcome to the sales server.]
+    vi /etc/hosts
+        172.25.1.101 account.example.com account
+        10.11.12.100 sales.example.com sales
+        :wq
+    elinks http://account.example.com
+        [Welcome to the account server.]
+    elinks http://sales.example.com
+        [Welcome to the sales server.]
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. "Basic Web Server"
+2. systemctl enable httpd
+3. /etc/httpd/conf.d/
+4. elinks <web-address>
+5. /etc/httpd/conf/httpd.conf
+6. /var/www/html/
+7. index.html
+8. systemctl status httpd
+9. /etc/httpd/conf.d/
+10. /etc/httpd/
 
 @@@
 @@@ Lab 17.1
 @@@
-    1.
-    2.
-    3.
-    4.
-    5.
+    1.  yum groups install "Basic Web Server"
+        systemctl enable httpd
+    2.  echo "Welcome to my web server." | tee /var/www/html/index.html
+    3.  elinks http://localhost
+    4.  yum install httpd-manual
+    5.  Browse to http://localhost/manual
+            [Success]
+            [Enabled by /etc/httpd/conf.d/manual.conf]
+            [Files located in /usr/share/httpd/manual/]
 @@@
 
 
