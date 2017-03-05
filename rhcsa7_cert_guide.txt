@@ -4671,51 +4671,312 @@ Review Questions
 18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18-18
 
 Do I Know This Already?
+A C D D A B B D B A
 
+Systemd unit types:
+    systemctl -t help
+        Available unit types:
+        service
+        socket
+        busname
+        target
+        snapshot
+        device
+        mount
+        automount
+        swap
+        timer
+        path
+        slice
+        scope
+
+System default unit files: /usr/lib/systemd/system/
+System-specific modifications (override defaults): /etc/systemd/system/
+Runtime configuration: /run/systemd/system/
+
+Service unit file components:
+    - [Unit]
+        Description=, After=, Before=
+    - [Service]
+        Type=, ExecStart=, ExecStop=
+    - [Install]
+        WantedBy=
+
+systemctl show <unit-name>
+    e.g. systemctl show sshd
+        Type=forking
+        Restart=on-failure
+        PIDFile=/var/run/sshd.pid
+        ...
 
 @@@
 @@@ Exercise 18.1 Managing Units with systemctl
 @@@
-
+    yum install vsftpd
+    systemctl start vsftpd
+    systemctl status vsftpd
+        ● vsftpd.service - Vsftpd ftp daemon
+           Loaded: loaded (/usr/lib/systemd/system/vsftpd.service; disabled; vendor preset: disabled)
+           Active: active (running) since Fri 2017-03-03 14:16:31 CET; 28s ago
+          Process: 5508 ExecStart=/usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf (code=exited, status=0/SUCCESS)
+         Main PID: 5509 (vsftpd)
+           CGroup: /system.slice/vsftpd.service
+                   └─5509 /usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf
+        Mar 03 14:16:31 server1.example.com systemd[1]: Starting Vsftpd ftp daemon...
+        Mar 03 14:16:31 server1.example.com systemd[1]: Started Vsftpd ftp daemon.
+    systemctl enable vsftpd
+        Created symlink from /etc/systemd/system/multi-user.target.wants/vsftpd.service to /usr/lib/systemd/system/vsftpd.service.
+    systemctl status vsftpd
+        ● vsftpd.service - Vsftpd ftp daemon
+           Loaded: loaded (/usr/lib/systemd/system/vsftpd.service; enabled; vendor preset: disabled)
+           Active: active (running) since Fri 2017-03-03 14:16:31 CET; 2min 59s ago
+         Main PID: 5509 (vsftpd)
+           CGroup: /system.slice/vsftpd.service
+                   └─5509 /usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf
+        Mar 03 14:16:31 server1.example.com systemd[1]: Starting Vsftpd ftp daemon...
+        Mar 03 14:16:31 server1.example.com systemd[1]: Started Vsftpd ftp daemon.
 @@@
 
+systemctl list-units --type=service
+-OR-
+systemctl --type=service
+    UNIT                 LOAD      ACTIVE    SUB        DESCRIPTION
+    abrt-ccpp.service    loaded    active    exited     Install ABRT coredump hook
+    abrt-oops.service    loaded    active    running    ABRT kernel log watcher
+    abrt-xorg.service    loaded    active    running    ABRT Xorg log watcher
+    ...
+
+systemctl --type=service --all
+    UNIT                   LOAD      ACTIVE      SUB        DESCRIPTION
+    abrt-ccpp.service      loaded    active      exited     Install ABRT coredump hook
+    abrt-oops.service      loaded    active      running    ABRT kernel log watcher
+    abrt-vmcore.service    loaded    inactive    dead       Harvest vmcores for ABRT
+    ...
+
+systemctl --type=service --failed
+      UNIT            LOAD      ACTIVE    SUB       DESCRIPTION
+    ● rngd.service    loaded    failed    failed    Hardware RNG Entropy Gatherer Daemon
+
+systemctl status -l <unit-name>
+    [Sometimes excessive output is ellipsized; this shows everything]
+
+systemctl list-unit-files --type=service
+    UNIT FILE                  STATE
+    abrt-ccpp.service          enabled
+    abrt-oops.service          enabled
+    abrt-pstoreoops.service    disabled
+    ...
+
+systemctl list-dependencies <unit-name>
+    [List a unit's dependencies; what it depends on]
+    e.g. systemctl list-dependencies vsftpd
+        vsftpd.service
+        ● ├─system.slice
+        ● └─basic.target
+        ●   ├─alsa-restore.service
+        ●   ├─alsa-state.service
+        ...
+
+systemctl list-dependencies --reverse <unit-name>
+    [List units that are dependent on the specified unit]
+    e.g. systemctl list-dependencies --reverse vsftpd
+        vsftpd.service
+        ● └─multi-user.target
+        ●   └─graphical.target
+
+@@@
+@@@ Conflicting Units Exercise
+@@@
+    yum install iptables-services
+    cat /usr/lib/systemd/system/firewalld.service | less
+        [Unit]
+        ...
+        Conflicts=iptables.service ip6tables.service ebtables.service ipset.service
+        ...
+    cat /usr/lib/systemd/system/iptables.service | less
+        [No "Conflicts" line]
+    systemctl status firewalld
+        ● firewalld.service - firewalld - dynamic firewall daemon
+           Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled; vendor preset: enabled)
+           Active: active (running) since Thu 2017-03-02 16:11:43 CET; 22h ago
+             Docs: man:firewalld(1)
+         Main PID: 798 (firewalld)
+           CGroup: /system.slice/firewalld.service
+                   └─798 /usr/bin/python -Es /usr/sbin/firewalld --nofork --nopid
+    systemctl status iptables
+        ● iptables.service - IPv4 firewall with iptables
+           Loaded: loaded (/usr/lib/systemd/system/iptables.service; disabled; vendor preset: disabled)
+           Active: inactive (dead)
+    systemctl start iptables
+        ● iptables.service - IPv4 firewall with iptables
+           Loaded: loaded (/usr/lib/systemd/system/iptables.service; disabled; vendor preset: disabled)
+           Active: active (exited) since Fri 2017-03-03 15:27:55 CET; 38s ago
+          Process: 7444 ExecStart=/usr/libexec/iptables/iptables.init start (code=exited, status=0/SUCCESS)
+         Main PID: 7444 (code=exited, status=0/SUCCESS)
+        [TODO Supposed to fail to start due to "Conflicts" in '.service' definition; starts anyway though]
+    systemctl stop firewalld
+    systemctl stop iptables
+    systemctl mask iptables
+        Created symlink from /etc/systemd/system/iptables.service to /dev/null.
+    systemctl status iptables
+        ● iptables.service
+           Loaded: masked (/dev/null; bad)
+           Active: inactive (dead) since Fri 2017-03-03 15:30:49 CET; 7min ago
+         Main PID: 7676 (code=exited, status=0/SUCCESS)
+    systemctl start iptables
+        Failed to start iptables.service: Unit is masked.
+    systemctl enable iptables
+        Failed to execute operation: Cannot send after transport endpoint shutdown
+@@@
+
+@@@
+@@@ Enabling a Service Unit Exercise
+@@@
+    systemctl status vsftpd
+        ● vsftpd.service - Vsftpd ftp daemon
+           Loaded: loaded (/usr/lib/systemd/system/vsftpd.service; enabled; vendor preset: disabled)
+           Active: active (running) since Fri 2017-03-03 14:28:21 CET; 1h 17min ago
+         Main PID: 5757 (vsftpd)
+           CGroup: /system.slice/vsftpd.service
+                   └─5757 /usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf
+    ls -l /etc/systemd/system/multi-user.target.wants | grep 'vsftpd'
+        [No results]
+    systemctl enable vsftpd
+        Created symlink from /etc/systemd/system/multi-user.target.wants/vsftpd.service to /usr/lib/systemd/system/vsftpd.service.
+    ls -l /etc/systemd/system/multi-user.target.wants | grep 'vsftpd'
+        lrwxrwxrwx. 1 root root    38 Mar  3 15:48 vsftpd.service -> /usr/lib/systemd/system/vsftpd.service
+@@@
+
+[On the exam, don't forget to enable services that need to auto-start after a reboot]
+
+systemctl --type=target
+    UNIT                 LOAD      ACTIVE    SUB       DESCRIPTION
+    basic.target         loaded    active    active    Basic System
+    cryptsetup.target    loaded    active    active    Encrypted Volumes
+    getty.target         loaded    active    active    Login Prompts
+    graphical.target     loaded    active    active    Graphical Interface
+    ...
+
+systemctl --type=target --all
+    UNIT                   LOAD      ACTIVE   SUB    DESCRIPTION
+    basic.target           loaded    active   active Basic System
+    cryptsetup.target      loaded    active   active Encrypted Volumes
+  ● dirsrv.target          not-found inactive dead   dirsrv.target
+    emergency.target       loaded    inactive dead   Emergency Mode
+    ...
+
+RunLevel->Target Mapping (symbolic links in /usr/lib/systemd/system):
+    runlevel 0 -> poweroff.target
+    runlevel 1 -> rescue.target
+    runlevel 2 -> multi-user.target
+    runlevel 3 -> multi-user.target
+    runlevel 4 -> multi-user.target
+    runlevel 5 -> graphical.target
+    runlevel 6 -> reboot.target
 
 @@@
 @@@ Exercise 18.2 Isolating Targets
 @@@
-
+    cd /usr/lib/systemd/system
+    grep 'Isolate' *.target
+        anaconda.target:AllowIsolate=yes
+        ctrl-alt-del.target:AllowIsolate=yes
+        default.target:AllowIsolate=yes
+        emergency.target:AllowIsolate=yes
+        graphical.target:AllowIsolate=yes
+        ...
+    systemctl isolate rescue.target
+        PolicyKit daemon disconnected from the bus.
+        We are no longer a registered authentication agent.
+    systemctl isolate reboot.target
+        [Reboots; don't need to be in /usr/lib/systemd/system for the command to work]
 @@@
 
+systemctl get-default
+    graphical.target
+systemctl set-default <target>.target
+    e.g. systemctl set-default multi-user.target
+        Removed symlink /etc/systemd/system/default.target.
+        Created symlink from /etc/systemd/system/default.target to /usr/lib/systemd/system/multi-user.target.
+
+GRUB 2 starting point for configuration:
+    /etc/default/grub
+
+Other GRUB 2 config files:
+    /etc/grub.d/
+
+GRUB 2 main config file (DO NOT EDIT THIS FILE):
+    /boot/grub2/grub.cfg
+    [Pulls boot menu kernel entries from config files in /etc/grub.d/]
+    [After "linux16", shows kernel boots options]
+
+[GRUB 2 adds support for extended functionality via modules, available in /boot/grub2/i386-pc/]
+
+[Recommend removing 'rhgb' and 'quiet' from the boot parameters in /etc/default/grub]
+
+man 7 bootparam
+    [Description of boot-time parameters for the kernel]
 
 @@@
 @@@ Exercise 18.3 Applying Modifications to GRUB2
 @@@
-
+    vi /etc/default/grub
+        [Remove 'rhgb' and 'quiet' from the 'GRUB_CMDLINE_LINUX' parameter]
+        [Change the 'GRUB_TIMEOUT' parameter from '5' to '10' seconds]
+        :wq
+    grub2-mkconfig -o /boot/grub2/grub.cfg
+    -OR-
+    grub2-mkconfig > /boot/grub2/grub.cfg
+        Generating grub configuration file ...
+        Found linux image: /boot/vmlinuz-3.10.0-514.6.2.el7.x86_64
+        Found initrd image: /boot/initramfs-3.10.0-514.6.2.el7.x86_64.img
+        Found linux image: /boot/vmlinuz-3.10.0-514.6.1.el7.x86_64
+        Found initrd image: /boot/initramfs-3.10.0-514.6.1.el7.x86_64.img
+        Found linux image: /boot/vmlinuz-3.10.0-514.el7.x86_64
+        Found initrd image: /boot/initramfs-3.10.0-514.el7.x86_64.img
+        Found linux image: /boot/vmlinuz-0-rescue-b101d0db23e44e9f9a4be5f01ca6416e
+        Found initrd image: /boot/initramfs-0-rescue-b101d0db23e44e9f9a4be5f01ca6416e.img
+        done
+    reboot
+        [Check for a longer menu timeout and for messages scrolling by on the screen]
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. Something started by systemd, like a service, target, mount, socket, etc.
+2. systemctl mask <target-name>.target
+3. /etc/default/grub
+4. systemctl --type=service
+5. systemctl enable <service-name>
+6. systemctl isolate rescue.target
+7. Doesn't have the "AllowIsolate=yes" parameter
+8. systemctl list-dependencies --reverse <service-name>
+9. /etc/default/grub
+10. grub2-mkconfig > /boot/grub2/grub.cfg
 
 @@@
 @@@ Lab 18.1
 @@@
-
+    systemctl enable firewalld
+    systemctl mask iptables
 @@@
-
 
 @@@
 @@@ Lab 18.2
 @@@
-
+    vi /etc/default/grub
+        [Remove 'rhgb' and 'quiet' from the 'GRUB_CMDLINE_LINUX' parameter]
+        :wq
+    grub2-mkconfig > /boot/grub2/grub.cfg
+        Generating grub configuration file ...
+        Found linux image: /boot/vmlinuz-3.10.0-514.6.2.el7.x86_64
+        Found initrd image: /boot/initramfs-3.10.0-514.6.2.el7.x86_64.img
+        Found linux image: /boot/vmlinuz-3.10.0-514.6.1.el7.x86_64
+        Found initrd image: /boot/initramfs-3.10.0-514.6.1.el7.x86_64.img
+        Found linux image: /boot/vmlinuz-3.10.0-514.el7.x86_64
+        Found initrd image: /boot/initramfs-3.10.0-514.el7.x86_64.img
+        Found linux image: /boot/vmlinuz-0-rescue-b101d0db23e44e9f9a4be5f01ca6416e
+        Found initrd image: /boot/initramfs-0-rescue-b101d0db23e44e9f9a4be5f01ca6416e.img
+        done
 @@@
 
 
