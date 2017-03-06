@@ -2420,6 +2420,7 @@ GPG keys are stored in /etc/pki/rpm-gpg
         [myrepo]
         name=thisismyrepo
         baseurl=file:///repo
+        :wq
     yum repolist
         repo id             repo name             status
         base/7/x86_64       CentOS-7 - Base       9363
@@ -4988,40 +4989,242 @@ Review Questions
 19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19-19
 
 Do I Know This Already?
+C B B D A&C B C C A C
 
+The Linux boot procedure:
+1. Performing Power-On Self Test (POST) - hardware initialized from UEFI/BIOS firmware
+2. Selecting the bootable device - bootable device located from UEFI firmware or Master Boot Record (MBR)
+3. Loading the boot loader - from the bootable device, the boot loader is loaded; usually GRUB 2
+4. Loading the kernel - boot loader presents a boot menu; kernel loaded together with initramfs
+5. Starting /sbin/init - kernel loaded into memory; /sbin/init process and udev daemon loaded from initramfs image
+6. Processing initrd.target - systemd executes all initrd.target units; root fs on disk mounted on /sysroot
+7. Switching to the root file system - system switches to root fs on disk; systemd process loaded from disk
+8. Running the default target - systemd executes all default.target units; login screen presented; 90% loaded
 
 @@@
 @@@ Exercise 19.1 Exploring troubleshooting targets.
 @@@
-
+    [Restart the Linux server]
+    [At the GRUB 2 menu, select the first line and hit 'e']
+    [Find the line "linux16 /vmlinuz"; remove 'rhgb' and 'quiet'; add 'systemd.unit=rescue.target']
+    Ctrl-X
+        "Welcome to emergency mode! After logging in, type 'journalctl -xb' to view
+         system logs, 'systemctl reboot' to reboot, 'systemctl default' or ^D to
+         boot into default mode."
+         "Give the root password for maintenance"
+            [Enter the root password]
+    systemctl list-units
+        [80 active units; 25 active services]
+    systemctl show-environment
+        [Displays environment variables 'LANG' and 'PATH']
+    systemctl reboot
+    [At the GRUB 2 menu, select the first line and hit 'e']
+    [Find the line "linux16 /vmlinuz"; add 'systemd.unit=emergency.target']
+    Ctrl-X
+        "Welcome to emergency mode! After logging in, type 'journalctl -xb' to view
+         system logs, 'systemctl reboot' to reboot, 'systemctl default' or ^D to
+         try again to boot into default mode."
+         "Give the root password for maintenance"
+            [Enter the root password]
+    systemctl list-units
+        [10 active units; 3 active services]
 @@@
-
 
 @@@
 @@@ Exercise 19.2 Using the Rescue Option
 @@@
+    [Restart the Linux server and load the Installation Disk]
+    [Select the "Troubleshooting" menu option]
+    [Select the "Rescue a CentOS (Red Hat) Linux system"]
+    [Select option '1' to find the Linux installation and mount it on '/mnt/sysimage']
+    [Press 'Enter' to get to a shell]
+    ls
+        bin     dev    firmware           lib      lost+found    modules    root    sbin    tmp    var
+        boot    etc    imjournal.state    lib64    mnt           proc       run     sys     usr
+    [Missing: 1, data, files, groups, home, media, opt, srv, www]
+    [Extra: firmware, imjournal.state, lost+found, modules]
+    chroot /mnt/sysimage
+        [Rebuild GRUB 2]
+            lsblk
+                [Identify the primary disk]
+                grub2-install /dev/sdb
+                Installing for i386-pc platform.
+                Installation finished. No error reported.
+        [Rebuild initramfs]
+            ls /usr/lib/dracut/dracut.conf.d/*
+                [System default dracut configuration files]
+            ls /etc/dracut.conf.d/*
+                [Custom dracut configuration files]
+            ls /etc/dracut.conf
+                [The default dracut configuration file]
+            dracut
+                Will not override existing initramfs (/boot/initramfs-3.10.0-514.el7.x86_64.img) without --force
+            dracut --force
+        exit
+    reboot
+@@@
 
+[If an /etc/fstab entry is incorrect, the system will wait 90 seconds during boot before going to emergency mode]
+["Give root password for maintenance" is a 'fsck' prompt]
+journalctl -xb -p err
+
+@@@
+@@@ Reset the Root Password Exercise
+@@@
+    [Restart the Linux server]
+    [At the GRUB 2 menu, select the first line and hit 'e']
+    [Find the line "linux16 /vmlinuz"; add 'rd.break']
+    Ctrl-X
+        [Generating "/run/initramfs/rdsosreport.txt"]
+    [No root login required]
+    ls
+        bin    dracut-state.sh    etc     kernel    lib64    root    sbin        sys        tmp     var
+        dev    early_cpio         init    lib       proc     run     shutdown    sysroot    user
+    mount -o remount,rw /sysroot
+        [Changes the /sysroot mount from 'ro' to 'rw']
+    chroot /sysroot
+        ls
+            bin     dev    firmware           lib      lost+found    modules    root    sbin    tmp    var
+            boot    etc    imjournal.state    lib64    mnt           proc       run     sys     usr
+        passwd
+            [Changing password for user root.]
+        [This changes the SELinux policy on /etc/shadow to 'unlabeled_t', which will prevent user login]
+        [Fix SELinux labels by running 'load_policy -i' and 'chcon -t shadow_t /etc/shadow']
+        [Easier method is to execute 'touch /.autorelabel'; but full SELinux relabel can take a long time at next boot]
+        exit
+    reboot
+@@@
+
+@@@
+@@@ Recover a Virtual Machine Exercise
+@@@
+    virsh list --all
+    virsh destroy smallvm1
+    virsh dumpxml smallvm1 | grep "source file="
+        <source file='/var/lib/libvirt/images/smallvm1.qcow2'/>
+    cd /var/lib/libvirt/images
+
+    [kpartx doesn't work on .qcow2 images, only .img (raw) images]
+        qemu-img convert -f qcow2 -O raw smallvm1.qcow2 smallvm1.img
+        kpartx -av /var/lib/libvirt/images/smallvm1.img
+            add map loop2p1 (253:2): 0 2097152 linear /dev/loop2 2048
+            add map loop2p2 (253:3): 0 6289408 linear /dev/loop2 2099200
+
+    [Check partitions]
+        fdisk /dev/loop0
+            p
+                 Device Boot      Start         End      Blocks   Id  System
+                loop2p1   *        2048     2099199     1048576   83  Linux
+                loop2p2         2099200     8388607     3144704   8e  Linux LVM
+
+    [Scan for physical volumes]
+        pvscan
+            PV /dev/sda2             VG cl              lvm2 [19.00 GiB / 0    free]
+            PV /dev/mapper/loop0p2   VG cl              lvm2 [3.00 GiB / 0    free]
+            Total: 2 [21.99 GiB] / in use: 2 [21.99 GiB] / in no VG: 0 [0   ]
+
+    [Check logical volumes]
+        lvs
+            LV   VG Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+            root cl -wi-ao----  17.00g
+            root cl -wi-------   2.59g
+            swap cl -wi-ao----   2.00g
+            swap cl -wi------- 412.00m
+
+    [Activate the logical volumes]
+        vgchange -a y cl
+            Multiple VGs found with the same name: skipping cl
+            Use --select vg_uuid=<uuid> in place of the VG name.
+
+        vgdisplay | grep -e "VG Size" -e "VG UUID"
+            VG Size               19.00 GiB
+            VG UUID               ChEJVX-pt1U-xOEH-70Un-0nhu-ISiU-KfchcF
+            VG Size               3.00 GiB
+            VG UUID               u40VVm-VJfe-y0E8-kGSr-L2TL-7Kwm-yzZxPw
+
+        vgrename u40VVm-VJfe-y0E8-kGSr-L2TL-7Kwm-yzZxPw vg_small
+            Processing VG cl because of matching UUID u40VVm-VJfe-y0E8-kGSr-L2TL-7Kwm-yzZxPw
+            Volume group "u40VVm-VJfe-y0E8-kGSr-L2TL-7Kwm-yzZxPw" successfully renamed to "vg_small"
+
+        vgchange -a y vg_small
+            2 logical volume(s) in volume group "vg_small" now active
+
+        lvs
+            LV   VG       Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+            root cl       -wi-ao----  17.00g
+            swap cl       -wi-ao----   2.00g
+            root vg_small -wi-a-----   2.59g
+            swap vg_small -wi-a----- 412.00m
+
+    mkdir /root2
+    mount /dev/mapper/vg_small-root /root2
+    mount /dev/mapper/loop0p1 /root2/boot
+    mount -o bind /dev /root2/dev
+    mount -o bind /proc /root2/proc
+    mount -o bind /sys /root2/sys
+    chroot /root2
+    dracut --force
+    grub2-mkconfig -o /boot/grub2/grub.cfg
+    exit
+
+    umount /root2/dev
+    umount /root2/proc
+    umount /root2/sys
+    umount /root2/boot
+    umount /root2
+    vgchange -a n vg_small
+    kpartx -dv /var/lib/libvirt/images/smallvm1.img
+        del devmap : loop0p2
+        del devmap : loop0p1
+        loop deleted : /dev/loop0
+
+    [Convert from .img back to .qcow2]
+        qemu-img convert -f raw -O qcow2 smallvm1.img smallvm1.qcow2
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. e
+2. Problem with /etc/fstab
+3. rd.break (NOT systemd.unit=rescue.target)
+4. Use a rescue disk
+5. systemctl list-units
+6. rd.break
+7. load_policy -i
+8. chcon -t shadow_t /etc/shadow
+9. grub2-mkconfig -o /boot/grub2/grub.cfg
+10. systemd.unit=emergency.target
 
 @@@
 @@@ Lab 19.1
 @@@
-    1.
-    2.
-    3.
-    4.
+    1.  e
+        rd.break
+        Ctrl+X
+        mount -o remount,rw /sysroot
+        chroot /sysroot
+        passwd
+            [Change the password]
+        load_policy -i
+        chcon -t shadow_t /etc/shadow
+        exit
+        reboot
+    2.  [Corrupt /etc/fstab so that boot fails]
+            vi /etc/fstab
+                [Change the boot UUID]
+                :wq
+            reboot
+        ["Give root password for maintenance"]
+            [Enter the root password]
+            vi /etc/fstab
+                [Fix the boot UUID]
+                :wq
+            reboot
+    3.  [Restart the Linux server with a rescue disk mounted]
+        [Select the "Troubleshooting" menu option]
+        [Select the "Rescue a CentOS (Red Hat) Linux system"]
+        [Select option '1' to find the Linux installation and mount it on '/mnt/sysimage']
+        [Press 'Enter' to get to a shell]
+    4.  dracut --force <kernel-name>
 @@@
 
 
