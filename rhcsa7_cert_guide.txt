@@ -5243,47 +5243,165 @@ Review Questions
 20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20-20
 
 Do I Know This Already?
+B A&B D C B A B C B D
 
+[The network server can be NFS, FTP, or HTTP]
+[Need to provide the boot image via PXE boot by a TFTP server, working with the DHCP server]
+[A Kickstart file is provided by the installation server; it is an answer file]
 
 @@@
 @@@ Exercise 20.1 Setting Up the Network Installation Server
 @@@
+    [Use VirtualBox, not VMware Fusion; use network type "Internal Network"]
+    [Load an Installation Disk; mount it on /mnt]
+    mkdir /www/docs/account.example.com/install
+    cp -r /mnt/. /www/docs/account.example.com/install
+    vi /etc/httpd/conf.d/account.example.com.conf
+        Options Indexes
+    systemctl restart httpd
+    elinks http://account.example.com/install
+    elinks http://192.168.222.100/install
 
+    [THE FOLLOWING DOESN'T WORK ON VMWARE FUSION DUE TO NETWORKING RESTRICTIONS]
+    virt-manager &
+        File -> New Virtual Machine
+            Network Install -> Forward
+            URL: http://account.example.com/install -> Forward
+            768 MiB RAM & 2 CPUs -> Forward
+            3.0 GiB storage -> Forward
+            Name: testnetinstall -> Finish
+    [Warning: can't find installer mainimage path in .treeinfo]
 @@@
-
 
 @@@
 @@@ Exercise 20.2 Configuring the TFTP Server for PXE Boot
 @@@
+    yum install xinetd
+    yum install tftp-server
+    mkdir /var/lib/tftpboot/pxelinux
+    vi /etc/xinetd.d/tftp
+        disable = no
+    systemctl start xinetd
+    systemctl enable xinetd
 
+    yum install dhcp
+    systemctl enable dhcpd
+    vi /etc/dhcp/dhcpd.conf
+        subnet 192.168.222.0 netmask 255.255.255.0 {
+            option routers 192.168.222.1;
+            range 192.168.222.240 192.168.222.250;
+            next-server 192.168.222.100;
+            filename "pxelinux/pxelinux.0";
+        }
+
+        cp /www/docs/account.example.com/install/Packages/syslinux-4.05-13.el7.x86_64.rpm /tmp
+        cd /tmp
+        rpm2cpio syslinux-4.05-13.el7.x86_64.rpm | cpio -idmv
+        cp /tmp/usr/share/syslinux/pxelinux.0 /var/lib/tftpboot/pxelinux/
+    -OR-
+        yum install syslinux
+        cp /usr/share/syslinux/pxelinux.0 /var/lib/tftpboot/pxelinux/
+        cp /usr/share/syslinux/vesamenu.c32 /var/lib/tftpboot/pxelinux/
+
+    mkdir /var/lib/tftpboot/pxelinux/pxelinux.cfg
+    vi /var/lib/tftpboot/pxelinux/pxelinux.cfg/default
+        DEFAULT vesamenu.c32
+        PROMPT 0
+        TIMEOUT 300
+        MENU TITLE PXE Boot Menu
+        LABEL Linux
+            MENU LABEL ^Install RHEL Manually
+            MENU default
+            KERNEL vmlinuz
+            APPEND initrd=initrd.img inst.repo=http://192.168.222.100/install
+        LABEL Rescue
+            MENU LABEL ^Rescue System
+            KERNEL vmlinuz
+            APPEND initrd=initrd.img rescue
+        LABEL Local
+            MENU LABEL Boot from ^Local Drive
+            LOCALBOOT 0
+        LABEL Tools
+            MENU LABEL Tools
+            KERNEL vesamenu.c32
+            APPEND pxelinux.cfg/tools
+        :wq
+    [Optional, but seems to do nothing]
+        cp /boot/grub/splash.xpm.gz /var/lib/tftpboot/pxelinux
+
+    cp /www/docs/account.example.com/install/images/pxeboot/vmlinuz /var/lib/tftpboot/pxelinux
+    cp /www/docs/account.example.com/install/images/pxeboot/initrd.img /var/lib/tftpboot/pxelinux
+
+    systemctl restart dhcpd
+    systemctl restart xinetd
+
+    firewall-cmd --permanent --add-service=dhcp
+        success
+    firewall-cmd --permanent --add-service=tftp
+        success
+    firewall-cmd --permanent --add-service=http
+        success
+    firewall-cmd --reload
+        success
+
+    tail -f /var/log/messages
+    [Start a server on this network and select PXE Boot in the boot menu]
 @@@
-
 
 @@@
 @@@ Exercise 20.3 Performing a Virtual Machine Network Installation Using a Kickstart File
 @@@
+    [REQUIRES AT LEAST 1280MB RAM!]
 
+    scp 192.168.222.241:/root/anaconda-ks.cfg /www/docs/account.example.com
+    chmod 644 /www/docs/account.example.com/anaconda-ks.cfg
+
+    vi /var/lib/tftpboot/pxelinux/pxelinux.cfg/default
+        [Add the following to the 'pxelinux.cfg/default' file]
+        LABEL Kickstart
+            MENU LABEL Install RHEL using ^Kickstart
+            KERNEL vmlinuz
+            APPEND initrd=initrd.img inst.repo=http://192.168.222.100/install inst.ks=http://192.168.222.100/anaconda-ks.cfg
+        :wq
+
+    [Start a server on this network and select PXE Boot in the boot menu]
+    [The server will skip straight to the graphical installation without intervention]
 @@@
 
+GUI for creating/modifying Kickstart:
+    system-config-kickstart
+    system-config-kickstart /root/anaconda-ks.cfg
+
+Manually modifying Kickstart:
+    Change '--device=enp0s3' to '--device=eth0'
+    Remove the entire line 'rootpw'
+        [This will cause the installation process to prompt for a new root password]
+
+Validate a Kickstart file:
+    ksvalidator /www/docs/account.example.com/ks.cfg
+    [No output indicates a good file]
+
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. /root/anaconda-ks.cfg
+2. system-config-kickstart
+3. LVM logical volumes, individual RPM packages, firewalld configurations
+4. ks=http://server.example.com/kickstart.cfg
+5. A network-based installation repository (HTTP, FTP, NFS), a TFTP server with the boot image, a DHCP server pointing to the TFTP server and boot image name
+6. xinetd
+7. /var/lib/tftpboot/pxelinux/pxelinux.cfg/default
+8. syslinux
+9. RHN (boot.iso)
+10. /var/lib/tftpboot/
 
 @@@
 @@@ Lab 20.1
 @@@
-    1.
-    2.
-    3.
-    4.
+    1.  [Set up a HTTP installation server]
+    2.  [Set up a TFTP server and DHCP server]
+    3.  [Create a basic Kickstart file]
+            [Put /home on a dedicated partition or logical volume]
+            [Install the 'nmap' package]
+    4.  [Install a VM using this configuration]
 @@@
 
 
