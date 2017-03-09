@@ -5413,59 +5413,322 @@ Review Questions
 21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21-21
 
 Do I Know This Already?
+D D-NOT-A A D C D B B A D
 
+Changing between SELinux enabled and disabled requires a reboot; set here:
+    vi /etc/sysconfig/selinux
+        SELINUX=enforcing
+        -OR-
+        SELINUX=permissive
+        -OR-
+        SELINUX=disabled
+
+When SELinux is enabled, the system can switch between 'enforcing' and 'permissive':
+    setenforce 1
+    getenforce
+        Enforcing
+    setenforce 0
+    getenforce
+        Permissive
+    [Doesn't change 'SELINUX=' setting in /etc/sysconfig/selinux]
+
+sestatus
+    SELinux status:                 enabled
+    SELinuxfs mount:                /sys/fs/selinux
+    SELinux root directory:         /etc/selinux
+    Loaded policy name:             targeted
+    Current mode:                   permissive
+    Mode from config file:          enforcing
+    Policy MLS status:              enabled
+    Policy deny_unknown status:     allowed
+    Max kernel policy version:      28
+
+sestatus -v
+    [Same section as above]
+
+    Process contexts:
+    Current context:                unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+    Init context:                   system_u:system_r:init_t:s0
+    /usr/sbin/sshd                  system_u:system_r:sshd_t:s0-s0:c0.c1023
+
+    File contexts:
+    Controlling terminal:           unconfined_u:object_r:user_devpts_t:s0
+    /etc/passwd                     system_u:object_r:passwd_file_t:s0
+    /etc/shadow                     system_u:object_r:shadow_t:s0
+    /bin/bash                       system_u:object_r:shell_exec_t:s0
+    /bin/login                      system_u:object_r:login_exec_t:s0
+    /bin/sh                         system_u:object_r:bin_t:s0 -> system_u:object_r:shell_exec_t:s0
+    /sbin/agetty                    system_u:object_r:getty_exec_t:s0
+    /sbin/init                      system_u:object_r:bin_t:s0 -> system_u:object_r:init_exec_t:s0
+    /usr/sbin/sshd                  system_u:object_r:sshd_exec_t:s0
 
 @@@
 @@@ Exercise 21.1 Manipulating SELinux Modes
 @@@
-
+    getenforce
+        Enforcing
+    setenforce 0
+    getenforce
+        Permissive
+    vi /etc/sysconfig/selinux
+        SELINUX=disabled
+        :wq
+    reboot
+    getenforce
+        Disabled
+    setenforce 1
+        setenforce: SELinux is disabled
+    vi /etc/sysconfig/selinux
+        SELINUX=enforcing
+        :wq
+    reboot
+    sestatus -v
+        [Shows SELinux status]
 @@@
 
+[DO NOT edit /etc/sysconfig/selinux during the exam!]
+
+SELinux context labels can apply to:
+    - files
+    - directories
+    - ports
+    - processes
+    - users
+
+ls -Z /
+    -rw-r--r--. root root system_u:object_r:etc_runtime_t:s0 1
+    lrwxrwxrwx. root root system_u:object_r:bin_t:s0       bin -> usr/bin
+    dr-xr-xr-x. root root system_u:object_r:boot_t:s0      boot
+    drwxr-xr-x+ root root unconfined_u:object_r:default_t:s0 data
+    ...
+
+ps auxZ | sort -rk5
+    LABEL                                       USER     PID   %CPU   %MEM        VSZ      RSS   TTY   STAT   START   TIME   COMMAND
+    system_u:system_r:xdm_t:s0-s0:c0.c1023      gdm     2970    0.3    5.1    1378064    96372     ?   Sl     20:58   0:02   gnome-shell --mode=gdm
+    system_u:system_r:firewalld_t:s0            root     875    0.0    1.4     327268    26744     ?   Ssl    20:57   0:00   /usr/bin/python -Es /usr/sbin/firewalld --nofork --nopid
+    system_u:system_r:xdm_t:s0-s0:c0.c1023      gdm     3046    0.0    1.0     713768    18888     ?   Sl     20:58   0:00   /usr/libexec/goa-daemon
+    system_u:system_r:virtd_t:s0-s0:c0.c1023    root    1415    0.0    1.0     623060    20348     ?   Ssl    20:57   0:00   /usr/sbin/libvirtd
+    ...
+
+netstat -peanutZ
+    Active Internet connections (servers and established)
+    Proto   Recv-Q   Send-Q    Local Address       Foreign Address   State     User    Inode    PID/Program name   Security Context
+    tcp          0        0    0.0.0.0:111         0.0.0.0:*         LISTEN    0       15072    1/systemd          system_u:system_r:init_t:s0
+    tcp          0        0    192.168.122.1:53    0.0.0.0:*         LISTEN    0       25054    2794/dnsmasq       system_u:system_r:dnsmasq_t:s0-s0:c0.c1023
+    tcp          0        0    0.0.0.0:22          0.0.0.0:*         LISTEN    0       22418    1748/sshd          system_u:system_r:sshd_t:s0-s0:c0.c1023
+    ...
+
+Context label parts:
+    - User ('_u')
+    - Role ('_r')
+    - Type ('_t')
+
+'semanage' vs. 'chcon'
+    [semanage writes context info to the SELinux policy, then applies it to the file system]
+    [chcon only writes context info to the file system]
+    [Contexts written by chcon will be overwritten by a file system relabel, or by reapplication of the policy]
+    [DO NOT USE chcon!]
+
+yum provides */semanage
+yum install policycoreutils-python
+
+semanage fcontext -a -t <context> "/mydir(/.*)?"
+restorecon -R -v /mydir
+
+man semanage
+    G
+    semanage-fcontext (8)
+
+man semanage-fcontext
+    /example
+    [Good examples]
 
 @@@
 @@@ Exercise 21.2 Setting a Context Label on a Nondefault Apache Document Root
 @@@
-
+    mkdir /web
+    vi /web/index.html
+        Welcome to my web server for SELinux testing.
+        :wq
+    cp /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.BAK
+    vi /etc/httpd/conf/httpd.conf
+        DocumentRoot "/web"
+        <Directory "/web">
+            AllowOverride None
+            Require all granted
+        </Directory>
+        :wq
+    systemctl restart httpd
+    elinks http://localhost
+        [Default Red Hat web page; not what we want]
+    setenforce 0
+    elinks http://localhost
+        Welcome to my web server for SELinux testing.
+    setenforce 1
+    ls -laZ /web
+        drwxr-xr-x. root root unconfined_u:object_r:default_t:s0 .
+        dr-xr-xr-x. root root system_u:object_r:root_t:s0      ..
+        -rw-r--r--. root root unconfined_u:object_r:default_t:s0 index.html
+    semanage fcontext -a -t httpd_sys_content_t "/web(/.*)?"
+    restorecon -R -v /web
+        restorecon reset /web context unconfined_u:object_r:default_t:s0->unconfined_u:object_r:httpd_sys_content_t:s0
+        restorecon reset /web/index.html context unconfined_u:object_r:default_t:s0->unconfined_u:object_r:httpd_sys_content_t:s0
+    ls -laZ /web
+        drwxr-xr-x. root root unconfined_u:object_r:httpd_sys_content_t:s0 .
+        dr-xr-xr-x. root root system_u:object_r:root_t:s0      ..
+        -rw-r--r--. root root unconfined_u:object_r:httpd_sys_content_t:s0 index.html
+    elinks http://localhost
+        Welcome to my web server for SELinux testing.
 @@@
 
+[TODO Practice this next exercise a lot!]
 
 @@@
 @@@ Exercise 21.3 Installing SELinux-Specific Man Pages
 @@@
-
+    man -k _selinux
+        pam_selinux (8)      - PAM module to set the default security context
+    yum provides */sepolicy
+    yum install policycoreutils-devel
+    sepolicy manpage -a -p /usr/share/man/man8
+        [Adds 823 _selinux man pages]
+    man -k _selinux
+        pam_selinux (8)      - PAM module to set the default security context
+        [No change yet; need to rebuild man database]
+    mandb
+        [Processing]
+    man -k _selinux
+    man -k _selinux | grep 'http'
+        apache_selinux (8)   - Security Enhanced Linux Policy for the httpd processes
+        httpd_helper_selinux (8) - Security Enhanced Linux Policy for the httpd_helper processes
+        httpd_passwd_selinux (8) - Security Enhanced Linux Policy for the httpd_passwd processes
+        httpd_php_selinux (8) - Security Enhanced Linux Policy for the httpd_php processes
+        httpd_rotatelogs_selinux (8) - Security Enhanced Linux Policy for the httpd_rotatelogs processes
+        httpd_selinux (8)    - Security Enhanced Linux Policy for the httpd processes
+        httpd_suexec_selinux (8) - Security Enhanced Linux Policy for the httpd_suexec processes
+        httpd_sys_script_selinux (8) - Security Enhanced Linux Policy for the httpd_sys_script processes
+        httpd_unconfined_script_selinux (8) - Security Enhanced Linux Policy for the httpd_unconfined_script processes
+        httpd_user_script_selinux (8) - Security Enhanced Linux Policy for the httpd_user_script processes
+    man httpd_selinux
+        [Read through this man page]
 @@@
 
+[New files inherit the context from their parent directory]
+[Copied files inherit the context from their parent directory]
+[Moved files, or files copied with 'cp -a', retain their original context]
+
+Can relabel the filesystem two ways:
+    touch ./autorelabel -> reboot
+    -OR-
+    restorecon -Rv /
 
 @@@
 @@@ Exercise 21.4 Using restorecon to Relabel Files
 @@@
-
+    ls -Z /etc/hosts
+        -rw-r--r--. root root system_u:object_r:net_conf_t:s0  /etc/host
+                                                ^^^^^^^^^^
+    cp /etc/hosts ~
+    ls -Z ~/hosts
+        -rw-r--r--. root root unconfined_u:object_r:admin_home_t:s0 /root/hosts
+                                                    ^^^^^^^^^^^^
+    \mv ~/hosts /etc
+    ls -Z /etc/hosts
+        -rw-r--r--. root root unconfined_u:object_r:admin_home_t:s0 /etc/hosts
+                                                    ^^^^^^^^^^^^
+    restorecon -v /etc/hosts
+        restorecon reset /etc/hosts context unconfined_u:object_r:admin_home_t:s0->unconfined_u:object_r:net_conf_t:s0
+                                                                  ^^^^^^^^^^^^                           ^^^^^^^^^^
+    ls -Z /etc/hosts
+        -rw-r--r--. root root unconfined_u:object_r:net_conf_t:s0 /etc/hosts
+                                                    ^^^^^^^^^^
+    touch ./autorelabel
+    reboot
 @@@
 
+Show SELinux Booleans:
+    getsebool -a
+        abrt_anon_write --> off
+        abrt_handle_event --> off
+        abrt_upload_watch_anon_write --> on
+        ...
+        [Alphabetical order; only shows current state]
+    -OR-
+    semanage boolean -l
+        SELinux boolean        State  Default    Description
+        privoxy_connect_any    (on   ,   on)     Determine whether privoxy can connect to all tcp ports.
+        smartmon_3ware         (off  ,  off)     Determine whether smartmon can support devices on 3ware controllers.
+        mpd_enable_homedirs    (off  ,  off)     Determine whether mpd can traverse user home directories.
+        ...
+        [Not sorted; shows current state and default; provides description]
+
+Change SELinux Boolean values:
+    setsebool <boolean-name> on
+    setsebool <boolean-name> off
+        [Applies to current runtime only]
+    setsebool -P <boolean-name> on
+    setsebool -P <boolean-name> off
+        [Permanent change]
 
 @@@
 @@@ Exercise 21.5 Working with SELinux Booleans
 @@@
-
+    getsebool -a | grep 'ftp'
+        ftpd_anon_write --> off
+        ...
+    setsebool ftpd_anon_write on
+    getsebool ftpd_anon_write
+        ftpd_anon_write --> on
+    semanage boolean -l | grep 'ftpd_anon_write'
+        ftpd_anon_write    (on   ,  off)    Determine whether ftpd can modify public files used for public file transfer services. Directories/Files must be labeled public_content_rw_t.
+                            ^^      ^^^
+    setsebool -P ftpd_anon_write on
+    semanage boolean -l | grep 'ftpd_anon_write'
+        ftpd_anon_write    (on   ,   on)    Determine whether ftpd can modify public files used for public file transfer services. Directories/Files must be labeled public_content_rw_t.
+                            ^^       ^^
 @@@
 
+grep AVC /var/log/audit/audit.log
+    type=AVC msg=audit(1489061405.591:403): avc:  denied  { read } for  pid=8816 comm="rpm" name="hosts" dev="dm-0" ino=9400290 scontext=
+        system_u:system_r:setroubleshootd_t:s0-s0:c0.c1023 tcontext=unconfined_u:object_r:admin_home_t:s0 tclass=file
+    type=USER_AVC msg=audit(1489062601.800:253): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='avc:
+        received policyload notice (seqno=2)  exe="/usr/lib/systemd/systemd" sauid=0 hostname=? addr=? terminal=?'
+
+yum provides */sealert
+yum install setroubleshoot-server
+sealert -a /var/log/audit/audit.log | less
+
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. setenforce 0
+2. getsebool -a <OR> semanage boolean -l
+3. yum provides */sepolicy; yum install policycoreutils-devel; sepolicy manpage -a -p /usr/share/man/man8; mandb; man -k _selinux
+4. setroubleshoot-server (sealert)
+5. semanage fcontext -a -t httpd_sys_content_t "/web(/.*)?"; restorecon -Rv /web
+6. Never use chcon
+7. /etc/sysconfig/selinux
+8. /var/log/audit/audit.log
+9. man -k _selinux | grep 'ftp'; man ftpd_selinux; /file contexts
+10. sealert -a /var/log/audit/audit.log | grep <service-name>
+    -OR-
+    setenforce 0 [and try again to see if SELinux is the problem]
 
 @@@
 @@@ Lab 21.1
 @@@
-    1.
-    2.
+    1.  [Repeat of Exercise 21.2]
+    2.  vi /root/hosts2
+            192.168.122.200 labipa.example.com
+            192.168.122.210 server1.example.com
+            192.168.122.220 server2.example.com
+            :wq
+        ls -Z /root/hosts2
+            -rw-r--r--. root root unconfined_u:object_r:admin_home_t:s0 /root/hosts2
+        mv /root/hosts2 /etc
+        semanage fcontext -a -t net_conf_t /etc/hosts2
+        restorecon -v /etc/hosts2
+            restorecon reset /etc/hosts2 context unconfined_u:object_r:admin_home_t:s0->unconfined_u:object_r:net_conf_t:s0
+        ls -Z /etc/hosts2
+            -rw-r--r--. root root unconfined_u:object_r:net_conf_t:s0 /etc/hosts2
 @@@
 
 
