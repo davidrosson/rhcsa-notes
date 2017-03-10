@@ -5740,38 +5740,172 @@ Review Questions
 22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22-22
 
 Do I Know This Already?
+A C D C C B-NOT-A A D B A
 
+Service XML files stored:
+    /usr/lib/firewalld/services
+        [81 XML files]
+    /etc/firewalld/services
+        [0 XML files]
+
+cat /usr/lib/firewalld/services/ipsec.xml
+    <?xml version="1.0" encoding="utf-8"?>
+    <service>
+      <short>IPsec</short>
+      <description>Internet Protocol Security (IPsec)...</description>
+      <port protocol="ah" port=""/>
+      <port protocol="esp" port=""/>
+      <port protocol="udp" port="500"/>
+      <port protocol="udp" port="4500"/>
+    </service>
 
 @@@
 @@@ Exercise 22.1 Managing the Firewall with Firewall-cmd
 @@@
-
+    firewall-cmd --get-default-zone
+        public
+    firewall-cmd --get-zones
+        work drop internal external trusted home dmz public block
+    firewall-cmd --get-active-zones
+        public
+            interfaces: enp0s3 enp0s8 enp0s9 enp0s10
+    firewall-cmd --get-services
+        RH-Satellite-6 amanda-client amanda-k5-client bacula bacula-client ceph ceph-mon dhcp dhcpv6 dhcpv6-client dns docker-registry
+        dropbox-lansync freeipa-ldap freeipa-ldaps freeipa-replication ftp high-availability http https imap imaps ipp ipp-client ipsec
+        iscsi-target kadmin kerberos kpasswd ldap ldaps libvirt libvirt-tls mdns mosh mountd ms-wbt mysql nfs ntp openvpn pmcd pmproxy
+        pmwebapi pmwebapis pop3 pop3s postgresql privoxy proxy-dhcp ptp pulseaudio puppetmaster radius rpc-bind rsyncd samba samba-client
+        sane smtp smtps snmp snmptrap squid ssh synergy syslog syslog-tls telnet tftp tftp-client tinc tor-socks transmission-client vdsm
+        vnc-server wbem-https xmpp-bosh xmpp-client xmpp-local xmpp-server
+    firewall-cmd --list-services
+        dhcp dhcpv6-client http ssh tftp
+    firewall-cmd --list-all
+        public (active)
+          target: default
+          icmp-block-inversion: no
+          interfaces: enp0s10 enp0s3 enp0s8 enp0s9
+          sources:
+          services: dhcp dhcpv6-client http ssh tftp
+          ports:
+          protocols:
+          masquerade: no
+          forward-ports:
+          sourceports:
+          icmp-blocks:
+          rich rules:
+    firewall-cmd --list-all --zone=public
+        [Same output as above]
+    firewall-cmd --add-service=vnc-server
+        success
+    firewall-cmd --list-services
+        dhcp dhcpv6-client http ssh tftp vnc-server
+                                         ^^^^^^^^^^
+    systemctl restart firewalld
+    firewall-cmd --list-services
+        dhcp dhcpv6-client http ssh tftp
+                                         ^^^^^^^^^^
+    firewall-cmd --add-service=vnc-server --permanent
+        success
+    firewall-cmd --list-services
+        dhcp dhcpv6-client http ssh tftp
+                                         ^^^^^^^^^^
+    firewall-cmd --reload
+    firewall-cmd --list-services
+        dhcp dhcpv6-client vnc-server http ssh tftp
+                           ^^^^^^^^^^
+    firewall-cmd --add-port=2022/tcp --permanent
+        success
+    firewall-cmd --reload
+    firewall-cmd --list-all
+        public (active)
+          target: default
+          icmp-block-inversion: no
+          interfaces: enp0s10 enp0s3 enp0s8 enp0s9
+          sources:
+          services: dhcp dhcpv6-client http ssh tftp vnc-server
+          ports: 2022/tcp
+          protocols:
+          masquerade: no
+          forward-ports:
+          sourceports:
+          icmp-blocks:
+          rich rules:
 @@@
-
 
 @@@
 @@@ Exercise 22.2 Using Firewall-config
 @@@
-
+    firewall-config &
+    [In the GUI]
+        Runtime dropdown -> Permanent dropdown
+        Zones tab -> 'public' Zone -> Services sub-tab -> activate 'http' & 'ssh' services
+        Zones tab -> 'public' Zone -> Ports sub-tab -> Add button -> 2022 & tcp
+        Services tab -> 'kerberos' service -> Modules sub-tab -> [no modules listed]
+        Services tab -> 'ftp' service -> Modules sub-tab -> 'nf_conntrack_ftp' module listed
+        [Close the GUI]
+    firewall-cmd --list-all
+        [Permanent changes not shown in runtime]
+    firewall-cmd --reload
+    firewall-cmd --list-all
+        [Permanent changes are shown]
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. firewalld
+2. firewall-cmd --add-port=2355/udp
+3. firewall-cmd --list-all-zones
+4. firewall-cmd --remove-service=vnc-server
+5. firewall-cmd --reload
+6. firewall-cmd --list-all
+7. firewall-cmd --add-interface=eno1 --zone=public [--permanent]
+8. The default zone
+9. firewall-cmd --add-source=192.168.0.0/24 [--permanent]
+10. firewall-cmd --get-services
 
 @@@
 @@@ Lab 22.1
 @@@
-    1.
-    2.
+    1.  firewall-cmd --get-zones
+            work drop internal external trusted home dmz public block
+        firewall-cmd --add-service=http --add-service=ftp --add-service=ssh --zone=home
+            success
+        firewall-cmd --list-services --zone=home
+            ssh mdns samba-client dhcpv6-client http ftp
+        nmcli device | awk '{print $1}' | tail -n +2
+            virbr0
+            enp0s10
+            enp0s3
+            enp0s8
+            enp0s9
+            lo
+            virbr0-nic
+        firewall-cmd --add-interface=enp0s3 --add-interface=enp0s8 --add-interface=enp0s9 --add-interface=enp0s10 --zone=home
+            The interface is under control of NetworkManager, setting zone to 'home'.
+            The interface is under control of NetworkManager, setting zone to 'home'.
+            The interface is under control of NetworkManager, setting zone to 'home'.
+            The interface is under control of NetworkManager, setting zone to 'home'.
+            success
+        firewall-cmd --get-active-zones
+            home
+                interfaces: enp0s3 enp0s8 enp0s9 enp0s10
+        firewall-cmd --set-default-zone=home
+            success
+    2.  firewall-cmd --runtime-to-permanent
+            success
+        systemctl restart firewalld
+        firewall-cmd --list-all
+            home (active)
+              target: default
+              icmp-block-inversion: no
+              interfaces: enp0s10 enp0s3 enp0s8 enp0s9
+              sources:
+              services: dhcpv6-client ftp http mdns samba-client ssh
+              ports:
+              protocols:
+              masquerade: no
+              forward-ports:
+              sourceports:
+              icmp-blocks:
+              rich rules:
 @@@
 
 
