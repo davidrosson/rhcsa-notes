@@ -5917,53 +5917,405 @@ Review Questions
 23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23-23
 
 Do I Know This Already?
+B D B D A D D B(&D) (A&)C A
 
+[Can use 'nfsvers=' to force a certain NFS version]
 
 @@@
 @@@ Exercise 23.1 Mounting an NFS Share
 @@@
+    [On the NFS client machine]
+        yum search nfs
+        yum install nfs-utils
+        showmount -e 172.25.1.103
+            clnt_create: RPC: Port mapper failure - Unable to receive: errno 113 (No route to host)
 
+    [On the NFS server machine]
+        vi /etc/exports
+            /home 172.25.1.0/255.255.255.0(rw)
+            /etc 172.25.1.101(ro)
+            :wq
+            [If changed, run 'exportfs -ra' to re-read the /etc/exports file]
+        systemctl stop firewalld
+        systemctl start rpcbind
+        systemctl enable rpcbind
+        systemctl start nfs
+        systemctl enable nfs
+
+    [On the NFS client machine]
+        showmount -e 172.25.1.103
+            Export list for 172.25.1.103:
+            /home 172.25.1.0/255.255.255.0
+            /etc  172.25.1.101
+
+    [On the NFS server machine]
+        systemctl start firewalld
+        firewall-cmd --add-service=rpc-bind
+            success
+        firewall-cmd --add-service=mountd
+            success
+        firewall-cmd --add-service=nfs
+            success
+        firewall-cmd --runtime-to-permanent
+            success
+        systemctl restart firewalld
+        firewall-cmd --list-services
+            ftp rpc-bind http https ntp dhcpv6-client kerberos ldaps nfs ssh dns ldap mountd kpasswd
+
+    [On the NFS client machine]
+        mount 172.25.1.103:/ /mnt
+        mount | grep 172.25.1.103
+            172.25.1.103:/ on /mnt type nfs4 (rw,relatime,vers=4.0,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=172.25.1.101,local_lock=none,addr=172.25.1.103)
+        ls /mnt
+            etc  home
+        touch /mnt/home/file.test
+            touch: cannot touch ‘/mnt/home/file.test’: Permission denied
+        umount /mnt
 @@@
-
 
 @@@
 @@@ Exercise 23.2 Discovering and Mounting SMB Shares
 @@@
+    yum install cifs-utils samba-client
+    firewall-cmd --add-service=samba-client --permanent
+    firewall-cmd --reload
 
+    smbclient -L ipa.example.com
+        Enter root's password:
+            [Hit <Enter> without typing anything]
+        Anonymous login successful
+        Domain=[MYSAMBA] OS=[Windows 6.1] Server=[Samba 4.4.4]
+                Sharename       Type      Comment
+                ---------       ----      -------
+                print$          Disk      Printer Drivers
+                sambashare      Disk      My Samba Share
+                IPC$            IPC       IPC Service (Samba 4.4.4)
+        Anonymous login successful
+        Domain=[MYSAMBA] OS=[Windows 6.1] Server=[Samba 4.4.4]
+                Server               Comment
+                ---------            -------
+                Workgroup            Master
+                ---------            -------
+
+    net share -l -S ipa.example.com
+        Enter root's password:
+            [Hit <Enter> without typing anything]
+        Anonymous login successful
+        Enumerating shared resources (exports) on remote server:
+        Share name   Type     Description
+        ----------   ----     -----------
+        print$       Disk     Printer Drivers
+        sambashare   Disk     My Samba Share
+        IPC$         IPC      IPC Service (Samba 4.4.4)
+
+    mount -t cifs -o guest //ipa.example.com/sambashare /mnt
+    mount | grep ipa.example.com
+        //ipa.example.com/sambashare on /mnt type cifs (rw,relatime,vers=1.0,sec=none,cache=strict,domain=IPA,uid=0,noforceuid,gid=0,noforcegid,addr=172.25.1.103,unix,posixpaths,serverino,mapposix,acl,rsize=1048576,wsize=65536,echo_interval=60,actimeo=1)
+    umount /mnt
+
+    vi /root/creds
+        username=lisa
+        password=password
+        domain=mydomain
+        :wq
+    chown root:root /root/creds
+    chmod 600 /root/creds
+    mount -t cifs -o credentials=/root/creds //ipa.example.com/sambashare /mnt
+    mount | grep ipa.example.com
+        //ipa.example.com/sambashare on /mnt type cifs (rw,relatime,vers=1.0,cache=strict,username=lisa,domain=mydomain,uid=0,noforceuid,gid=0,noforcegid,addr=172.25.1.103,unix,posixpaths,serverino,mapposix,acl,rsize=1048576,wsize=65536,echo_interval=60,actimeo=1)
+    umount /mnt
 @@@
 
+Samba via GUI:
+    Places -> Browse Network
+    -OR-
+    Network -> Connect to Server
+        smb://ipa.example.com/sambashare
+
+Mounting NFS shares via /etc/fstab:
+    <server-name-or-ip>:/<share-dir>    /<mount-point>    nfs    _netdev,x-systemd.automount,sync    0 0
+        vi /etc/fstab
+            ipa.example.com:/home    /mnt    nfs    _netdev,x-systemd.automount,sync    0 0
+            :wq
+        mount -a
+        ls /mnt
+            [Contents of ipa.example.com:/home]
+        umount /mnt
+
+Mounting Samba shares via /etc/fstab:
+    //<server-name-or-ip>/<share-dir>    /<mount-point>    cifs    _netdev,x-systemd.automount,username=<username>,password=<password>    0 0
+        vi /etc/fstab
+            //ipa.example.com/sambashare    /mnt    cifs    _netdev,x-systemd.automount,username=lisa,password=password    0 0
+            :wq
+        mount -a
+        ls /mnt
+            [Contents of ipa.example.com:/sambashare]
+        umount /mnt
+    -OR-
+    vi /root/creds
+        username=lisa
+        password=password
+        domain=mydomain
+        :wq
+    chown root:root /root/creds
+    chmod 600 /root/creds
+    //<server-name-or-ip>/<share-dir>    /<mount-point>    cifs    _netdev,x-systemd.automount,credentials=/root/creds    0 0
+        vi /etc/fstab
+            //ipa.example.com/sambashare    /mnt    cifs    _netdev,x-systemd.automount,credentials=/root/creds    0 0
+            :wq
+        mount -a
+        ls /mnt
+            [Contents of ipa.example.com:/sambashare]
+        umount /mnt
+    [If guest access is permitted, can an also use options "_netdev,x-systemd.automount,guest"]
 
 @@@
 @@@ Exercise 23.3 Configuring Direct and Indirect Maps to Mount NFS Shares
 @@@
+    showmount -e ipa [ipa.example.com] [172.25.1.103]
+        Export list for ipa.example.com:
+        /home 172.25.1.0/255.255.255.0
+        /etc  172.25.1.101
+        /data 172.25.1.101
 
+    yum install autofs
+    vi /etc/auto.master.d/demo.autofs
+        /shares    /etc/auto.indirect
+        /-         /etc/auto.direct
+        :wq
+    vi /etc/auto.indirect
+        ipa_etc    -rw,sync    ipa.example.com:/etc
+        :wq
+    vi /etc/auto.direct
+        /mnt    -rw,sync    ipa.example.com:/home
+        :wq
+    echo "/remote_data    /etc/auto.data" | tee -a /etc/auto.master
+    vi /etc/auto.data
+        ipa_data    -rw,sync    ipa.example.com:/data
+        :wq
+    systemctl start autofs
+    systemctl enable autofs
+
+    findmnt
+        ...
+        ├─/misc           /etc/auto.misc         autofs    rw,relatime,fd=7,pgrp=4304,timeout=300,minproto=5,maxproto=5,indirect
+        ├─/net            -hosts                 autofs    rw,relatime,fd=13,pgrp=4304,timeout=300,minproto=5,maxproto=5,indirect
+        ├─/shares         /etc/auto.indirect     autofs    rw,relatime,fd=19,pgrp=4304,timeout=300,minproto=5,maxproto=5,indirect
+        ├─/mnt            /etc/auto.direct       autofs    rw,relatime,fd=25,pgrp=4304,timeout=300,minproto=5,maxproto=5,direct
+        └─/remote_data    /etc/auto.data         autofs    rw,relatime,fd=30,pgrp=4872,timeout=300,minproto=5,maxproto=5,indirect
+
+    ls /mnt
+        [The direct mount immediately shows the contents of /mnt]
+    ls /shares
+        [The indirect mount is empty; autofs doesn't it considered "accessed" yet]
+    ls /shares/*
+        ls: cannot access /shares/*: No such file or directory
+        [Still nothing]
+    ls /shares/ipa_etc
+        [autofs finally mounts the NFS share; contents of /etc from ipa.example.com are displayed]
+    ls /remote_data
+        [The indirect mount is empty; autofs doesn't it considered "accessed" yet]
+    ls /remote_data/*
+        ls: cannot access /remote_data/*: No such file or directory
+        [Still nothing]
+    ls /remote_data/ipa_data
+        [autofs finally mounts the NFS share; contents of /data from ipa.example.com are displayed]
+
+    findmnt
+        ...
+        ├─/misc                      /etc/auto.misc        autofs    rw,relatime,fd=7,pgrp=4872,timeout=300,minproto=5,maxproto=5,indirect
+        ├─/net                       -hosts                autofs    rw,relatime,fd=13,pgrp=4872,timeout=300,minproto=5,maxproto=5,indirect
+        ├─/shares                    /etc/auto.indirect    autofs    rw,relatime,fd=19,pgrp=4872,timeout=300,minproto=5,maxproto=5,indirect
+        │ └─/shares/ipa_etc          ipa:/etc              nfs4      rw,relatime,sync,vers=4.0,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,timeo=600,retrans=2,sec=sys,clientaddr=172.25.1.101,local_lock=none,addr=172.25.1.103
+        ├─/mnt                       /etc/auto.direct      autofs    rw,relatime,fd=25,pgrp=4872,timeout=300,minproto=5,maxproto=5,direct
+        └─/remote_data               /etc/auto.data        autofs    rw,relatime,fd=30,pgrp=4872,timeout=300,minproto=5,maxproto=5,indirect
+          └─/remote_data/ipa_data    ipa:/data             nfs4      rw,relatime,sync,vers=4.0,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,timeo=600,retrans=2,sec=sys,clientaddr=172.25.1.101,local_lock=none,addr=172.25.1.103
 @@@
 
+NFS wildcard automount:
+    vi /etc/auto.master.d/home.autofs
+        /home/guests    /etc/auto.homes
+        :wq
+    vi /etc/auto.homes
+        *    -rw,sync    ipa.example.com:/home/&
+        :wq
+    systemctl restart autofs
+    ls /home/guests
+        [Nothing yet]
+    ls /home/guests/ladmin
+        [Contents of ipa.example.com:/home/ladmin]
+
+Samba automount:
+    vi /etc/auto.master.d/samba.autofs
+        /samba     /etc/auto.samba
+        :wq
+    vi /etc/auto.samba
+        shares    -fstype=cifs,credentials=/root/creds    ://ipa.example.com/sambashare
+        :wq
+    systemctl restart autofs
+    ls /samba
+        [Nothing yet]
+    ls /samba/shares
+        [Contents of //ipa.example.com/sambashare]
 
 @@@
 @@@ Exercise 23.4 Configuring an FTP Anonymous Drop Box
 @@@
+    [From server1]
+        yum install vsftpd
+        mkdir /var/ftp/uploads
+        chmod 0730 /var/ftp/uploads
+        chgrp ftp /var/ftp/uploads
+        vi /etc/vsftpd/vsftpd.conf
+            anon_umask=077
+            anon_upload_enable=YES
+            anon_mkdir_write_enable=YES
+            chown_uploads=YES
+            chown_username=root
+            :wq
+        systemctl start vsftpd
+        systemctl enable vsftpd
+        firewall-cmd --add-service=ftp --permanent
+            success
+        firewall-cmd --reload
+            success
 
+    [From server2]
+        yum install lftp
+        lftp server1
+            ls
+                drwxr-xr-x    2 0        0               6 Nov 05 19:43 pub
+                drwx-wx---    2 0        50              6 Mar 11 22:19 uploads
+            cd uploads
+            put /etc/hosts
+                put: Access failed: 553 Could not create file. (hosts)
+            quit
+
+    [From server1]
+        grep avc /var/log/audit/audit.log
+            type=AVC msg=audit(1489275720.667:457): avc:  denied  { write } for  pid=4327 comm="vsftpd" name="uploads" dev="dm-0" ino=21249272
+            scontext=system_u:system_r:ftpd_t:s0-s0:c0.c1023 tcontext=unconfined_u:object_r:public_content_t:s0 tclass=dir
+        getsebool -a | grep ftpd_anon
+            ftpd_anon_write --> off
+        semanage boolean -l | grep ftpd_anon
+            ftpd_anon_write    (off   ,   off)    Determine whether ftpd can modify public files used for public file transfer services. Directories/Files must be labeled public_content_rw_t.
+        setsebool -P ftpd_anon_write on
+        semanage boolean -l | grep ftpd_anon
+            ftpd_anon_write    (on   ,   on)    Determine whether ftpd can modify public files used for public file transfer services. Directories/Files must be labeled public_content_rw_t.
+        semanage fcontext -a -t public_content_rw_t "/var/ftp/uploads(/.*)?"
+        restorecon -Rv /var/ftp/uploads
+            restorecon reset /var/ftp/uploads context unconfined_u:object_r:public_content_t:s0->unconfined_u:object_r:public_content_rw_t:s0
+
+    [From server2]
+        lftp server1
+            cd uploads
+            put /etc/hosts
+                338 bytes transferred
+            ls
+                [Nothing returned; anonymous drop box]
+
+    [From server1]
+        ls /var/ftp/uploads
+            hosts
+            [Drop was successful]
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. /etc/krb5.keytab
+2. showmount -e server1
+3. mount [-t nfs] -o _netdev,x-systemd.automount,sync server1:/share /mnt
+4. smbclient -L server1 <OR> net share -l -S server1
+5. samba-client and cifs-utils
+6. mount -t cifs -o guest //server1/data /mnt
+7. //<server-name>/<samba-share>    /mnt    cifs    _netdev,x-systemd.automount,credentials=/root/creds    0 0
+8. Must have the extension '.autofs'; '/<share-name>' for indirect automounts; '/-' for direct automounts; absolute filename with mount specifics
+9. To perform a mount on an existing directory
+10. /etc/vsftpd/vsftpd.conf
 
 @@@
 @@@ Lab 23.1
 @@@
-    1.
-    2.
-    3.
+    1.  showmount -e ipa
+            Export list for ipa:
+            /home 172.25.1.0/255.255.255.0
+            /etc  172.25.1.101
+            /data 172.25.1.101
+        vi /etc/auto.master.d/lab.autofs
+            /-    /etc/auto.lab
+            :wq
+        vi /etc/auto.lab
+            /labdata    -rw,sync    ipa:/data
+            :wq
+        systemctl restart autofs
+        findmnt
+            ├─/labdata    /etc/auto.lab    autofs    rw,relatime,fd=25,pgrp=11267,timeout=300,minproto=5,maxproto=5,direct
+        ls /labdata
+            [Contents of ipa:/data]
+        findmnt
+            ├─/labdata      /etc/auto.lab    autofs    rw,relatime,fd=25,pgrp=11267,timeout=300,minproto=5,maxproto=5,direct
+            │ └─/labdata    ipa:/data        nfs4      rw,relatime,sync,vers=4.0,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,timeo=600,retrans=2,sec=sys,clientaddr=172.25.1.101,local_lock=none,addr=172.25.1.103
+
+    2.  smbclient -L ipa
+            Enter root's password:
+            Anonymous login successful
+            Domain=[MYSAMBA] OS=[Windows 6.1] Server=[Samba 4.4.4]
+                    Sharename       Type      Comment
+                    ---------       ----      -------
+                    print$          Disk      Printer Drivers
+                    sambashare      Disk      My Samba Share
+                    IPC$            IPC       IPC Service (Samba 4.4.4)
+            Anonymous login successful
+            Domain=[MYSAMBA] OS=[Windows 6.1] Server=[Samba 4.4.4]
+                    Server               Comment
+                    ---------            -------
+                    Workgroup            Master
+                    ---------            -------
+        mkdir -p /srv/samba/guest
+        vi /etc/fstab
+            //ipa.example.com/sambashare    /srv/samba/guest    cifs    _netdev,x-systemd.automount,guest    0 0
+            :wq
+        mount -a
+        findmnt
+            ├─/srv/samba/guest    //ipa.example.com/sambashare    cifs    rw,relatime,vers=1.0,sec=none,cache=strict,domain=IPA,uid=0,noforceuid,gid=0,noforceuid,gid=0,noforcegid,addr=172.25.1.103,unix,posixpaths,serverino,mapposix,acl,rsize=1048576,wsize=65536,echo_interval=60,actimeo=1
+        ls /srv/samba/guest
+            [Contents of ipa:/sambashare]
+
+    3.  [On server1]
+            mkdir /var/ftp/downloads
+            chgrp ftp /var/ftp/downloads
+            chmod 2755 /var/ftp/downloads
+            touch /var/ftp/downloads/test.file
+            semanage boolean -l | grep 'ftp'
+                [Shows all 'ftp' booleans]
+            setsebool -P ftpd_anon_write off
+            vi /etc/vsftpd/vsftpd.conf
+                #write_enable=YES
+                #anon_upload_enable=YES
+                #anon_mkdir_write_enable=YES
+                #chown_uploads=YES
+                #chown_username=root
+        [On server2]
+            cd /root
+            lftp server1
+                ls
+                    drwxr-sr-x    2 0        50             23 Mar 12 16:11 downloads
+                    drwxr-xr-x    2 0        0               6 Nov 05 19:43 pub
+                    drwx-wx---    2 0        50             19 Mar 11 23:48 uploads
+                cd uploads
+                ls
+                    [Nothing visible]
+                put /etc/hosts
+                    put: Access failed: 553 Could not create file. (hosts)
+                cd ../downloads
+                ls
+                    -rw-r--r--    1 0        50              0 Mar 12 16:21 test.file
+                put /etc/hosts
+                    put: Access failed: 553 Could not create file. (hosts)
+                get test.file
+                    [Success]
+                quit
+            ls /root/test.file
+                /root/test.file
 @@@
 
 
