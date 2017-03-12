@@ -6327,29 +6327,171 @@ Review Questions
 24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24-24
 
 Do I Know This Already?
+C D D C D C A C D D
 
+vi /etc/chrony.conf
+    # Use public servers from the pool.ntp.org project.
+    # Please consider joining the pool (http://www.pool.ntp.org/join.html).
+    server 0.centos.pool.ntp.org iburst
+    server 1.centos.pool.ntp.org iburst
+    server 2.centos.pool.ntp.org iburst
+    server 3.centos.pool.ntp.org iburst
+    ...
+
+Convert 'epoch time' to 'human time':
+    date --date '@1420987251'
+        Sun Jan 11 15:40:51 CET 2015
+
+date
+    Sun Mar 12 18:41:56 CET 2017
+
+date +%d-%m-%y
+    12-03-17
+
+date -s 16:03
+    [Sets the system time to 4:03PM]
+
+hwclock -c
+    hw-time      system-time         freq-offset-ppm   tick
+    1489297372   1489340815.320280
+    1489297382   1489340825.321843               156      2
+    1489297392   1489340835.322760               124      1
+    [Updates every 10 seconds]
+    Ctrl+C
+
+hwclock --systohc
+    [Synchronize current system time to the hardware clock]
+
+hwclock --hctosys
+    [Synchronize current hardware time to the system clock]
+
+timedatectl [status]
+          Local time: Sun 2017-03-12 18:29:17 CET
+      Universal time: Sun 2017-03-12 17:29:17 UTC
+            RTC time: Sun 2017-03-12 05:25:14
+           Time zone: Europe/Stockholm (CET, +0100)
+         NTP enabled: yes
+    NTP synchronized: yes
+     RTC in local TZ: no
+          DST active: no
+     Last DST change: DST ended at
+                    Sun 2016-10-30 02:59:59 CEST
+                    Sun 2016-10-30 02:00:00 CET
+     Next DST change: DST begins (the clock jumps one hour forward) at
+                    Sun 2017-03-26 01:59:59 CET
+                    Sun 2017-03-26 03:00:00 CEST
+
+timedatectl set-time "2012-10-30 18:17:16"
+
+timedatectl list-timezones
+    Africa/Abidjan
+    Africa/Accra
+    Africa/Addis_Ababa
+    ...
+
+timedatectl set-timezone <timezone>
+
+timedatectl set-local-rtc {0,1}
+    [RTC in UTC | RTC in local time (keep in UTC)]
+
+timedatectl set-ntp {0,1}
+    [Turns off|on  NTP]
 
 @@@
 @@@ Exercise 24.1 Managing Local Time
 @@@
-
+    date
+        Sun Mar 12 19:07:10 CET 2017
+    hwclock
+        Sun 12 Mar 2017 07:03:09 AM CET  -0.407347 seconds
+    hwclock -c
+        hw-time      system-time         freq-offset-ppm   tick
+        1489298744   1489342187.280796
+        1489298754   1489342197.283576               278      3
+        1489298764   1489342207.284945               207      2
+        1489298774   1489342217.286538               191      2
+        ...
+        Ctrl+C
+    date -d '@1489298744'
+        Sun Mar 12 07:05:44 CET 2017
+    timedatectl status
+              Local time: Sun 2017-03-12 19:11:55 CET
+          Universal time: Sun 2017-03-12 18:11:55 UTC
+                RTC time: Sun 2017-03-12 06:07:52
+               Time zone: Europe/Stockholm (CET, +0100)
+             NTP enabled: yes
+        NTP synchronized: yes
+         RTC in local TZ: no
+              DST active: no
+         Last DST change: DST ended at
+                        Sun 2016-10-30 02:59:59 CEST
+                        Sun 2016-10-30 02:00:00 CET
+         Next DST change: DST begins (the clock jumps one hour forward) at
+                        Sun 2017-03-26 01:59:59 CET
+                        Sun 2017-03-26 03:00:00 CEST
+    timedatectl list-timezones
+        Africa/Abidjan
+        Africa/Accra
+        Africa/Addis_Ababa
+        ...
+    timedatectl set-timezone Europe/Amsterdam
+    timedatectl status | grep 'zone'
+        Time zone: Europe/Amsterdam (CET, +0100)
+    timedatectl set-ntp 1
+    vi /etc/chrony.conf
+        # Use public servers from the pool.ntp.org project.
+        # Please consider joining the pool (http://www.pool.ntp.org/join.html).
+        server 0.centos.pool.ntp.org iburst
+        server 1.centos.pool.ntp.org iburst
+        server 2.centos.pool.ntp.org iburst
+        server 3.centos.pool.ntp.org iburst
+        ...
+    systemctl status chronyd
+        ● chronyd.service - NTP client/server
+           Loaded: loaded (/usr/lib/systemd/system/chronyd.service; enabled; vendor preset: enabled)
+           Active: active (running) since Sun 2017-03-12 00:12:19 CET; 19h ago
+          Process: 853 ExecStartPost=/usr/libexec/chrony-helper update-daemon (code=exited, status=0/SUCCESS)
+          Process: 762 ExecStart=/usr/sbin/chronyd $OPTIONS (code=exited, status=0/SUCCESS)
+         Main PID: 771 (chronyd)
+           CGroup: /system.slice/chronyd.service
+                   └─771 /usr/sbin/chronyd
+    systemctl status -l chronyd
+        [Same output as above]
 @@@
 
+Can set the time zone four ways:
+    - timedatectl set-timezone <timezone>
+    - ln -sf /usr/share/zoneinfo/Europe/Stockholm /etc/localtime
+    - tzselect
+        Please identify a location so that time zone rules can be set correctly.
+        Please select a continent or ocean.
+         1) Africa
+         2) Americas
+         3) Antarctica
+         ...
+         [Not persistent!]
+    - system-config-date &
+
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. date -s 16:24
+2. hwclock --systohc
+3. date -d '@1234567890'
+4. hwclock --hctosys
+5. chronyd
+6. timedatectl set-ntp 1
+7. /etc/chrony.conf
+8. timedatectl list-timezones
+9. timedatectl set-timezone <timezone>
+10. timedatectl set-time <time>
 
 @@@
 @@@ Lab 24.1
 @@@
-    1.
-    2.
+    1.  hwclock -c
+        hwclock --hctosys
+    2.  timedatectl list-timezones | grep 'Boston'
+            [No result]
+        timedatectl set-timezone "America/New_York"
+        timedatectl | grep 'zone'
+            Time zone: America/New_York (EDT, -0400)
 @@@
