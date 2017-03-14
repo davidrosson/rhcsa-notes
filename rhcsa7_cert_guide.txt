@@ -28,16 +28,16 @@ A D A C A C D D D B
 Just a simple overview of a graphical installation.
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. CentOS
+2. Not able to use virtualization on a 32-bit system
+3. 512MB
+4. Need access to updates and packages
+5. Use a disk (ISO) image
+6. Some features require a GUI
+7. XFS
+8. Yes, using an installation disk
+9. Repository access
+10. Minimal install
 
 @@@
 @@@ Lab 1.1
@@ -86,6 +86,13 @@ which ls
         0inputs+0outputs (0major+302minor)pagefaults 0swaps
 @@@
 
+type time
+    time is a shell keyword
+type /usr/bin/time
+    /usr/bin/time is /usr/bin/time
+type cp
+    cp is aliased to 'cp -i'
+
 STDIN: 0<
 STDOUT (overwrite): 1>
 STDOUT (append): 1>>
@@ -108,44 +115,47 @@ Append rather than overwrite:
 @@@
 @@@ Exercise 2.2 Using I/O Redirection and Pipes
 @@@
-    cd
-    pwd
-        /home/ladmin
-    ls
-        Desktop  Documents  Downloads  Music  Pictures  Public  Templates  Videos
-    ls > /dev/null
-    ls ilwehgi > /dev/null
-        ls: cannot access ilwehgi: No such file or directory
-    ls ilwehgi 2> /dev/null
-    ls ilwehgi Documents 2> /dev/null
-        Documents:
-    ls ilwehgi Documents 2> /dev/null > output
-    cat output
-        Documents:
-    echo hello > output
-    cat output
-        hello
-    ls >> output
-    cat output
-        hello
-        Desktop
-        Documents
-        ...
-    ls -R /
-        ...
-    ls -R / | less
-        <opens resutls in less>
-    ls > /dev/tty1
-        -bash: /dev/tty1: Permission denied
+    [As user ladmin]
+        cd
+        pwd
+            /home/ladmin
+        ls
+            Desktop  Documents  Downloads  Music  Pictures  Public  Templates  Videos
+        ls > /dev/null
+        ls ilwehgi > /dev/null
+            ls: cannot access ilwehgi: No such file or directory
+        ls ilwehgi 2> /dev/null
+        ls ilwehgi Documents 2> /dev/null
+            Documents:
+        ls ilwehgi Documents 2> /dev/null > output
+        cat output
+            Documents:
+        echo hello > output
+        cat output
+            hello
+        ls >> output
+        cat output
+            hello
+            Desktop
+            Documents
+            ...
+        ls -R /
+            ...
+        ls -R / | less
+            [Opens results in less]
+        ls > /dev/tty1
+            -bash: /dev/tty1: Permission denied
 @@@
 
-Working with history
+Working with history:
     history
     Ctrl+R
     !number
-        !118
+        e.g., !118
+        [Re-executes line 118 from the history]
     !sometext
-        !vi
+        e.g., !vi
+        [Re-executes the last line containing 'vi' from the history]
 
 @@@
 @@@ Exercise 2.3 Working with History
@@ -227,6 +237,9 @@ Working with history
 /etc/issue
     echo "Before you log in, remember; don't dick around" | sudo tee -a /etc/issue > /dev/null
 
+env
+    [Prints all environment variables]
+
 @@@
 @@@ Exercise 2.6 Managing the Shell Environment
 @@@
@@ -242,6 +255,7 @@ Working with history
     cat ~/.bashrc
     . ~/.bashrc
     echo $COLOR
+        red
 @@@
 
 Finding help:
@@ -254,6 +268,9 @@ Finding help:
         Use if a man page states "The full documentation for ... is maintained as a Texinfo manual."
     /usr/share/doc
         Usually for services and larger systems
+
+man -f <some-command>
+    [Shows a short description of the command]
 
 @@@
 @@@ Exercise 2.7 Using man -k
@@ -283,16 +300,16 @@ Finding help:
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. A variable is an assignable placeholder that represents another value
+2. man -k <keyword>
+3. /etc/bashrc
+4. [p]info <command>
+5. ~/.bash_history
+6. mandb
+7. u
+8. <command> 2> /dev/null
+9. echo $PATH
+10. !dog
 
 @@@
 @@@ Lab 2.1
@@ -360,24 +377,25 @@ ls c[aou]
 @@@
 @@@ Exercise 3.2 Working with Directories
 @@@
-    cd
-    pwd
-        /home/ladmin
-    touch file1
-        [Success]
-    cd /
-    touch file2
-        touch: cannot touch 'file2': Permission denied
-    cd /tmp
-    touch file2
-        [Success]
-    cd
-    mkdir files
-        [Success]
-    mkdir /home/$USER/files
-        mkdir: cannot create directory '/home/ladmin/files': File exists
-    rmdir files
-        [Success; only works if folder is empty]
+    [As user ladmin]
+        cd
+        pwd
+            /home/ladmin
+        touch file1
+            [Success]
+        cd /
+        touch file2
+            touch: cannot touch 'file2': Permission denied
+        cd /tmp
+        touch file2
+            [Success]
+        cd
+        mkdir files
+            [Success]
+        mkdir /home/$USER/files
+            mkdir: cannot create directory '/home/ladmin/files': File exists
+        rmdir files
+            [Success; only works if folder is empty]
 @@@
 
 ls -l
@@ -423,11 +441,21 @@ cp -a /somedir/ .
         unhidden
     cp -a ../newfiles/ .
     ls -la
+        .
+        ..
+        newfiles
     rm -rf newfiles
     cp -a ../newfiles/* .
     ls -la
+        .
+        ..
+        unhidden
     cp -a ../newfiles/. .
     ls -la
+        .
+        ..
+        .hidden
+        unhidden
 @@@
 
 ln <source> <destination>
@@ -453,6 +481,7 @@ ln -s /home /tmp
         [Link is removed]
     ln -s test link
     rm -rf link/
+               ^
     ls -la
         [Link remains but its destination, test, is empty now]
 @@@
@@ -460,27 +489,28 @@ ln -s /home /tmp
 @@@
 @@@ Exercise 3.4 Working with Symbolic Links and Hard Links
 @@@
-    cd
-    ln /etc/passwd .
-        ln: failed to create hard link './passwd' => '/etc/passwd': Operation not permitted
-    ln -s /etc/passwd .
-        [Success]
-    ln -s /etc/hosts
-    touch newfile
-    ln newfile linkedfile
+    [As user ladmin]
+        cd
+        ln /etc/passwd .
+            ln: failed to create hard link './passwd' => '/etc/passwd': Operation not permitted
+        ln -s /etc/passwd .
+            [Success]
+        ln -s /etc/hosts
+        touch newfile
+        ln newfile linkedfile
+            ls -la
+                [inode counter is 2]
+        ln -s newfile symlinkfile
+        rm newfile
+        cat symlinkfile
+            cat: symlinkfile: No such file or directory
+        cat linkedfile
+            [Success]
         ls -la
-            [inode counter is 2]
-    ln -s newfile symlinkfile
-    rm newfile
-    cat symlinkfile
-        cat: symlinkfile: No such file or directory
-    cat linkedfile
-        [Success]
-    ls -la
-        [symlinkfile still shows a link to the non-existent newfile]
-    ln linkedfile newfile
-    ls -la
-        [link from symlinkfile to newfile is restored]
+            [symlinkfile still shows a link to the non-existent newfile]
+        ln linkedfile newfile
+        ls -la
+            [link from symlinkfile to newfile is restored]
 @@@
 
 tar -cvf files.tar file1 file2 dir1 dir2
@@ -489,10 +519,15 @@ tar -tvf files.tar
 
 tar -xvf files.tar -C place/
 
-tar -xvf files.tar hosts
+tar -xvf files.tar etc/hosts
 
 file files.tar
     files.tar: POSIX tar archive (GNU)
+
+gzip
+    -z
+bzip2
+    -j
 
 @@@
 @@@ Exercise 3.5 Using tar
@@ -521,16 +556,16 @@ file files.tar
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. /etc
+2. ls -lat
+3. mv myfile yourfile
+4. rm -rf <directory>
+5. ln -s /tmp ~
+6. cp /etc/[abc]* .
+7. ln -s /etc ~
+8. rm <symbolic-link>
+9. tar -czvf /tmp/etchome.tgz /etc /home
+10. tar -xvf /tmp/etchome.tgz etc/passwd
 
 @@@
 @@@ Lab 3.1
@@ -541,12 +576,13 @@ Review Questions
     2.  cp /root/essentials.tar /tmp
         ln essentials.tar /
     3.  mv /essentials.tar /archive.tar
-    4.  ln -s /archive.tar link.tar
+    4.  ln -s /archive.tar /root/link.tar
     5.  rm -rf /archive.tar
-        ls -la link.tar
-        rm -rf link.tar
-    6.  gzip essentials.tar
-        essentials.tar.gz
+        ls -la /root/link.tar
+        rm /root/link.tar
+    6.  gzip /root/essentials.tar
+            ls /root | grep 'tar'
+                essentials.tar.gz
 @@@
 
 
@@ -720,20 +756,20 @@ sed -i s/oldtext/newtext/g ~/myfile
 sed -i -e '2d' ~/myfile
     [Deletes line 2 in 'myfile']
 
-sed -i -e '2,4d' ~/myfile
-    [Deletes lines 2-4 in 'myfile']
+sed -i -e '2d;10,15d' ~/myfile
+    [Deletes line 2 and lines 10-15 in 'myfile']
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. ps aux | less
+2. tail -n 5 ~/samplefile
+3. wc -w ~/samplefile
+4. Ctrl+C
+5. grep -v -e '^#' -e '^;' <file>
+6. + (NOT ?; ? is for zero or more)
+7. grep -i 'text' <file>
+8. grep -B 5 'PATH' <file>
+9. sed -n p9 ~/samplefile
+10. sed -i 's/user/users/g' ~/samplefile
 
 @@@
 @@@ Lab 4.1
@@ -746,7 +782,7 @@ Review Questions
             grep -rnwl '/' -e "`ip address show dev enp0s3 | grep -Eo '([0-9]*\.){3}[0-9]*/' | cut -d/ -f1`"
     3.  You have just used the sed command that replaces all occurrences of the text Administrator with root. How do you revert?
             Identify recently modified files:
-                find . -type f -cmin -1 | grep -v '/\.'
+                find / -type f -cmin -1 | grep -v '/\.'
             In the future, use a backup extension when using 'sed -i'
                 sed -i.bak 's/Administrator/root/g' sample.txt
     4.  Process the output of 'ps aux' to show the process that has the heaviest memory utilization first in the results list
@@ -920,49 +956,49 @@ Scan for remote keys:
     ssh-keyscan -t rsa 172.25.1.102
 
 Using the 'screen' utility
-    Open an ssh session
+    [Open an ssh session]
     screen
-        Execute a command
+        [Execute a command]
             w
                 USER     TTY     FROM         LOGIN@   IDLE     JCPU    PCPU WHAT
                 ladmin   pts/0   172.25.1.1   13:39    28.00s   0.10s   0.20s sshd: ladmin [p
                 root     pts/1   :tty1:S.0    15:22    4.00s    0.01s   0.00s w
                                       ^^^^
-        List screen commands
+        [List screen commands]
             Ctrl+A, ?
-        Disconnect
+        [Disconnect]
             Ctrl+A, d
-        As the same user, reconnect to the screen session
-            screen -r
-        List all screen sessions
-            screen -ls
-                There are screens on:
-                4707.tty1.Server2       (Attached)
-                4696.pts-0.Server2      (Detached)
-                2 Sockets in /var/run/screen/S-root.
-        Connect to an available, detached screen session
-            screen -r 4696
-        Connect to a shared session
-            screen -x
-            screen -x 4786
-        Disconnect current screen session from terminal (from within screen or external)
-            screen -d
-        Disconnect and terminate
-            Ctrl+D
-        Terminate the screen session
-            Ctrl+A, \
+    [As the same user, reconnect to the screen session]
+        screen -r
+    [List all screen sessions]
+        screen -ls
+            There are screens on:
+            4707.tty1.Server2       (Attached)
+            4696.pts-0.Server2      (Detached)
+            2 Sockets in /var/run/screen/S-root.
+    [Connect to an available, detached screen session]
+        screen -r 4696
+    [Connect to a shared session]
+        screen -x
+        screen -x 4786
+    [Disconnect current screen session from terminal (from within screen or external)]
+        screen -d
+    [Disconnect and terminate]
+        Ctrl+D
+    [Terminate the screen session]
+        Ctrl+A, \
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. The physical screen
+2. Alt+F1
+3. w
+4. /dev/pts/0
+5. ssh -v
+6. ssh -X (or ssh -Y)
+7. /etc/ssh/ssh_config
+8. scp /etc/hosts lisa@server2:/tmp
+9. ~/.ssh/authorized_keys
+10. ssh-keygen [-t rsa -b 4096]
 
 @@@
 @@@ Lab 5.1
@@ -971,7 +1007,16 @@ Review Questions
             /dev/tty6
         Alt+F1
             /dev/tty1
-    2.  Test Server2 -> Server1 key-based authentication with graphical application support
+    2.  [As ladmin on server2]
+            ssh -X server1
+                [Login with the ladmin password for server1]
+                exit
+            ssh-keygen -t rsa -b 4096
+                [Answer all questions by pressing <Enter>]
+            ssh-copy-id server1
+                [Enter the ladmin password for server1]
+            ssh -X server1
+                [Login is successful without a password]
 @@@
 
 
