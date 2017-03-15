@@ -1064,9 +1064,10 @@ Update password properties directly in /etc/shadow, or using 'passwd', or using 
 @@@
 @@@ Exercise 6.2 Creating User Accounts
 @@@
-    Assume root role
+    [As the root user]
     vi /etc/login.defs
         /CREATE_HOME
+            CREATE_HOME yes
         /USERGROUPS_ENAB
             USERGROUPS_ENAB no
                 When 'yes', the new user's default group is the same as their name
@@ -1142,7 +1143,7 @@ lid lisa | cut -d'(' -f1
         :wq
     yum groupinstall directory-client
 
-    mkdir -p /etc/openldap/cacerts
+    #mkdir -p /etc/openldap/cacerts
     scp ipa.example.com:/root/cacert.p12 /etc/openldap/cacerts/
 
     *DEPRECATED*
@@ -1156,7 +1157,7 @@ lid lisa | cut -d'(' -f1
             [Ok]
 
     Configure LDAP using sssd without TLS:
-        authconfig -help | grep rfc
+        authconfig --help | grep 'ldap'
         authconfig --enableldap --enableldapauth --update
         authconfig --ldapserver=ipa.example.com --ldapbasedn="dc=example,dc=com" --update
 
@@ -1174,6 +1175,7 @@ lid lisa | cut -d'(' -f1
         su - lara
 
     Other sssd configs that don't seem necessary:
+        #authconfig --help | grep 'rfc'
         #authconfig --enablesssd --enablesssdauth --update
         #authconfig --enablerfc2307bis --update
         #authconfig --ldaploadcacert=ftp://ipa.example.com/pub/cacert.p12 --update
@@ -1187,22 +1189,24 @@ lid lisa | cut -d'(' -f1
         authconfig --enablemkhomedir --update
         vi /etc/nslcd.conf
             tls_reqcert never
+        vi /etc/sysconfig/authconfig
+            FORCELEGACY=yes
         systemctl restart nslcd
         getent passwd lara
         su - lara
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. 0
+2. /etc/sudoers
+3. visudo
+4. /etc/login.defs; /etc/default/useradd
+5. 1 (primary group GID)
+6. wheel
+7. vigr
+8. passwd; chage
+9. /etc/shadow
+10. /etc/group
 
 @@@
 @@@ Lab 6.1
@@ -1245,10 +1249,10 @@ C A C C C D B A C C
 find / -user linda
 find / -group users
 
-chown who what
+chown <who> <what>
 chown linda account
-chown user:group file
-chown user.group file
+chown <user>:<group> file
+chown <user>.<group> file
 
 chown -R linda /home/linda
 chown -R :account /home/account
@@ -1293,14 +1297,15 @@ su - lisa
     groups
         users sales
 
-chmod 755 somefile
-chmod +x somefile
-chmod g+w,o-r somefile
+chmod 755 <somefile>
+chmod +x <somefile>
+chmod g+w,o-r <somefile>
 
 chmod -R o+rx /data
-    [sets execute permissions on all files and directories in /data]
+    [Sets execute permissions on all files and directories in /data]
 chmod -R o+rX /data
-    [sets execute permissions only on directories in /data]
+    [Sets execute permissions only on directories in /data]
+    [Also works with the command 'setfacl']
 
 @@@
 @@@ Exercise 7.1 Managing Basic Permissions
@@ -1319,7 +1324,7 @@ chmod -R o+rX /data
             [Success]
 @@@
 
-Set User ID (SUID)
+[Set User ID (SUID)]
     ls -la /bin/passwd
         -rwsr-xr-x. 1 root root 27832 Jun 10  2014 /bin/passwd
            ^
@@ -1338,7 +1343,7 @@ Set User ID (SUID)
         -rws------. 1 root root 0 Feb 20 20:18 somefile
            ^
 
-Set Group ID (SGID)
+[Set Group ID (SGID)]
     mkdir somedir
     ls -ld somedir
         drwxr-xr-x. 2 root root 6 Feb 20 20:22 somedir
@@ -1353,7 +1358,7 @@ Set Group ID (SGID)
         d---rws---. 2 root root 6 Feb 20 20:22 somedir
               ^
 
-Set Stick Bit
+[Set Stick Bit]
     mkdir stickydir
     chmod 755 stickydir
     ls -ld stickydir
@@ -1391,7 +1396,7 @@ Set Stick Bit
         ls -ld /data/sales
             drwxrws--T. 2 linda sales 49 Feb 20 20:45 /data/sales
                   ^  ^          ^^^^^
-                [T means others have no execute, whereas t means others have execute]
+                [T means others have no execute, whereas t means others have execute; same for S and s]
     su - linda
         groups
             users sales
@@ -1406,18 +1411,20 @@ Set Stick Bit
         ls -ld place
             drwxr-sr-x. 2 linda sales 6 Feb 20 20:58 place/
                   ^             ^^^^^
+            [Group sales is inherited, even though linda's default group is users]
+            [The SGID is inherited by new directories, but not by files; sticky bit is not inherited by anything]
         rm -rf lisa*
-            [Even with sticky bit set, files removed because linda owns /data/sales]
+            [Even with sticky bit set on /data/sales, files were removed because linda owns /data/sales]
 
     su - lisa
         cd /data/sales
         rm -rf linda*
             rm: cannot remove ‘linda3’: Operation not permitted
             rm: cannot remove ‘linda4’: Operation not permitted
-                [Because sticky bit is set, lisa cannot remove files owned by linda]
+                [Because sticky bit is set (and lisa doesn't own the directory), lisa cannot remove files owned by linda]
 @@@
 
-TODO If archiving with ACL, use star instead of tar
+[If archiving with ACL, use star instead of tar; star is not installed by default]
 
 getfacl -R /directory > file.acl
 setfacl --restore=file.acl
@@ -1425,9 +1432,10 @@ setfacl --restore=file.acl
 setfacl -m u:linda:rwx /data
     [Gives permissions to linda on /data without making her the owner and without changing the current owner assignment]
 
-setfacl -R -m
+setfacl -R -m <u,g,o>:<the-user,the-group,blank>:<r,w,x,-> <file-or-directory>
     [Modify the ACLs for current files]
-setfacl -m d:
+
+setfacl -m d:<u,g,o>:<the-user,the-group,blank>:<r,w,x,-> <file-or-directory>
     [Take care of all new items that will be created]
 
 setfacl -m d:o::- /data
@@ -1519,16 +1527,16 @@ rm -rf /root/fuzzy
     [Success]
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. chown :<group> <file>
+2. find / -user <user>
+3. chmod -R 770 /data
+4. chmod +x <file>
+5. chmod g+s <directory>
+6. chmod +t <directory>
+7. setfacl -m g:sales:r *
+8. setfact -R -m g:sales:rx <directory>; setfacl -R -m d:g:sales:rx <directory>
+9. ##7 (027, etc.)
+10. chattr +i myfile
 
 @@@
 @@@ Lab 7.1
@@ -1812,6 +1820,7 @@ ls ifcfg-*
 vi /etc/sysconfig/network-scripts/ifcfg-static
     BOOTPROTO=dhcp
     :wq
+    [Adds a dynamic IP address to a configuration that already has a static IP; two IP under one connection]
 
 If editing an 'ifcfg-' file directly, activate the changes:
     nmcli con reload
@@ -1830,32 +1839,33 @@ hostnamectl status
             Kernel: Linux 3.10.0-514.6.1.el7.x86_64
       Architecture: x86-64
 
-To set DNS:
+Four ways to set DNS:
     1. Use nmtui
-    2. Edit /etc/sysconfig/network-scripts/ifcfg-* files
-    3. nmcli con mod <con-name> [+]ipv4.dns <ip-of-dns>
+    2. nmcli con mod <con-name> [+]ipv4.dns <ip-of-dns>
+    3. Edit 'DNS1' and 'DNS2' in the /etc/sysconfig/network-scripts/ifcfg-* files
     4. Rely on DHCP
 
-Ignore DNS from DHCP:
-    1. Edit /etc/sysconfig/network-scripts/ifcfg-* files to include PEERDNS=no
-    2. nmcli con mod <con-name> ipv4.ignore-auto-dns yes
+Two ways to ignore DNS from DHCP:
+    1. nmcli con mod <con-name> ipv4.ignore-auto-dns yes
+    2. Edit /etc/sysconfig/network-scripts/ifcfg-* files to include PEERDNS=no
 
 Verify hostname resolution:
-    getent hosts <server-name>
+    getent hosts <hostname>
+        [Checks both /etc/hosts and DNS to resolve the specified hostname]
 
 DO NOT specify DNS in /etc/resolv.conf because it will be overwritten by NM!
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. 213.214.215.96
+2. ip link [show]
+3. NetworkManager
+4. /etc/hostname
+5. hostnamectl <hostname>
+6. nmcli con reload
+7. /etc/hosts
+8. ip route [show]
+9. systemctl status NetworkManager
+10. nmcli con mod <con-name> ipv4.addresses "10.0.2.15/24" ip4 10.11.12.13/24
 
 @@@
 @@@ Lab 8.1a
@@ -2051,6 +2061,7 @@ B&D B A A&B A C C B A A
     [Return to original server]
         top
         k
+            [kill the dd job]
 @@@
 
 Still use '<command> &' to start a process in the bg, but no longer need 'nohup' in front.
@@ -2077,10 +2088,10 @@ pgrep dnsmasq
 
 Priority ranges from 0 (highest priority) to 39 (lowest priority); default is 20.
 
-Setting process priority using 'niceness' adjustment (-20 to 19; lower number is higher priority):
-    nice
+Setting process priority using 'niceness' adjustment (-20 to 19; lower number is higher priority, because it's less 'nice'):
+    nice -n <niceness> <process>
         [Start a process with adjusted priority]
-    renice
+    renice -n <niceness> -p <process-pid>
         [Adjust the priority of an active process]
     top -> r
         [Adjust the priority of the selected process]
@@ -2150,7 +2161,8 @@ killall <process-name>
         5725 pts/0    R+     0:00                      \_ ps fax
         5726 pts/0    S+     0:00                      \_ grep --color=auto -B6 dd
     kill -9 3117
-        [TODO Killing bash doesn't actually kill the 'dd' process as was expected]
+        [Killing bash doesn't actually kill the 'dd' process as was expected]
+        [Orphaned processes (those whose parents are killed) are adopted by init (PID=0)]
 @@@
 
 top
@@ -2163,17 +2175,33 @@ top
         <PID>
             <niceness>
 
+[top commands to execute]
+    ? - Show all available commands
+    f - Add columns and change default sort column
+    x - Highlight sort column
+    y - Highlight running tasks
+    R - Reverses the sort
+    C - Show scroll coordinates
+    E - Toggle summary memory scale
+    e - Toggle task memory scale
+    z - Turn on colors
+        Z - change colors
+            S2 M2 H7 T6
+    m - Toggle memory display (numbers vs. graphs)
+    u - Toggle user
+    W - Write settings as default
+
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. jobs
+2. Ctrl+Z -> bg
+3. Ctrl+C
+4. pidof <process-name> -> kill [-9] <PID>
+5. ps fax
+6. renice -n <niceness> -p 1234
+7. killall dd
+8. kill mycommand
+9. k
+10. nice -n -5 <command>
 
 @@@
 @@@ Lab 9.1
@@ -2378,7 +2406,7 @@ On KVM host:
         4127 qemu      20   0 1501640 979456   2812 S   1.3 52.5   9:42.70 qemu-kvm
         3392 ladmin    20   0 2139452 341752  17108 S   5.6 18.3   7:05.52 gnome-shell
 
-Start VM on KVM host boot:
+Autostart VM on KVM host boot:
     virsh autostart smallvm1
     virsh autostart --disable smallvm1
 
@@ -2387,16 +2415,16 @@ qemu-img create -f qcow2 smallvm2.qcow2 4G
 virt-install --hvm --name smallvm2 --memory 768 --vcpus 2 --disk /var/lib/libvirt/images/smallvm2.qcow2,size=4 --cdrom /root/CentOS-7-x86_64-DVD-1611.iso --graphics none
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. kvm, kvm_intel (Intel) or kvm_amd (AMD)
+2. vmx
+3. Left Ctrl+Alt
+4. uname -r; arch
+5. cat /proc/cpuinfo; lscpu
+6. virt-manager &
+7. libvirtd
+8. /var/lib/libvirt/images
+9. virsh list --all
+10. virsh destroy vm1
 
 @@@
 @@@ Lab 10.1
