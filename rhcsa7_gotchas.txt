@@ -1,0 +1,373 @@
+RHCSA “Gotcha’s”
+
+Ch. 2 - Using Essential Tools
+    Usefulness of 'man -f' in addition to 'man -k'
+    Remember that 'info' pages exist, not just 'man' pages
+    Update mandb after installing new packages
+    When not root, if '>>' doesn't work to write to a file, use '| tee -a' instead
+
+Ch. 3 - Essential File Management Tools
+    Use 'cp -r' on directories
+    Use 'cp -a' to preserve attributes
+    Don't use 'cp /somedir/* .', use 'cp -a /somedir/. .' to make sure all invisible files/directories are copied
+    Never use 'rm -rf' to remove a symbolic link; it can delete the destination content instead of the symbolic link
+    The order of the 'tar' command parameters is important: 'tar -cvf <filename>' and 'tar -xvf <filename>'
+
+Ch. 4 - Working with Text Files
+    Different functions specify the delimiter differently: 'cut' uses '-d'; 'sort' uses '-t'; 'awk' uses '-F'
+    'sort' uses '-k3' to specify 'column 3' and so on
+    'awk' can filter columns better than 'cut' in some cases
+    Always encase regular expressions in quotes, e.g: grep '^anna' /etc/passwd
+    Need to use double-quotes when 'grep' includes certain characters, e.g.: grep -v -e "^#" -e "^$"
+    Pull the 5th line from a file: sed -n 5p <filename>
+        Useful for executing commands from a "scratch" file, e.g.: $(sed -n 7p /root/scratch)
+    If using 'sed -i', use 'sed -i.BAK' instead; remember there is no '%' in a 'sed -i.BAK s/old/new/g' replacement statement
+
+Ch. 5 - Connecting to Red Hat Enterprise Linux 7
+    Change terminal with Alt+Ctrl+F2 or 'chvt 2'
+    Ctrl+A is the 'screen' control command
+
+Ch. 6 - User and Group Management
+    /etc/nologin.txt can contain a message to users who attempt to log in to a /sbin/nologin account
+    'passwd' or 'chage' for changing password properties
+    Can modify /etc/logins.defs, /etc/skel, /etc/default/useradd
+    for i in <user1> <user2> <user3>; do <command> $i; done
+    Change groups with 'usermod -aG <group> <user>' or 'groupmems -g <group> -{a,d} <user>'; view all group members with 'lid -g <group>'
+    For LDAP client with 'sssd', run 'yum groupinstall directory-client'
+    For LDAP client with 'nslcd', run 'yum install openldap-clients nss-pam-ldapd'
+    The LDAP config command is 'authconfig'
+    When using 'sssd' and TLS, need to add 'ldap_tls_reqcert = never' to /etc/sssd/sssd.conf
+    When using 'nslcd' and TLS, need to add 'tls_reqcert never' to /etc/nslcd.conf
+    Restart 'sssd' or 'nslcd' service after config file changes
+    Use 'getent passwd <ldap-user>' then 'su - <ldap-user>' to check for LDAP connection
+
+Ch. 7 - Configuring Permissions
+    find / -type f -exec grep -nw 'something' {} \; vs. grep -rnw '.' -e "something"
+        For finding file content, 'grep' takes half the time; 'find' doesn't show filenames where content is found
+        Use 'find' for filenames and specific types/owners/groups, etc.
+    'chgrp' is only for changing the group owner of files/directories, not group user management
+    Set a group password with 'gpasswd <group>'
+    A user can temporarily change to another primary group with 'newgrp <group>'
+        Need to enter the group password if not already a member of that group
+    Resolve 'sefacl' "effective permissions" issues by modifying the 'mask'
+    When setting a default permission policy with 'setfacl', change all current permissions then set the defaul policy
+
+Ch. 8 - Configuring Networking
+    Always use 'ip addr/link/route' instead of 'ifconfig' for viewing ip address/link/route info
+    The 'ip' command can make non-persistent changes; use 'nmcli' for permanent network changes
+    man nmcli-examples | col | grep 'Example 9' -B1 -A18
+    If making network changes, first make a backup of associated /etc/sysconfig/network-scripts/ifcfg-* files
+    Use 'nmcli con reload' to pull in manual changes made to 'ifcfg-*' files
+    Certain IP changes require 'nmcli con down <con-name>' then 'nmcli con up <con-name>'
+    Use 'nmtui' to set DNS servers most easily
+    Verify hostname resolution with 'getent hosts <hostname>'
+
+Ch. 9 - Managing Processes
+    Use 'pgrep' to find PIDs by process name; doesn't need to be exact
+    Display shell background jobs with 'jobs'
+    Never 'renice' all the way to -20; go in -5 increments
+
+Ch. 10 - Working with Virtual Machines
+    'yum groupinstall "Virtualization Host"'
+        Need to reboot to activate the bridge adapter
+    Make sure the kernel modules are loaded: 'lsmod | grep kvm'
+    Make sure 'libvirtd is running': systemctl status libvirtd
+    The GUI manager is not installed by default: 'yum install virt-manager'
+    On new hosted VMs, add the grub parameter 'console=ttyS0'
+
+Ch. 11 - Managing Software
+    A custom repository has '[repolabel]', 'name=', and 'baseurl='
+        Good idea to include 'gpgcheck=0' so yum won't fail due to a lack of GPG acceptance
+    Remember the triple forward-slashes for file-based repos: baseurl=<http://, ftp://, file:///>
+    Only two commands to remember: 'createrepo' and 'yum repolist'
+    'rpm -q' command really only used for querying for information
+    Might find the command 'repoquery' useful for getting package info
+    Use 'yumdownloader' to pull repo files without installing
+
+Ch. 12 - Scheduling Tasks
+    cron scheduling: | minute | hour | day of month | month | day of week |
+    'crontab -e' jobs are user-specific and don't require a username be specified
+    '/etc/cron.d/' jobs will run as root unless a username is specified
+    '/etc/cron.{hourly,daily,weekly,monthly}' jobs are just commands/scripts that get run; no cron timing info
+        Must make these files executable with 'chmod +x <filename>' or they won't run
+    Check for '/etc/cron.allow' and '/etc/cron.deny'
+    Use 'logger <message>' as a convenient way to see if cron is functioning; <message> goes to /var/log/messages
+    If an absolute path is not supplied, 'at' executes its command in the directory in which the 'at' job was created
+
+Ch. 13 - Configuring Logging
+    Remember the difference between 'kern.info' and 'kern.=info' and 'kern.!alert' and 'kern.!=alert'
+    Don't modify /etc/rsyslog.conf directly; instead, create a '.conf' file in /etc/rsyslog.d/
+    Remember to restart rsyslogd after making a change: 'systemctl restart rsyslog'
+    Test rsyslog changes with e.g.: 'logger -p kern.err <message>'
+    Send Apache logs to 'local1': in /etc/httpd/conf/httpd.conf set 'ErrorLog syslog:local1'
+    Log files in /var/log are rotated if listed in /etc/logrotate.d/syslog
+    The journal lives in /run/log/journal
+    To make the journal persistent: 'mkdir /var/log/journal/''; 'chown' and 'chmod'; 'killall -USR1 systemd-journald'
+
+Ch. 14 - Managing Partitions
+    Back up a MBR: 'dd if=/dev/sda of=/root/sda_mbr_bak bs=1M count=1'
+    Don't just run 'fdisk', specify the /dev/<disk>, e.g.: 'fdisk /dev/sdb'; same goes for 'gdisk'
+    When creating partitions, can specify exact size rather than sectors, e.g.: '+100M'
+    Check the in-memory kernel partition table with 'cat /proc/partitions'
+    After using 'fdisk' or 'gdisk', run 'partprobe /dev/<disk>' to ensure the kernel recognizes the changes
+    Can only create file systems on primary and logical partitions, not on extended partitions
+    Don't forget to make a file system on the partition, e.g.: 'mkfs -t xfs /dev/sdb1'
+    On 'ext4' set labels with 'tune2fs -L "my_ext4_disk" /dev/sdb1'
+    On 'xfs' set labels with 'xfs_admin -L "my_xfs_disk" /dev/sdb1'
+    To add swap: label partition as swap (82/8200); mkswap /dev/sdb1; swapon /dev/sdb1; free -m
+        Can also make a swap file: 'dd if=/dev/zero of=/my_swap bs=1M count=100'; mkswap /my_swap; chmod 600 /my_swap; swapon /my_swap
+        Check active swaps: 'cat /proc/swaps'
+    When mounting manually or in /etc/fstab, can identify disks three ways: '/dev/sdb1', 'LABEL=<my_label>', 'UUID=<my_uuid>'
+    Common mount options: auto/noauto, acl, user_xattr, ro, atime/noatime, exec/noexec, _netdev, x-systemd.automount
+    In /etc/fstab, the fifth entry is 'dump utility support': 0 for off and 1 for on
+    In /etc/fstab, the sixth entry is 'file system integrity check during boot': 0 for off, 1 for on (root), 2 for on (all others)
+        If boot fails with a "enter root password to enter maintenance mode" error, then there is probably failed integrity check in /etc/fstab
+
+Ch. 15 - Managing LVM Logical Volumes
+    When working with LVMs, the partition type must be changed to 'Linux LVM' (8e/8e00)
+    To create a Physical Volume, run e.g.: 'pvcreate /dev/sdb1' on a partition or 'pvcreate /dev/sdb' on a disk
+        Use 'pvs' to view the result
+    To create a Volume Group, run e.g.: 'vgcreate vg_mydata /dev/sdb1' on a partition or 'vgcreate vg_mydata /dev/sdb' on a disk
+        Can skip the 'pvcreate' step when creating a Volume Group from a properly-labeled partition
+        Can skip the 'pvcreate' step when creating a Volume Group from an entire disk
+        Use 'vgs' to view the result
+    The 'extent size' defaults to 4MiB but can be set for the VG, e.g.: 'vgcreate -s 8m vg_mydata /dev/sdb1'
+    To create a Logical Volume, run e.g.: 'lvcreate -n lv_mydata -L 75M vg_mydata' or 'lvcreate -n lv_mydata -l 50%FREE vg_mydata'
+        '-L' is used for absolute size; '-l' is used for relative size
+        Use 'lvs' to view the result
+    Don't forget to make a file system on the Logical Volume, e.g.: 'mkfs.xfs /dev/vg_mydata/lv_mydata'
+    Extending a Logical Volume may involve first extending the Volume Group if there isn't already free space
+        To extend a VG, run e.g.: 'vgextend vg_mydata /dev/sdb2' on a partition or 'vgextend vg_mydata /dev/sdc' on a disk
+        To shrink a VG, run e.g.: 'vgreduce vg_mydata /dev/sdb2' on a partition or 'vgreduce vg_mydata /dev/sdc' on a disk
+    To resize a LV, can use 'lvresize' instead of 'lvextend' or 'lvreduce' because it can go both ways
+        Extend by a relative amount, e.g.: 'lvresize -r -l +50%FREE /dev/vg_mydata/lv_mydata'
+        Extend by an absolute amount, e.g.: 'lvresize -r -L +32M /dev/vg_mydata/lv_mydata'
+        Remember that there is a difference between '50%FREE' and '+50%FREE' and '32M' and '+32M'
+        Can only shrink an 'ext4' file system, e.g. 'lvresize -r -L -52M /dev/vg_mydata/lv_mydata'
+        Do not forget the '-r' flag when resizing; this resizes the underlying file system along with the LV itself
+
+Ch. 16 - Basic Kernel Management
+    'dmesg' shows kernel messages with time relative to the start of the kernel; 'journalctl -k' shows kernel messages with clock time
+    'hostnamectl status' shows many relevant system parameters (hostname, machine ID, boot ID, kernel, architecture)
+    Module tools: 'lsmod', 'modinfo <module-name>', 'modprobe <module-name>', 'modprobe -r <module-name>', 'lspci -k'
+    To automatically load additional modules at boot: 'echo "<module-name>" > /etc/modules-load.d/<module-name>.conf'
+    To manually load modules with parameters, run e.g.: 'modprobe cdrom debug=1'
+    To automatically load modules with parameters: 'echo "options <module-name> <param>=<value>" > /etc/modprobe.d/<module-name>.conf'
+
+Ch. 17 - Configuring a Basic Apache Server
+    No RHCSA exam objectives relate directly to Apache
+    A useful utility for checking web pages on text-only systems: 'yum install elinks'
+
+Ch. 18 - Managing and Understanding the Boot Procedure
+    List a specified service's dependencies: 'systemctl list-dependencies <unit-name>'
+    List services dependent upon a specified service: 'systemctl list-dependencies --reverse <unit-name>'
+    Masked services have a symlink from /etc/systemd/system/<service>.service to /dev/null
+    Don't forget to enable services that need to auto-start after a reboot
+    Remove 'rhgb' and 'quiet' from the boot parameters in /etc/default/grub; add 'console=ttyS0'
+
+Ch. 19 - Troubleshooting the Boot Procedure
+    Use boot troubleshooting approaches in order of increasing severity:
+        GRUB 2 menu -> e -> systemd.unit=rescue.target
+        -OR-
+        GRUB 2 menu -> e -> rescue
+            Requires the root password
+            62 active units, 22 active services
+            Read-write / and /boot file systems
+            Ctrl+D to continue the boot process
+        GRUB 2 menu -> e -> systemd.unit=emergency.target
+        -OR-
+        GRUB 2 menu -> e -> emergency
+            Requires the root password
+            10 active units, 3 active services
+            Initially a read-only / file system; need to run: 'mount -o remount,rw /'
+            No /boot file system mounted
+            Ctrl+D to continue the boot process
+        GRUB 2 menu -> e -> rd.break
+            No root password required
+            Execute: 'mount -o remount,rw /sysroot' and 'chroot /sysroot'
+            Fix SELinux for /etc/shadow: 'load_policy -i' and 'restorecon /etc/shadow'
+            Can mount /dev/sda1 onto /boot if needed
+            'exit' twice to continue the boot process
+        Installation Disk -> Troubleshooting -> Rescue a Red Hat Linux system -> Option 1
+            Make sure /mnt/sysroot is mounted and make /mnt/sysroot the root image using 'chroot'
+            Rebuild GRUB 2: 'grub2-install /dev/sda'
+            Rebuild initramfs: 'dracut --force'
+        Check for boot errors with 'journalctl -xb -p err'
+        Mount a VM's partitions:
+            If in 'qcow2' format, convert first: 'qemu-img convert -f qcow2 -O raw smallvm1.qcow2 smallvm1.img'
+            Execute: 'kpartx -av /var/lib/libvirt/images/smallvm1.img'
+                     'ls /dev/mapper/loop*'
+                     'pvscan'
+                     'lvs'
+                     'vgchange -a y <vg-name>'
+            [Manipulate mounted VM volumes as needed, then unmount]
+            Execute: 'kpartx -dv /var/lib/libvirt/images/smallvm1.img'
+
+Ch. 20 - Using Kickstart
+    'yum provides */semanage'
+    'yum install policycoreutils-python'
+        While already installing this, install the 'devel' package too: 'yum install policycoreutils-devel'
+    'yum install httpd'
+        To show web page file listings via httpd, in /etc/httpd/conf/httpd.conf: 'Options Indexes'
+    'mkdir /var/www/install'
+    'mount /dev/cdrom /var/www/install'
+    'systemctl start httpd'
+    'systemctl enable httpd'
+    'mkdir -p /var/lib/tftpboot/pxelinux/pxelinux.cfg'
+    'restorecon -R /var/lib/tftpboot'
+    'vi /var/lib/tftpboot/pxelinux/pxelinux.cfg/default'
+        DEFAULT vesamenu.c32
+        PROMPT 0
+        TIMEOUT 300
+        MENU TITLE PXE Boot Menu
+        LABEL Linux
+            MENU LABEL ^Install RHEL
+            MENU default
+            KERNEL vmlinuz
+            APPEND initrd=initrd.img inst.repo=http://<local-ip>/install
+        :wq
+    'yum install syslinux'
+    'cp /usr/share/syslinux/pxelinux.0 /var/lib/tftpboot/pxelinux'
+    'cp /usr/share/syslinux/vesamenu.c32 /var/lib/tftpboot/pxelinux'
+    'cp /var/www/install/images/pxeboot/vmlinuz /var/lib/tftpboot/pxelinux'
+    'cp /var/www/install/images/pxeboot/initrd.img /var/lib/tftpboot/pxelinux'
+    'firewall-cmd --add-service=dhcp --permanent'
+    'firewall-cmd --add-service=tftp --permanent'
+    'firewall-cmd --add-service=http --permanent'
+    'firewall-cmd --reload'
+    [IF ON THE HYPERVISOR]
+        'virsh net-edit default'
+            <ip address='192.168.122.1' netmask='255.255.255.0'>
+              <tftp root='/var/lib/tftpboot'/>
+              <dhcp>
+                <range start='192.168.122.2' end='192.168.122.254'/>
+                <bootp file='pxelinux/pxelinux.0'/>
+              </dhcp>
+            </ip>
+    [IF ON A HYPERVISOR-HOSTED VM]
+        'vi /etc/dnsmasq.conf'
+            150 <Enter>
+            dhcp-range=192.168.187.240,192.168.187.249,255.255.255.0,12h
+            160 <Enter>
+            dhcp-option=3,192.168.187.2
+            100 <Enter>
+            dhcp-boot=pxelinux.0
+            57 <Enter>
+            enable-tftp
+            3 <Enter>
+            tftp-root=/var/lib/tftpboot/pxelinux
+            :wq
+        'systemctl start dnsmasq'
+        'systemctl enable dnsmasq'
+    To use Kickstart: 'APPEND <existing-content> inst.ks=http://192.168.222.100/anaconda-ks.cfg'
+    Modify a Kickstart file: 'system-config-kickstart /root/anaconda-ks.cfg'
+    Validate a Kickstart file: 'ksvalidator /root/anaconda-ks.cfg'
+
+Ch. 21 - Managing SELinux
+    NEVER disable SELinux via /etc/sysconfig/selinux
+    Temporarily turn off SELinux until next reboot: 'setenforce 0'
+    Quick SELinux check: 'getenforce'
+    SELinux overview: 'sestatus'
+    '-Z' is the SELinux switch: 'ps auxZ', 'netstat -peanutZ'
+    Don't use 'chcon' because it only writes to the file system
+    Always use 'semanage fcontext -a -t <policy> "<path>(/.*)?"' to change the policy, then 'restorecon -R <path>' to apply it
+    Add SELinux man pages:
+        'yum provides */sepolicy'
+        'yum install policycoreutils-devel'
+        'sepolicy manpage -a -p /usr/share/man/man8'
+        'mandb'
+        'man -k _selinux'
+    New files inherit the context from their parent directory
+    Copied files inherit the context from their parent directory
+    Moved files, or files copied with 'cp -a', retain their original context
+    Force a system relabel: 'touch /.autorelabel'
+    Can show SELinux Booleans with two different commands:
+        'getsebool -a' (shows runtime values only)
+        'semanage boolean -l' (better, since it shows runtime and permanent values)
+    Can only set SELinux Booleans with one command, but can be runtime or permanent:
+        'setsebool <boolean-name> {on,off}' (runtime only)
+        'setsebool -P <boolean-name> {on,off}' (runtime and permanent)
+    Easy way to identify and fix SELinux violations:
+        'yum provides */sealert'
+        'yum install setroubleshoot-server'
+        'sealert -a /var/log/audit/audit.log | less'
+    To search the audit log for SELinux violations: 'grep avc /var/log/audit/audit.log'
+
+Ch. 22 - Configuring a Firewall
+    'firewall-cmd --get-zones' (available zones)
+    'firewall-cmd --get-default-zone' (default zone)
+    'firewall-cmd --get-active-zones' (active zones and interfaces)
+    'firewall-cmd --get-services' (available services)
+    'firewall-cmd --list-services' (currently allowed services)
+    'firewall-cmd --add-service=<service-name>' (not permanent, and not active until rule reload)
+    'firewall-cmd --add-service=<service-name>' --permanent (permanent, but not active until rule reload)
+    'firewall-cmd --remove-service=<service-name>' (not permanent, and not active until rule reload)
+    'firewall-cmd --remove-service=<service-name>' --permanent (permanent, but not active until rule reload)
+    'firewall-cmd --add-interface=eno1 --zone=public [--permanent]' (add an interface to a zone)
+    'firewall-cmd --add-source=192.168.0.0/24 [--permanent]' (allow all traffic from a source IP)
+    'firewall-cmd --reload' (reloads rules)
+    'firewall-cmd --add-port=2022/tcp --permanent' (opens a non-standard port)
+    'firewall-config &' (opens the GUI; do not use for management)
+    'firewall-cmd --runtime-to-permanent' (makes all runtime configs permanent; better to first set permanent then reload rules)
+
+Ch. 23 - Configuring Remote Mounts and FTP
+    'yum install nfs-utils'
+    'showmount -e ipa.example.com'
+        Export list for ipa.example.com:
+        /home  172.25.1.0/255.255.255.0
+        /etc   172.25.1.102
+        /data  172.25.1.102
+    'mount ipa.example.com:/ /mnt' (this "pseudo root mount" mounts all three directories when NFSv4)
+    'yum install cifs-utils samba-client'
+    'firewall-cmd --add-service=samba-client --permanent'
+    'firewall-cmd --reload'
+    'smbclient -L ipa.example.com'
+        It may prompt for the root password; just hit <Enter>
+    'net share -l -S ipa.example.com'
+        Does the same thing; requires 'yum install samba-common-tools'
+    'mount -t cifs -o guest //ipa.example.com/sambashare /mnt' (won't work without "cifs-utils" installed)
+    'vi /root/creds'
+        username=lisa
+        password=password
+        domain=mydomain
+        :wq
+    'chown root:root /root/creds'
+    'chmod 600 /root/creds'
+    'mount -t cifs -o credentials=/root/creds //ipa.example.com/sambashare /mnt'
+    'mount -t cifs -o username=lisa //ipa.example.com/sambashare /mnt'
+    Mounting NFS shares via /etc/fstab:
+        'ipa.example.com:/home    /mnt    nfs    _netdev,x-systemd.automount,sync    0 0'
+    Mounting Samba shares via /etc/fstab:
+        '//ipa.example.com/sambashare    /mnt    cifs    _netdev,x-systemd.automount,credentials=/root/creds    0 0'
+        If guest access is permitted, can an also use options "_netdev,x-systemd.automount,guest"
+    'yum install autofs'
+    'vi /etc/auto.master.d/demo.autofs'
+        /shares    /etc/auto.indirect
+        /-         /etc/auto.direct
+        :wq
+    'vi /etc/auto.indirect'
+        fake_dir    -rw,sync    ipa.example.com:/etc
+        :wq
+    'vi /etc/auto.direct'
+        /mnt    -rw,sync    ipa.example.com:/home
+        :wq
+    'systemctl start autofs'
+    'systemctl enable autofs'
+    'vi /etc/auto.master.d/home.autofs'
+        /home/guests    /etc/auto.homes
+        :wq
+    'vi /etc/auto.homes'
+        *    -rw,sync    ipa.example.com:/home/&
+        :wq
+    'systemctl restart autofs'
+    'vi /etc/auto.master.d/samba.autofs'
+        /samba    /etc/auto.samba
+        :wq
+    'vi /etc/auto.samba'
+        shares    -fstype=cifs,credentials=/root/creds    ://ipa.example.com/sambashare
+        :wq
+    'systemctl restart autofs'
+    
+
+Ch. 24 - Configuring Time Services
+    .
