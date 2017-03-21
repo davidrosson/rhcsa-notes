@@ -334,7 +334,7 @@ D C A C C C A D C C
 Get an overview of devices and mount points:
     mount
         [Reads /proc/mounts]
-    df -Th
+    df -hT
         [Shows disk space on mounted devices]
     findmnt
         [Shows all mounts as a tree]
@@ -347,7 +347,7 @@ Get an overview of devices and mount points:
         proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)
         devtmpfs on /dev type devtmpfs (rw,nosuid,seclabel,size=926268k,nr_inodes=231567,mode=755)
         ...
-    df -Th
+    df -hT
         Filesystem               Type      Size  Used Avail Use% Mounted on
         /dev/mapper/cl_odin-root xfs       8.0G  5.5G  2.6G  69% /
         devtmpfs                 devtmpfs  905M     0  905M   0% /dev
@@ -416,7 +416,7 @@ cp -R /somedir/* .
 cp /somedir/.* .
     [Copies all hidden files to the pwd]
 cp -R /somedir/.* .
-    [Copies all hidden files and hidden directories to the pwd; TODO also copies the above directory?]
+    [Copies all hidden files and hidden directories to the pwd; TODO also tries to copy the above directory for some reason?]
 cp -a /somedir/. .
     [Copies all visible and hidden files/directories to the pwd]
 cp -a /somedir/ .
@@ -796,9 +796,9 @@ Review Questions
 
 
 5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
-5-5-5                                                                       5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
-5-5-5    Chapter 5: Connecting to a Red Hat Enterprise Linux 7 (19 pg.)     5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
-5-5-5                                                                       5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
+5-5-5                                                                     5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
+5-5-5    Chapter 5: Connecting to Red Hat Enterprise Linux 7 (19 pg.)     5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
+5-5-5                                                                     5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
 5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5-5
 
 Do I Know This Already?
@@ -1820,7 +1820,7 @@ ls ifcfg-*
 vi /etc/sysconfig/network-scripts/ifcfg-static
     BOOTPROTO=dhcp
     :wq
-    [Adds a dynamic IP address to a configuration that already has a static IP; two IP under one connection]
+    [Adds a dynamic IP address to a configuration that already has a static IP; two IPs under one connection]
 
 If editing an 'ifcfg-' file directly, activate the changes:
     nmcli con reload
@@ -2459,7 +2459,7 @@ Repo file may contain:
     gpgkey=<file:///>
     enabled=<0,1>
 
-Repo labels:
+Default repo labels:
     base
     optional
     updates
@@ -2797,16 +2797,18 @@ repoquery -i kubernetes-unit-test
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. createrepo
+2. [repo-label]
+   name=Repo Name
+   baseurl=http://server.example.com/repo
+3. yum repolist
+4. yum provides */useradd
+5. yum group list; yum group info "Security Tools"
+6. yum install <package-filename>
+7. rpm -q[p] --scripts <package-filename>
+8. rpm -q[p]d <package-filename>
+9. rpm -qf <file-name>
+10. repoquery -i <package-name>
 
 @@@
 @@@ Lab 11.1
@@ -2826,14 +2828,14 @@ Review Questions
             Sqlite DBs complete
         vi /etc/yum.repos.d/lab11.repo
             [lab11repo]
-            name=lab11repo
+            name=Lab 11 Repo
             baseurl=file:///myrepo
             :wq
     2.  yum repolist
         repo id                 repo name             status
             base/7/x86_64       CentOS-7 - Base       9363
             extras/7/x86_64     CentOS-7 - Extras      264
-            lab11repo           lab11repo                4
+            lab11repo           Lab 11 Repo              4
             myrepo              thisismyrepo          3831
             updates/7/x86_64    CentOS-7 - Updates     856
             repolist: 14318
@@ -2936,7 +2938,8 @@ Scripts can be added to the following directories:
     /etc/cron.daily
     /etc/cron.weekly
     /etc/cron.monthly
-    [Files have a different syntax; no timing information; determined by folder]
+    [Files have a different syntax; no timing information, just a command/script; timing determined by folder]
+    [Must make these files executable with 'chmod +x <filename>' or they won't run]
 
 cat /etc/anacrontab
     [anacron is run by cron every hour to check /etc/anacrontab]
@@ -2956,7 +2959,7 @@ cron security
     /etc/cron.allow
         [If exists (not by default), only listed users can use cron]
     /etc/cron.deny
-        [If exists (not by default), listed users cannot use cron]
+        [If exists (by default), listed users cannot use cron]
 
 Time stepping:
     Use */2 to run something every second minute/hour/day/etc.
@@ -2980,7 +2983,7 @@ Time stepping:
             -rwxr-xr-x. 1 root root 42 Feb 25 19:47 eachhour
     cd /etc/cron.d
         vi eachhour
-            11 * * * *  root  logger This message is written in Stockholm by /etc/cron.d/eachhour
+            11 * * * * root logger This message is written in Stockholm by /etc/cron.d/eachhour
             :wq
         [Need to make executable? Apparently no.]
     grep 'Stockholm' /var/log/messages
@@ -3009,7 +3012,7 @@ Time stepping:
         Sat Feb 25 19:57:56 CET 2017
     at 20:30
         at>
-            logger This is message from Sweden scheduled by at
+            logger This is a message from Sweden scheduled by at
             Ctrl+D
                 at> <EOT>
                 job 5 at Sat Feb 25 20:30:00 2017
@@ -3029,7 +3032,7 @@ Time stepping:
     atq
         Sat Feb 25 20:30:00 2017 a root
     grep 'Sweden' /var/log/messages
-        Feb 25 20:30:02 virthost root: This is message from Sweden scheduled by at
+        Feb 25 20:30:02 virthost root: This is a message from Sweden scheduled by at
 @@@
 
 at jobs are stored at /var/spool/at
@@ -3038,7 +3041,7 @@ at security:
     /etc/at.allow
         [If exists (not by default), only listed users can use at]
     /etc/at.deny
-        [If exists (not by default), listed users cannot use at]
+        [If exists (by default), listed users cannot use at]
 
 Remove multiple at jobs
     atrm 14 15 16
@@ -3065,14 +3068,14 @@ grep 'Sweden' /var/log/messages
     Feb 25 20:49:29 virthost root: Hey Sweden this is a batch job!
 
 Review Questions
-1. crontab -e -OR- /etc/cron.d
+1. crontab -e <OR> /etc/cron.d
 2. 0 14 1,15 * *
-3. */2 * * * * -OR- 0/2 * * * *
+3. */2 * * * *
 4. 0 0 19 9 4
 5. 0, 7, sun
 6. crontab -e -u lisa
-7. echo "boris" > /etc/cron.deny
-8. /etc/anacrontab
+7. echo "boris" >> /etc/cron.deny
+8. /etc/anacrontab -OR- /etc/cron.daily/<job-name>
 9. atd
 10. atq
 
@@ -3081,11 +3084,11 @@ Review Questions
 @@@
     1.  crontab -e
             0 23 * * * yum update -y
-                [Don't specify a username]
+                [Configure as root; don't need to specify a username]
             :wq
     2.  vi /etc/cron.d/rebootjob
             0 03 25 2 * root /sbin/reboot
-                [Should specify a username; otherwise will run as root]
+                [Should specify a username; otherwise will run as root by default]
             :wq
 @@@
 
@@ -3106,7 +3109,7 @@ Important log files/locations:
     /var/log/secure
     /var/log/boot.log
     /var/log/audit/audit.log
-    /var log/maillog
+    /var/log/maillog
     /var/log/samba/
     /var/log/sssd
     /var/log/cups/
@@ -3118,15 +3121,15 @@ logger -p kern.err My Message
 @@@
 @@@ Exercise 13.1 Using Live Log Monitoring and logger
 @@@
-    [First terminal]
+    [First terminal as root]
         sudo -i
         tail -f /var/log/messages
-    [Second terminal]
+    [Second terminal as ladmin]
         su - user
         su -
             [Enter wrong password]
         logger hello
-    [First terminal]
+    [First terminal as root]
         [/var/log/messages]
             Feb 26 20:56:42 virthost su: FAILED SU (to root) ladmin on pts/0
             Feb 26 20:57:32 virthost ladmin: hello
@@ -3153,7 +3156,7 @@ cd /etc/rsyslog.d/
 
 man 5 rsyslog.conf
     [Lists all facilities and priorities]
-        [A "selector" is the set 'facility:priority']
+        [A "selector" is the set 'facility.priority']
     kern.info
         [All kernel messages at info level and higher]
     kern.*
@@ -3173,7 +3176,6 @@ man 5 rsyslog.conf
     kern.*;kern.!=alert
         [All kernel messages except alert]
 
-TODO
 #local0.info                                            /var/log/custom_test.log
 #local0.*                                               /var/log/custom_test.log
 #*.info                                                 /var/log/custom_test.log
@@ -3184,10 +3186,10 @@ TODO
 #local0.*;local0.!alert                                 /var/log/custom_test.log
 #local0.*;local0.!=alert                                /var/log/custom_test.log
 
-$template TempTest,"-p local1.info Dumpster Fire!"
-local0.alert    -?TempTest
-^/bin/logger;TempTest
-TODO
+[TODO The following does not work]
+    $template TempTest,"-p local1.info Dumpster Fire!"
+    local0.alert    -?TempTest
+    ^/bin/logger;TempTest
 
 [Instead of sending messages to files, they can be sent to modules, like :modulename:]
     [For example, to use the User Message Module, send to ":omusrmsg:*" for all users]
@@ -3203,6 +3205,7 @@ TODO
     systemctl restart httpd
     vi /etc/rsyslog.conf
         local1.err    -/var/log/httpd-error.log
+        [The '-/' buffers the writes for efficiency]
     systemctl restart rsyslog
     http://127.0.01
     cat /var/log/httpd-error.log
@@ -3215,6 +3218,7 @@ TODO
         tail -f /var/log/messages-debug
     logger -p daemon.debug "Daemon Debug Message"
     [In a second terminal]
+        [See the debug message]
         Ctrl+C
 @@@
 
@@ -3320,22 +3324,25 @@ vi /etc/systemd/journald.conf
 @@@
 
 Review Questions
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
-9.
-10.
+1. /etc/rsyslog.conf
+2. /var/log/secure
+3. 5 weeks
+4. logger -p user.notice <message>
+5. *.=info /var/log/messages.info
+6. /etc/systemd/journald.conf
+7. journalctl -f
+8. journalctl _PID=1 -S 9:00 -U 15:00
+9. journalctl -b
+10. mkdir /var/log/journal/
+    chown root:systemd-journal /var/log/journal/
+    chmod 2755 /var/log/journal/
+    killall -USR1 systemd-journald
 
 @@@
 @@@ Lab 13.1
 @@@
     1.  Configure the journal to be persistent [see Ex. 13.4]
-    2.  *.=info /var/log/messages.info
+    2.  echo "*.=info /var/log/messages.info" > /etc/rsyslog.d/info.conf
     3.  vi /etc/logrotate.conf
             rotate 10
 @@@
@@ -3344,7 +3351,7 @@ Review Questions
 
 14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
 14-14                                                 14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
-14-14    Chapter 14: Managing partitions (28 pg.)     14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
+14-14    Chapter 14: Managing Partitions (28 pg.)     14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
 14-14                                                 14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
 14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14-14
 
@@ -3383,12 +3390,12 @@ gdisk for GPT
 @@@
 @@@ Exercise 14.1 Creating MBR Partitions with fdisk
 @@@
-    At boot:
+    At boot on a test VM:
         IDE - 150MB
         AHCI (SATA) - 10GB* /dev/sda
         ACHI (SATA) - 200MB /dev/sdb
-        SCSI (SCSI) - 130MB
-        SCSI (SAS) - 112MB
+        SCSI (SCSI) - 130MB /dev/sdc
+        SCSI (SAS) - 112MB /dev/sdd
 
     dd if=/dev/sda of=/root/diskfile1 bs=1M count=1
     dd if=/dev/sdb of=/root/diskfile2 bs=1M count=1
@@ -3862,9 +3869,9 @@ Do I Know This Already?
 B C D C B&C A&B C B A B
 
 Just remember:
-    pv <TAB><TAB> --help
-    vg <TAB><TAB> --help
-    lv <TAB><TAB> --help
+    pv<TAB><TAB> --help
+    vg<TAB><TAB> --help
+    lv<TAB><TAB> --help
 
 @@@
 @@@ Exercise 15.1 Creating the Physical Volume
@@ -4254,7 +4261,7 @@ Review Questions
 7. vgextend
 8. -r
 9. lvs
-10. fsck /dev/vgname/lvname
+10. fsck /dev/vgdata/lvdata
 
 @@@
 @@@ Lab 15.1
@@ -4481,7 +4488,7 @@ lspci -k
     ...
 
 Create files to load modules with parameters automatically:
-    /etc/modprobe.d/
+    /etc/modprobe.d/<module-name>.conf
 
 @@@
 @@@ Exercise 16.2 Loading Kernel Modules with Parameters
@@ -4531,10 +4538,10 @@ Review Questions
 4. modinfo <module-name>
 5. modprobe -r
 6. Check for dependencies via lsmod to unload first
-7. modinfo
-8. /etc/modprobe.d/<filename>
+7. modinfo <module-name>
+8. /etc/modprobe.d/<module-name>.conf
 9. options cdrom debug=1
-10. yum upgrade kernel -OR- yum install kernel
+10. yum upgrade kernel <OR> yum install kernel
 
 @@@
 @@@ Lab 16.1
@@ -4584,7 +4591,7 @@ Review Questions
             copybreak: 256
         modprobe e1000 debug=2
             [No effect]
-        echo "options e1000 debug=2" | tee /etc/modprobe.d/e1000
+        echo "options e1000 debug=2" | tee /etc/modprobe.d/e1000.conf
 @@@
 
 
@@ -4982,7 +4989,7 @@ Other GRUB 2 config files:
 GRUB 2 main config file (DO NOT EDIT THIS FILE):
     /boot/grub2/grub.cfg
     [Pulls boot menu kernel entries from config files in /etc/grub.d/]
-    [After "linux16", shows kernel boots options]
+    [After each "linux16", shows kernel boots options for that menu entry]
 
 [GRUB 2 adds support for extended functionality via modules, available in /boot/grub2/i386-pc/]
 
@@ -5075,7 +5082,7 @@ The Linux boot procedure:
 8. Running the default target - systemd executes all default.target units; login screen presented; 90% loaded
 
 @@@
-@@@ Exercise 19.1 Exploring troubleshooting targets.
+@@@ Exercise 19.1 Exploring troubleshooting targets
 @@@
     [Restart the Linux server]
     [At the GRUB 2 menu, select the first line and hit 'e']
@@ -5120,7 +5127,7 @@ The Linux boot procedure:
         [Rebuild GRUB 2]
             lsblk
                 [Identify the primary disk]
-                grub2-install /dev/sdb
+                grub2-install /dev/sda
                 Installing for i386-pc platform.
                 Installation finished. No error reported.
         [Rebuild initramfs]
@@ -5161,11 +5168,11 @@ journalctl -xb -p err
             boot    etc    imjournal.state    lib64    mnt           proc       run     sys     usr
         passwd
             [Changing password for user root.]
-        [This changes the SELinux policy on /etc/shadow to 'unlabeled_t', which will prevent user login]
-        [Fix SELinux labels by running 'load_policy -i' and 'chcon -t shadow_t /etc/shadow']
+        [This changes the SELinux policy on /etc/shadow to 'unlabeled_t', which will prevent any user from logging in]
+        [Fix SELinux labels by running 'load_policy -i' and 'chcon -t shadow_t /etc/shadow' (or 'restorecon /etc/shadow')]
         [Easier method is to execute 'touch /.autorelabel'; but full SELinux relabel can take a long time at next boot]
         exit
-    reboot
+    reboot [or 'exit' again]
 @@@
 
 @@@
@@ -5263,14 +5270,15 @@ Review Questions
 5. systemctl list-units
 6. rd.break
 7. load_policy -i
-8. chcon -t shadow_t /etc/shadow
+8. chcon -t shadow_t /etc/shadow (or better, 'restorecon /etc/shadow')
 9. grub2-mkconfig -o /boot/grub2/grub.cfg
 10. systemd.unit=emergency.target
 
 @@@
 @@@ Lab 19.1
 @@@
-    1.  e
+    1.  [Wait for the GRUB 2 boot menu]
+        e
         rd.break
         Ctrl+X
         mount -o remount,rw /sysroot
@@ -5278,7 +5286,7 @@ Review Questions
         passwd
             [Change the password]
         load_policy -i
-        chcon -t shadow_t /etc/shadow
+        restorecon /etc/shadow
         exit
         reboot
     2.  [Corrupt /etc/fstab so that boot fails]
@@ -5325,7 +5333,7 @@ B A&B D C B A B C B D
 @@@
 @@@ Exercise 20.1 Setting Up the Network Installation Server
 @@@
-    [Use VirtualBox, not VMware Fusion; use network type "Internal Network"]
+    [If using VirtualBox, use network type "Internal Network"]
     [Load an Installation Disk; mount it on /mnt]
     mkdir /www/docs/account.example.com/install
     cp -r /mnt/. /www/docs/account.example.com/install
@@ -5335,19 +5343,93 @@ B A&B D C B A B C B D
     elinks http://account.example.com/install
     elinks http://192.168.222.100/install
 
-    [THE FOLLOWING DOESN'T WORK ON VMWARE FUSION DUE TO NETWORKING RESTRICTIONS]
     virt-manager &
         File -> New Virtual Machine
             Network Install -> Forward
             URL: http://account.example.com/install -> Forward
-            768 MiB RAM & 2 CPUs -> Forward
-            3.0 GiB storage -> Forward
+            1536 MiB RAM & 2 CPUs -> Forward
+            6.0 GiB storage -> Forward
             Name: testnetinstall -> Finish
-    [Warning: can't find installer mainimage path in .treeinfo]
 @@@
 
 @@@
-@@@ Exercise 20.2 Configuring the TFTP Server for PXE Boot
+@@@ Configuring the TFTP Server for PXE Boot (NOT HOW THE BOOK DOES IT, BUT BETTER)
+@@@
+    yum provides */semanage
+        yum install policycoreutils-python
+
+    yum install httpd
+    mkdir /var/www/install
+
+    mount /dev/cdrom /var/www/install
+    -OR-
+    mount -o loop /root/CentOS7.iso /var/www/install
+
+    systemctl start httpd
+    systemctl enable httpd
+
+    mkdir -p /var/lib/tftpboot/pxelinux/pxelinux.cfg
+    restorecon -R /var/lib/tftpboot
+
+    vi /var/lib/tftpboot/pxelinux/pxelinux.cfg/default
+        DEFAULT vesamenu.c32
+        PROMPT 0
+        TIMEOUT 300
+        MENU TITLE PXE Boot Menu
+        LABEL Linux
+            MENU LABEL ^Install RHEL
+            MENU default
+            KERNEL vmlinuz
+            APPEND initrd=initrd.img inst.repo=http://<local-ip>/install
+        :wq
+
+    yum install syslinux
+    cp /usr/share/syslinux/pxelinux.0 /var/lib/tftpboot/pxelinux
+    cp /usr/share/syslinux/vesamenu.c32 /var/lib/tftpboot/pxelinux
+    cp /var/www/install/images/pxeboot/vmlinuz /var/lib/tftpboot/pxelinux
+    cp /var/www/install/images/pxeboot/initrd.img /var/lib/tftpboot/pxelinux
+
+    firewall-cmd --add-service=dhcp --permanent
+        success
+    firewall-cmd --add-service=tftp --permanent
+        success
+    firewall-cmd --add-service=http --permanent
+        success
+    firewall-cmd --reload
+        success
+
+    [IF ON THE HYPERVISOR]
+        virsh net-edit default
+            <ip address='192.168.122.1' netmask='255.255.255.0'>
+              <tftp root='/var/lib/tftpboot'/>
+              <dhcp>
+                <range start='192.168.122.2' end='192.168.122.254'/>
+                <bootp file='pxelinux/pxelinux.0'/>
+              </dhcp>
+            </ip>
+
+    [IF ON A HYPERVISOR-HOSTED VM]
+        vi /etc/dnsmasq.conf
+            150 <Enter>
+            dhcp-range=192.168.187.240,192.168.187.249,255.255.255.0,12h
+            160 <Enter>
+            dhcp-option=3,192.168.187.2
+            100 <Enter>
+            dhcp-boot=pxelinux.0
+            57 <Enter>
+            enable-tftp
+            3 <Enter>
+            tftp-root=/var/lib/tftpboot/pxelinux
+            :wq
+        systemctl start dnsmasq
+        systemctl enable dnsmasq
+
+    tail -f /var/log/messages
+    [Start a server on this network and select PXE Boot in the boot menu]
+@@@
+
+@@@
+@@@ Exercise 20.2 Configuring the TFTP Server for PXE Boot (DON'T USER THIS; USE THE ABOVE METHOD INSTEAD)
 @@@
     yum install xinetd
     yum install tftp-server
@@ -5458,7 +5540,7 @@ Review Questions
 1. /root/anaconda-ks.cfg
 2. system-config-kickstart
 3. LVM logical volumes, individual RPM packages, firewalld configurations
-4. ks=http://server.example.com/kickstart.cfg
+4. inst.ks=http://server.example.com/kickstart.cfg
 5. A network-based installation repository (HTTP, FTP, NFS), a TFTP server with the boot image, a DHCP server pointing to the TFTP server and boot image name
 6. xinetd
 7. /var/lib/tftpboot/pxelinux/pxelinux.cfg/default
@@ -5691,7 +5773,7 @@ man semanage-fcontext
 [Moved files, or files copied with 'cp -a', retain their original context]
 
 Can relabel the filesystem two ways:
-    touch ./autorelabel -> reboot
+    touch /.autorelabel -> reboot
     -OR-
     restorecon -Rv /
 
@@ -5835,10 +5917,10 @@ cat /usr/lib/firewalld/services/ipsec.xml
 @@@
 @@@ Exercise 22.1 Managing the Firewall with Firewall-cmd
 @@@
-    firewall-cmd --get-default-zone
-        public
     firewall-cmd --get-zones
         work drop internal external trusted home dmz public block
+    firewall-cmd --get-default-zone
+        public
     firewall-cmd --get-active-zones
         public
             interfaces: enp0s3 enp0s8 enp0s9 enp0s10
@@ -6009,33 +6091,22 @@ B D B D A D D B(&D) (A&)C A
             /etc 172.25.1.101(ro)
             :wq
             [If changed, run 'exportfs -ra' to re-read the /etc/exports file]
-        systemctl stop firewalld
         systemctl start rpcbind
         systemctl enable rpcbind
+        systemctl start mountd
+        systemctl enable mountd
         systemctl start nfs
         systemctl enable nfs
+        firewall-cmd --add-service=rpc-bind --add-service=mountd --add-service=nfs --permanent
+        firewall-cmd --reload
+        firewall-cmd --list-services
+            ftp rpc-bind http https ntp dhcpv6-client kerberos ldaps nfs ssh dns ldap mountd kpasswd
 
     [On the NFS client machine]
         showmount -e 172.25.1.103
             Export list for 172.25.1.103:
             /home 172.25.1.0/255.255.255.0
             /etc  172.25.1.101
-
-    [On the NFS server machine]
-        systemctl start firewalld
-        firewall-cmd --add-service=rpc-bind
-            success
-        firewall-cmd --add-service=mountd
-            success
-        firewall-cmd --add-service=nfs
-            success
-        firewall-cmd --runtime-to-permanent
-            success
-        systemctl restart firewalld
-        firewall-cmd --list-services
-            ftp rpc-bind http https ntp dhcpv6-client kerberos ldaps nfs ssh dns ldap mountd kpasswd
-
-    [On the NFS client machine]
         mount 172.25.1.103:/ /mnt
         mount | grep 172.25.1.103
             172.25.1.103:/ on /mnt type nfs4 (rw,relatime,vers=4.0,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=172.25.1.101,local_lock=none,addr=172.25.1.103)
@@ -6070,6 +6141,7 @@ B D B D A D D B(&D) (A&)C A
                 Workgroup            Master
                 ---------            -------
 
+    yum install samba-common-tools
     net share -l -S ipa.example.com
         Enter root's password:
             [Hit <Enter> without typing anything]
@@ -6205,7 +6277,7 @@ Mounting Samba shares via /etc/fstab:
           └─/remote_data/ipa_data    ipa:/data             nfs4      rw,relatime,sync,vers=4.0,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,port=0,timeo=600,retrans=2,sec=sys,clientaddr=172.25.1.101,local_lock=none,addr=172.25.1.103
 @@@
 
-NFS wildcard automount:
+NFS wildcard indirect automount:
     vi /etc/auto.master.d/home.autofs
         /home/guests    /etc/auto.homes
         :wq
@@ -6218,7 +6290,7 @@ NFS wildcard automount:
     ls /home/guests/ladmin
         [Contents of ipa.example.com:/home/ladmin]
 
-Samba automount:
+Samba indirect automount:
     vi /etc/auto.master.d/samba.autofs
         /samba     /etc/auto.samba
         :wq
