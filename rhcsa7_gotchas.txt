@@ -17,11 +17,12 @@ Ch. 4 - Working with Text Files
     Different functions specify the delimiter differently: 'cut' uses '-d'; 'sort' uses '-t'; 'awk' uses '-F'
     'sort' uses '-k3' to specify 'column 3' and so on
     'awk' can filter columns better than 'cut' in some cases
+        awk -F : '/user/ { print $1 }' /etc/passwd
     Always encase regular expressions in quotes, e.g: grep '^anna' /etc/passwd
     Need to use double-quotes when 'grep' includes certain characters, e.g.: grep -v -e "^#" -e "^$"
-    Pull the 5th line from a file: sed -n 5p <filename>
-        Useful for executing commands from a "scratch" file, e.g.: $(sed -n 7p /root/scratch)
-    If using 'sed -i', use 'sed -i.BAK' instead; remember there is no '%' in a 'sed -i.BAK s/old/new/g' replacement statement
+    Pull the 5th line from a file: 'sed -n 5p <filename>'
+        Useful for executing commands from a "scratch" file, e.g.: '$(sed -n 7p /root/scratch)'
+    If using 'sed -i', use 'sed -i.BAK' instead; remember there is no '%' in a 'sed -i.BAK s/old/new/g <file-name>' replacement statement
 
 Ch. 5 - Connecting to Red Hat Enterprise Linux 7
     Change terminal with Alt+Ctrl+F2 or 'chvt 2'
@@ -51,11 +52,15 @@ Ch. 7 - Configuring Permissions
         Need to enter the group password if not already a member of that group
     Resolve 'sefacl' "effective permissions" issues by modifying the 'mask'
     When setting a default permission policy with 'setfacl', change all current permissions then set the defaul policy
+        'setfacl -m g:account:rx /data/sales'
+        'setfacl -m d:g:sales:rwx,d:g:account:rx /data/sales'
 
 Ch. 8 - Configuring Networking
     Always use 'ip addr/link/route' instead of 'ifconfig' for viewing ip address/link/route info
     The 'ip' command can make non-persistent changes; use 'nmcli' for permanent network changes
     man nmcli-examples | col | grep 'Example 9' -B1 -A18
+        'nmcli con add con-name my_con ifname eth0 type ethernet ip4 192.168.123.100/24 gw4 192.168.123.1'
+        'nmcli con mod my_con ipv4.dns "8.8.8.8 8.8.4.4"'
     If making network changes, first make a backup of associated /etc/sysconfig/network-scripts/ifcfg-* files
     Use 'nmcli con reload' to pull in manual changes made to 'ifcfg-*' files
     Certain IP changes require 'nmcli con down <con-name>' then 'nmcli con up <con-name>'
@@ -103,13 +108,15 @@ Ch. 13 - Configuring Logging
     Log files in /var/log are rotated if listed in /etc/logrotate.d/syslog
     The journal lives in /run/log/journal
     To make the journal persistent: 'mkdir /var/log/journal/''; 'chown' and 'chmod'; 'killall -USR1 systemd-journald'
+    'journalctl -p err'
+    'journalctl -p crit..err'
 
 Ch. 14 - Managing Partitions
     Back up a MBR: 'dd if=/dev/sda of=/root/sda_mbr_bak bs=1M count=1'
     Don't just run 'fdisk', specify the /dev/<disk>, e.g.: 'fdisk /dev/sdb'; same goes for 'gdisk'
     When creating partitions, can specify exact size rather than sectors, e.g.: '+100M'
     Check the in-memory kernel partition table with 'cat /proc/partitions'
-    After using 'fdisk' or 'gdisk', run 'partprobe /dev/<disk>' to ensure the kernel recognizes the changes
+    After using 'fdisk' or 'gdisk', run 'partprobe [/dev/<disk>]' to ensure the kernel recognizes the changes
     Can only create file systems on primary and logical partitions, not on extended partitions
     Don't forget to make a file system on the partition, e.g.: 'mkfs -t xfs /dev/sdb1'
     On 'ext4' set labels with 'tune2fs -L "my_ext4_disk" /dev/sdb1'
@@ -121,7 +128,7 @@ Ch. 14 - Managing Partitions
     Common mount options: auto/noauto, acl, user_xattr, ro, atime/noatime, exec/noexec, _netdev, x-systemd.automount
     In /etc/fstab, the fifth entry is 'dump utility support': 0 for off and 1 for on
     In /etc/fstab, the sixth entry is 'file system integrity check during boot': 0 for off, 1 for on (root), 2 for on (all others)
-        If boot fails with a "enter root password to enter maintenance mode" error, then there is probably failed integrity check in /etc/fstab
+        If boot fails with a "enter root password to enter maintenance mode" error, then there is probably a failed integrity check in /etc/fstab
 
 Ch. 15 - Managing LVM Logical Volumes
     When working with LVMs, the partition type must be changed to 'Linux LVM' (8e/8e00)
@@ -144,7 +151,7 @@ Ch. 15 - Managing LVM Logical Volumes
         Extend by an absolute amount, e.g.: 'lvresize -r -L +32M /dev/vg_mydata/lv_mydata'
         Remember that there is a difference between '50%FREE' and '+50%FREE' and '32M' and '+32M'
         Can only shrink an 'ext4' file system, e.g. 'lvresize -r -L -52M /dev/vg_mydata/lv_mydata'
-        Do not forget the '-r' flag when resizing; this resizes the underlying file system along with the LV itself
+        Do not forget the '-r' flag when resizing LVs; this resizes the underlying file system along with the LV itself
 
 Ch. 16 - Basic Kernel Management
     'dmesg' shows kernel messages with time relative to the start of the kernel; 'journalctl -k' shows kernel messages with clock time
@@ -163,7 +170,7 @@ Ch. 18 - Managing and Understanding the Boot Procedure
     List services dependent upon a specified service: 'systemctl list-dependencies --reverse <unit-name>'
     Masked services have a symlink from /etc/systemd/system/<service>.service to /dev/null
     Don't forget to enable services that need to auto-start after a reboot
-    Remove 'rhgb' and 'quiet' from the boot parameters in /etc/default/grub; add 'console=ttyS0'
+    Remove 'rhgb' and 'quiet' from the boot parameters in /etc/default/grub; add 'console=ttyS0' to VMs
 
 Ch. 19 - Troubleshooting the Boot Procedure
     Use boot troubleshooting approaches in order of increasing severity:
@@ -185,14 +192,14 @@ Ch. 19 - Troubleshooting the Boot Procedure
         GRUB 2 menu -> e -> rd.break
             No root password required
             Execute: 'mount -o remount,rw /sysroot' and 'chroot /sysroot'
-            Fix SELinux for /etc/shadow: 'load_policy -i' and 'restorecon /etc/shadow'
+            Fix SELinux for /etc/shadow after running 'passwd': 'load_policy -i' and 'restorecon /etc/shadow'
             Can mount /dev/sda1 onto /boot if needed
             'exit' twice to continue the boot process
         Installation Disk -> Troubleshooting -> Rescue a Red Hat Linux system -> Option 1
             Make sure /mnt/sysroot is mounted and make /mnt/sysroot the root image using 'chroot'
             Rebuild GRUB 2: 'grub2-install /dev/sda'
             Rebuild initramfs: 'dracut --force'
-        Check for boot errors with 'journalctl -xb -p err'
+        Check for boot errors with 'journalctl -xb -p err..err'
         Mount a VM's partitions:
             If in 'qcow2' format, convert first: 'qemu-img convert -f qcow2 -O raw smallvm1.qcow2 smallvm1.img'
             Execute: 'kpartx -av /var/lib/libvirt/images/smallvm1.img'
@@ -201,7 +208,8 @@ Ch. 19 - Troubleshooting the Boot Procedure
                      'lvs'
                      'vgchange -a y <vg-name>'
             [Manipulate mounted VM volumes as needed, then unmount]
-            Execute: 'kpartx -dv /var/lib/libvirt/images/smallvm1.img'
+            Execute: 'vgchange -a n <vg-name>'
+                     'kpartx -dv /var/lib/libvirt/images/smallvm1.img'
 
 Ch. 20 - Using Kickstart
     'yum provides */semanage'
@@ -217,8 +225,8 @@ Ch. 20 - Using Kickstart
     'restorecon -R /var/lib/tftpboot'
     'vi /var/lib/tftpboot/pxelinux/pxelinux.cfg/default'
         DEFAULT vesamenu.c32
-        PROMPT 0
-        TIMEOUT 300
+        PROMPT 1
+        TIMEOUT 100
         MENU TITLE PXE Boot Menu
         LABEL Linux
             MENU LABEL ^Install RHEL
@@ -265,7 +273,7 @@ Ch. 20 - Using Kickstart
 
 Ch. 21 - Managing SELinux
     NEVER disable SELinux via /etc/sysconfig/selinux
-    Temporarily turn off SELinux until next reboot: 'setenforce 0'
+    Temporarily turn off SELinux [doesn't survive reboot]: 'setenforce 0'
     Quick SELinux check: 'getenforce'
     SELinux overview: 'sestatus'
     '-Z' is the SELinux switch: 'ps auxZ', 'netstat -peanutZ'
@@ -299,12 +307,12 @@ Ch. 22 - Configuring a Firewall
     'firewall-cmd --get-active-zones' (active zones and interfaces)
     'firewall-cmd --get-services' (available services)
     'firewall-cmd --list-services' (currently allowed services)
-    'firewall-cmd --add-service=<service-name>' (not permanent, and not active until rule reload)
+    'firewall-cmd --add-service=<service-name>' (not permanent, but active immediately)
     'firewall-cmd --add-service=<service-name>' --permanent (permanent, but not active until rule reload)
-    'firewall-cmd --remove-service=<service-name>' (not permanent, and not active until rule reload)
+    'firewall-cmd --remove-service=<service-name>' (not permanent, but active immediately)
     'firewall-cmd --remove-service=<service-name>' --permanent (permanent, but not active until rule reload)
     'firewall-cmd --add-interface=eno1 --zone=public [--permanent]' (add an interface to a zone)
-    'firewall-cmd --add-source=192.168.0.0/24 [--permanent]' (allow all traffic from a source IP)
+    'firewall-cmd --add-source=192.168.0.0/24 [--permanent]' (allow all traffic from a source IP/range)
     'firewall-cmd --reload' (reloads rules)
     'firewall-cmd --add-port=2022/tcp --permanent' (opens a non-standard port)
     'firewall-config &' (opens the GUI; do not use for management)
@@ -326,6 +334,7 @@ Ch. 23 - Configuring Remote Mounts and FTP
     'net share -l -S ipa.example.com'
         Does the same thing; requires 'yum install samba-common-tools'
     'mount -t cifs -o guest //ipa.example.com/sambashare /mnt' (won't work without "cifs-utils" installed)
+    'mount -t cifs -o username=lisa //ipa.example.com/sambashare /mnt'
     'vi /root/creds'
         username=lisa
         password=password
@@ -334,7 +343,6 @@ Ch. 23 - Configuring Remote Mounts and FTP
     'chown root:root /root/creds'
     'chmod 600 /root/creds'
     'mount -t cifs -o credentials=/root/creds //ipa.example.com/sambashare /mnt'
-    'mount -t cifs -o username=lisa //ipa.example.com/sambashare /mnt'
     Mounting NFS shares via /etc/fstab:
         'ipa.example.com:/home    /mnt    nfs    _netdev,x-systemd.automount,sync    0 0'
     Mounting Samba shares via /etc/fstab:
@@ -367,7 +375,13 @@ Ch. 23 - Configuring Remote Mounts and FTP
         shares    -fstype=cifs,credentials=/root/creds    ://ipa.example.com/sambashare
         :wq
     'systemctl restart autofs'
-    
 
 Ch. 24 - Configuring Time Services
-    .
+    Convert epoch time to human time, e.g.: date -d '@1420987251'
+    Set the time, e.g.: 'date -s 16:03'
+    Compare hw-time and system-time: 'hwclock -c'
+    Synchronize: 'hwclock --systohc' and 'hwclock --hctosys'
+    Time details: 'timedatectl'
+    Set the time/date, e.g.: 'timedatectl set-time "2012-10-30 18:17:16"'
+    'timedatectl list-timezones'
+    'timedatectl set-timezone <timezone>'

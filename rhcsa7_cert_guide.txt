@@ -1184,7 +1184,7 @@ lid lisa | cut -d'(' -f1
         yum install openldap-clients nss-pam-ldapd
         authconfig --enableforcelegacy --update
         authconfig --enableldap --enableldapauth --update
-        authconfig --ldapserver="ipa.example.com" --ldapbasedn="dc=example,dc=com" --update
+        authconfig --ldapserver=ipa.example.com --ldapbasedn="dc=example,dc=com" --update
         authconfig --enableldaptls --update
         authconfig --enablemkhomedir --update
         vi /etc/nslcd.conf
@@ -6368,7 +6368,7 @@ Samba indirect automount:
 Review Questions
 1. /etc/krb5.keytab
 2. showmount -e server1
-3. mount [-t nfs] -o _netdev,x-systemd.automount,sync server1:/share /mnt
+3. mount [-t nfs] server1:/share /mnt
 4. smbclient -L server1 <OR> net share -l -S server1
 5. samba-client and cifs-utils
 6. mount -t cifs -o guest //server1/data /mnt
@@ -6505,10 +6505,10 @@ hwclock -c
     Ctrl+C
 
 hwclock --systohc
-    [Synchronize current system time to the hardware clock]
+    [Set the Hardware Clock to the current System Time]
 
 hwclock --hctosys
-    [Synchronize current hardware time to the system clock]
+    [Set the System Time from the Hardware Clock]
 
 timedatectl [status]
           Local time: Sun 2017-03-12 18:29:17 CET
@@ -6633,7 +6633,7 @@ Review Questions
 @@@ Lab 24.1
 @@@
     1.  hwclock -c
-        hwclock --hctosys
+        hwclock --systohc
     2.  timedatectl list-timezones | grep 'Boston'
             [No result]
         timedatectl set-timezone "America/New_York"
