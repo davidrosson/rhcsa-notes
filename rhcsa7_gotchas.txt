@@ -45,15 +45,15 @@ Ch. 6 - User and Group Management
 Ch. 7 - Configuring Permissions
     find / -type f -exec grep -nw 'something' {} \; vs. grep -rnw '.' -e "something"
         For finding file content, 'grep' takes half the time; 'find' doesn't show filenames where content is found
-        Use 'find' for filenames and specific types/owners/groups, etc.
+        Use 'find' for filenames and specific types/owners/groups/sizes, etc.
     'chgrp' is only for changing the group owner of files/directories, not group user management
     Set a group password with 'gpasswd <group>'
     A user can temporarily change to another primary group with 'newgrp <group>'
         Need to enter the group password if not already a member of that group
-    Resolve 'sefacl' "effective permissions" issues by modifying the 'mask'
+    Resolve 'setfacl' "effective permissions" issues by modifying the 'mask'
     When setting a default permission policy with 'setfacl', change all current permissions then set the defaul policy
-        'setfacl -m g:account:rx /data/sales'
-        'setfacl -m d:g:sales:rwx,d:g:account:rx /data/sales'
+        'setfacl -R -m g:account:rx /data/sales'
+        'setfacl -R -m d:g:sales:rwx,d:g:account:rx /data/sales'
 
 Ch. 8 - Configuring Networking
     Always use 'ip addr/link/route' instead of 'ifconfig' for viewing ip address/link/route info
@@ -61,8 +61,8 @@ Ch. 8 - Configuring Networking
     man nmcli-examples | col | grep 'Example 9' -B1 -A18
         'nmcli con add con-name my_con ifname eth0 type ethernet ip4 192.168.123.100/24 gw4 192.168.123.1'
         'nmcli con mod my_con ipv4.dns "8.8.8.8 8.8.4.4"'
-    If making network changes, first make a backup of associated /etc/sysconfig/network-scripts/ifcfg-* files
-    Use 'nmcli con reload' to pull in manual changes made to 'ifcfg-*' files
+    If making network changes, first make a backup of associated /etc/sysconfig/network-scripts/ifcfg-<if-name> files
+    Use 'nmcli con reload' to pull in manual changes made to 'ifcfg-<if-name>' files
     Certain IP changes require 'nmcli con down <con-name>' then 'nmcli con up <con-name>'
     Use 'nmtui' to set DNS servers most easily
     Verify hostname resolution with 'getent hosts <hostname>'
@@ -71,6 +71,7 @@ Ch. 9 - Managing Processes
     Use 'pgrep' to find PIDs by process name; doesn't need to be exact
     Display shell background jobs with 'jobs'
     Never 'renice' all the way to -20; go in -5 increments
+    'renice' only takes absolute values, not incremental changes
 
 Ch. 10 - Working with Virtual Machines
     'yum groupinstall "Virtualization Host"'
@@ -107,7 +108,7 @@ Ch. 13 - Configuring Logging
     Send Apache logs to 'local1': in /etc/httpd/conf/httpd.conf set 'ErrorLog syslog:local1'
     Log files in /var/log are rotated if listed in /etc/logrotate.d/syslog
     The journal lives in /run/log/journal
-    To make the journal persistent: 'mkdir /var/log/journal/''; 'chown' and 'chmod'; 'killall -USR1 systemd-journald'
+    To make the journal persistent: 'mkdir /var/log/journal/''; 'chown' and 'chmod'; 'killall -USR1 systemd-journald' -OR- 'reboot'
     'journalctl -p err'
     'journalctl -p crit..err'
 
@@ -118,17 +119,17 @@ Ch. 14 - Managing Partitions
     Check the in-memory kernel partition table with 'cat /proc/partitions'
     After using 'fdisk' or 'gdisk', run 'partprobe [/dev/<disk>]' to ensure the kernel recognizes the changes
     Can only create file systems on primary and logical partitions, not on extended partitions
-    Don't forget to make a file system on the partition, e.g.: 'mkfs -t xfs /dev/sdb1'
+    Don't forget to make a file system on a new partition, e.g.: 'mkfs -t xfs /dev/sdb1'
     On 'ext4' set labels with 'tune2fs -L "my_ext4_disk" /dev/sdb1'
     On 'xfs' set labels with 'xfs_admin -L "my_xfs_disk" /dev/sdb1'
     To add swap: label partition as swap (82/8200); mkswap /dev/sdb1; swapon /dev/sdb1; free -m
         Can also make a swap file: 'dd if=/dev/zero of=/my_swap bs=1M count=100'; mkswap /my_swap; chmod 600 /my_swap; swapon /my_swap
         Check active swaps: 'cat /proc/swaps'
     When mounting manually or in /etc/fstab, can identify disks three ways: '/dev/sdb1', 'LABEL=<my_label>', 'UUID=<my_uuid>'
-    Common mount options: auto/noauto, acl, user_xattr, ro, atime/noatime, exec/noexec, _netdev, x-systemd.automount
+    Common mount options in /etc/fstab: auto/noauto, acl, user_xattr, ro, atime/noatime, exec/noexec, _netdev, x-systemd.automount
     In /etc/fstab, the fifth entry is 'dump utility support': 0 for off and 1 for on
     In /etc/fstab, the sixth entry is 'file system integrity check during boot': 0 for off, 1 for on (root), 2 for on (all others)
-        If boot fails with a "enter root password to enter maintenance mode" error, then there is probably a failed integrity check in /etc/fstab
+        If boot fails with an "enter root password to enter maintenance mode" error, then there is probably a failed integrity check in /etc/fstab
 
 Ch. 15 - Managing LVM Logical Volumes
     When working with LVMs, the partition type must be changed to 'Linux LVM' (8e/8e00)
@@ -142,8 +143,8 @@ Ch. 15 - Managing LVM Logical Volumes
     To create a Logical Volume, run e.g.: 'lvcreate -n lv_mydata -L 75M vg_mydata' or 'lvcreate -n lv_mydata -l 50%FREE vg_mydata'
         '-L' is used for absolute size; '-l' is used for relative size
         Use 'lvs' to view the result
-    Don't forget to make a file system on the Logical Volume, e.g.: 'mkfs.xfs /dev/vg_mydata/lv_mydata'
-    Extending a Logical Volume may involve first extending the Volume Group if there isn't already free space
+    Don't forget to make a file system on the Logical Volume, e.g.: 'mkfs.xfs /dev/vg_mydata/lv_mydata' -L "my_xfs_label"
+    Extending a Logical Volume may involve first extending the Volume Group if there isn't already enough free space
         To extend a VG, run e.g.: 'vgextend vg_mydata /dev/sdb2' on a partition or 'vgextend vg_mydata /dev/sdc' on a disk
         To shrink a VG, run e.g.: 'vgreduce vg_mydata /dev/sdb2' on a partition or 'vgreduce vg_mydata /dev/sdc' on a disk
     To resize a LV, can use 'lvresize' instead of 'lvextend' or 'lvreduce' because it can go both ways
@@ -207,14 +208,14 @@ Ch. 19 - Troubleshooting the Boot Procedure
                      'pvscan'
                      'lvs'
                      'vgchange -a y <vg-name>'
-            [Manipulate mounted VM volumes as needed, then unmount]
+            [Mount VM volumes, manipulate as needed, then unmount]
             Execute: 'vgchange -a n <vg-name>'
                      'kpartx -dv /var/lib/libvirt/images/smallvm1.img'
 
 Ch. 20 - Using Kickstart
     'yum provides */semanage'
     'yum install policycoreutils-python'
-        While already installing this, install the 'devel' package too: 'yum install policycoreutils-devel'
+        While already installing this, install the 'devel' package too (to get 'sepolicy'): 'yum install policycoreutils-devel'
     'yum install httpd'
         To show web page file listings via httpd, in /etc/httpd/conf/httpd.conf: 'Options Indexes'
     'mkdir /var/www/install'
@@ -288,7 +289,7 @@ Ch. 21 - Managing SELinux
     New files inherit the context from their parent directory
     Copied files inherit the context from their parent directory
     Moved files, or files copied with 'cp -a', retain their original context
-    Force a system relabel: 'touch /.autorelabel'
+    Force a system relabel: 'touch /.autorelabel' -OR- 'restorecon -R /'
     Can show SELinux Booleans with two different commands:
         'getsebool -a' (shows runtime values only)
         'semanage boolean -l' (better, since it shows runtime and permanent values)
@@ -325,7 +326,7 @@ Ch. 23 - Configuring Remote Mounts and FTP
         /home  172.25.1.0/255.255.255.0
         /etc   172.25.1.102
         /data  172.25.1.102
-    'mount ipa.example.com:/ /mnt' (this "pseudo root mount" mounts all three directories when NFSv4)
+    'mount ipa.example.com:/ /mnt' (this "pseudo root mount" mounts all three directories when NFSv4 is used)
     'yum install cifs-utils samba-client'
     'firewall-cmd --add-service=samba-client --permanent'
     'firewall-cmd --reload'
@@ -334,13 +335,12 @@ Ch. 23 - Configuring Remote Mounts and FTP
     'net share -l -S ipa.example.com'
         Does the same thing; requires 'yum install samba-common-tools'
     'mount -t cifs -o guest //ipa.example.com/sambashare /mnt' (won't work without "cifs-utils" installed)
-    'mount -t cifs -o username=lisa //ipa.example.com/sambashare /mnt'
+    'mount -t cifs -o username=lisa //ipa.example.com/sambashare /mnt' (prompts for lisa's password)
     'vi /root/creds'
         username=lisa
         password=password
-        domain=mydomain
+        #domain=mydomain
         :wq
-    'chown root:root /root/creds'
     'chmod 600 /root/creds'
     'mount -t cifs -o credentials=/root/creds //ipa.example.com/sambashare /mnt'
     Mounting NFS shares via /etc/fstab:
@@ -374,6 +374,7 @@ Ch. 23 - Configuring Remote Mounts and FTP
     'vi /etc/auto.samba'
         shares    -fstype=cifs,credentials=/root/creds    ://ipa.example.com/sambashare
         :wq
+        If guest access is permitted, can an also use options "-fstype=cifs,guest"
     'systemctl restart autofs'
 
 Ch. 24 - Configuring Time Services
@@ -382,6 +383,6 @@ Ch. 24 - Configuring Time Services
     Compare hw-time and system-time: 'hwclock -c'
     Synchronize: 'hwclock --systohc' and 'hwclock --hctosys'
     Time details: 'timedatectl'
-    Set the time/date, e.g.: 'timedatectl set-time "2012-10-30 18:17:16"'
+    Set the time/date, e.g.: 'timedatectl set-time "2017-03-24 13:14:59"'
     'timedatectl list-timezones'
     'timedatectl set-timezone <timezone>'
