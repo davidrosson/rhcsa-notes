@@ -1,3 +1,4 @@
+
 New system:
     yum install openssh-server
     In VirtualBox, add Port Forwarding for ssh: TCP 2022 -> TCP 22
@@ -1961,3 +1962,6 @@ Video 0901 - IPTables
 
 RHEL6/CentOS6:
     iptables -L -v
+
+# Switched to Sander's book
+
